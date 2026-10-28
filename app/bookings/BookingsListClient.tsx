@@ -120,7 +120,8 @@ export function BookingsListClient({ initialBookings }: BookingsListClientProps)
       if (res.success) {
         router.refresh();
       } else {
-        alert(res.error || "Failed to cancel reservation");
+        const errorMsg = ("error" in res && (res as any).error) ? (res as any).error : "Failed to cancel reservation";
+        alert(errorMsg);
       }
     });
   };

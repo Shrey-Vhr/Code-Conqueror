@@ -530,7 +530,7 @@ async function main() {
   ];
 
   for (const r of resourcesData) {
-    const { trainingRequiredId, requiredRole, ...resourceFields } = r;
+    const { trainingRequiredId, requiredRole, ...resourceFields } = r as any;
 
     const resource = await prisma.resource.upsert({
       where: { id: resourceFields.id },

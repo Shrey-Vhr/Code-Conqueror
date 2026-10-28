@@ -26,22 +26,51 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { id } = await req.json();
-    if (id) {
-      await markNotificationAsRead(id, session.id);
+    let body: any = {};
+    try {
+      body = await req.json();
+    } catch {
+      // Empty body implies mark all
     }
-    return NextResponse.json({ success: true });
+
+    const targetId = body.notificationId || body.id;
+    if (targetId) {
+      await markNotificationAsRead(targetId, session.id);
+    } else {
+      await markAllNotificationsAsRead(session.id);
+    }
+
+    const unreadCount = await getUnreadCount(session.id);
+    return NextResponse.json({ success: true, unreadCount });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
 
-export async function PATCH() {
+export async function PATCH(req: Request) {
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  await markAllNotificationsAsRead(session.id);
-  return NextResponse.json({ success: true });
+  try {
+    let body: any = {};
+    try {
+      body = await req.json();
+    } catch {
+      // No body or empty body
+    }
+
+    const targetId = body.notificationId || body.id;
+    if (targetId) {
+      await markNotificationAsRead(targetId, session.id);
+    } else {
+      await markAllNotificationsAsRead(session.id);
+    }
+
+    const unreadCount = await getUnreadCount(session.id);
+    return NextResponse.json({ success: true, unreadCount });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 400 });
+  }
 }

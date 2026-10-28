@@ -229,6 +229,17 @@ export function NotificationBell({
               })
             )}
           </div>
+
+          <div className="p-2.5 bg-slate-50 border-t border-slate-100 text-center">
+            <Link
+              href="/notifications"
+              onClick={() => setIsOpen(false)}
+              className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-1"
+            >
+              <span>Open Notifications Center</span>
+              <span aria-hidden="true">&rarr;</span>
+            </Link>
+          </div>
         </div>
       )}
     </div>

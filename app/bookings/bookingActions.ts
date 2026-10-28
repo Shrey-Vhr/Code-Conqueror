@@ -13,7 +13,10 @@ import { summarizeIncident } from "@/lib/ai";
 import { createNotification } from "@/lib/notifications";
 import { revalidatePath } from "next/cache";
 
-export async function cancelBookingUserAction(bookingId: string, reason?: string) {
+export async function cancelBookingUserAction(
+  bookingId: string,
+  reason?: string
+): Promise<{ success: boolean; promotedBookingId?: string | null; error?: string }> {
   const session = await requireAuth();
 
   const booking = await prisma.booking.findUnique({
