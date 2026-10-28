@@ -1,8 +1,17 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const SECRET_KEY = process.env.SESSION_SECRET || "super-secret-campus-share-jwt-key-32-chars-long!";
-const key = new TextEncoder().encode(SECRET_KEY);
+function getSecretKey(): Uint8Array {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("SESSION_SECRET environment variable is required in production.");
+    }
+    return new TextEncoder().encode("super-secret-campus-share-jwt-key-32-chars-long!");
+  }
+  return new TextEncoder().encode(secret);
+}
+
 const COOKIE_NAME = "campus-session";
 const EXPIRATION_DAYS = 7;
 
@@ -19,12 +28,12 @@ export async function signSession(payload: SessionUser): Promise<string> {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(`${EXPIRATION_DAYS}d`)
-    .sign(key);
+    .sign(getSecretKey());
 }
 
 export async function verifySession(token: string): Promise<SessionUser | null> {
   try {
-    const { payload } = await jwtVerify(token, key, {
+    const { payload } = await jwtVerify(token, getSecretKey(), {
       algorithms: ["HS256"],
     });
     return payload as unknown as SessionUser;

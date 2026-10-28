@@ -160,6 +160,24 @@ export async function checkFairnessLimits(
   const requestedHours =
     (requestedEnd.getTime() - requestedStart.getTime()) / (1000 * 60 * 60);
 
+  // Cross-resource campus weekly cap (default 20 hours)
+  const allWeeklyBookings = await prisma.booking.findMany({
+    where: {
+      userId,
+      status: {
+        in: ["PENDING", "APPROVED", "CHECKED_IN", "RETURNED", "COMPLETED"],
+      },
+      start: {
+        gte: weekStart,
+        lte: weekEnd,
+      },
+    },
+  });
+
+  const totalCampusWeeklyHours = allWeeklyBookings.reduce((sum, b) => {
+    return sum + (b.end.getTime() - b.start.getTime()) / (1000 * 60 * 60);
+  }, 0);
+
   const maxWeeklyHours = resource.maxHoursPerBooking * resource.maxBookingsPerWeek;
   const reasons: string[] = [];
 
@@ -171,9 +189,17 @@ export async function checkFairnessLimits(
 
   if (currentWeeklyHours + requestedHours > maxWeeklyHours) {
     reasons.push(
-      `Weekly hours cap exceeded (${(currentWeeklyHours + requestedHours).toFixed(
+      `Resource weekly hours cap exceeded (${(currentWeeklyHours + requestedHours).toFixed(
         1
       )}h requested vs ${maxWeeklyHours}h weekly limit).`
+    );
+  }
+
+  if (totalCampusWeeklyHours + requestedHours > 20) {
+    reasons.push(
+      `Campus-wide 20-hour weekly fair-usage cap exceeded (${(totalCampusWeeklyHours + requestedHours).toFixed(
+        1
+      )}h / 20.0h).`
     );
   }
 
@@ -185,4 +211,38 @@ export async function checkFairnessLimits(
     currentActiveBookings,
     maxWeeklyBookingsAllowed: resource.maxBookingsPerWeek,
   };
+}
+
+export async function grantMonthlyCreditsIfDue(userId: string): Promise<boolean> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, credits: true, monthlyCreditsGrantedAt: true },
+    });
+    if (!user) return false;
+
+    const now = new Date();
+    const lastGranted = user.monthlyCreditsGrantedAt;
+    const isDue =
+      !lastGranted ||
+      now.getFullYear() > lastGranted.getFullYear() ||
+      now.getMonth() > lastGranted.getMonth();
+
+    if (isDue) {
+      const policy = await prisma.fairnessSetting.findUnique({ where: { id: "default" } });
+      const grantAmount = policy?.monthlyCreditGrant ?? 50;
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          credits: { increment: grantAmount },
+          monthlyCreditsGrantedAt: now,
+        },
+      });
+      return true;
+    }
+  } catch {
+    // Graceful fallback if setting table not ready
+  }
+  return false;
 }

@@ -3,7 +3,12 @@ import { audit } from "./audit";
 import { createNotification } from "./notifications";
 import { checkEligibility } from "./eligibility";
 import { checkBookingConflicts } from "./conflicts";
-import { computePriorityScore, checkFairnessLimits, getUserRecentHours } from "./fairness";
+import {
+  computePriorityScore,
+  checkFairnessLimits,
+  getUserRecentHours,
+  grantMonthlyCreditsIfDue,
+} from "./fairness";
 import { summarizeIncident } from "./ai";
 
 export interface RequestBookingParams {
@@ -17,6 +22,17 @@ export interface RequestBookingParams {
 
 export async function requestBooking(params: RequestBookingParams) {
   const { userId, resourceId, start, end, purpose, purposeDetails } = params;
+
+  // Validate timing
+  if (start.getTime() < Date.now() - 5 * 60 * 1000) {
+    return { success: false, error: "Cannot create a reservation in the past." };
+  }
+  if (end.getTime() <= start.getTime()) {
+    return { success: false, error: "End time must be after start time." };
+  }
+
+  // Grant monthly credits if due
+  await grantMonthlyCreditsIfDue(userId);
 
   // 1. Fetch user and resource with relations
   const user = await prisma.user.findUnique({
@@ -199,6 +215,23 @@ export async function approveBooking(params: {
   }
 
   return await prisma.$transaction(async (tx) => {
+    // Re-verify conflicts inside transaction against other approved/active sessions
+    const conflict = await tx.booking.findFirst({
+      where: {
+        resourceId: booking.resourceId,
+        id: { not: bookingId },
+        status: { in: ["APPROVED", "CHECKED_IN", "OVERDUE"] },
+        start: { lt: booking.end },
+        end: { gt: booking.start },
+      },
+    });
+
+    if (conflict) {
+      throw new Error(
+        "Cannot approve: this time slot conflicts with an already approved or active booking."
+      );
+    }
+
     const updated = await tx.booking.update({
       where: { id: bookingId },
       data: {
@@ -344,50 +377,92 @@ export async function cancelBooking(params: {
     });
 
     // 3. AUTO-PROMOTE TOP WAITLISTED BOOKING
-    // Find waitlisted bookings for this resource that overlap
-    const candidateWaitlists = await tx.booking.findMany({
-      where: {
-        resourceId: booking.resourceId,
-        status: "WAITLISTED",
-        start: { lt: booking.end },
-        end: { gt: booking.start },
-      },
-      include: { user: true, resource: true },
-      orderBy: [{ priorityScore: "desc" }, { createdAt: "asc" }],
-    });
-
+    // ONLY triggered if the cancelled booking was actually APPROVED or CHECKED_IN (held the slot)
     let promotedBookingId: string | null = null;
 
-    if (candidateWaitlists.length > 0) {
-      const topCandidate = candidateWaitlists[0];
-
-      await tx.booking.update({
-        where: { id: topCandidate.id },
-        data: {
-          status: "APPROVED",
-          waitlistPosition: null,
-          decisionReason: `Auto-promoted from waitlist upon cancellation of booking #${booking.id}`,
+    if (booking.status === "APPROVED" || booking.status === "CHECKED_IN") {
+      const candidateWaitlists = await tx.booking.findMany({
+        where: {
+          resourceId: booking.resourceId,
+          status: "WAITLISTED",
+          start: { lt: booking.end },
+          end: { gt: booking.start },
         },
+        include: {
+          user: {
+            include: {
+              certifications: {
+                include: { training: true },
+              },
+            },
+          },
+          resource: {
+            include: {
+              requirements: {
+                include: { training: true },
+              },
+            },
+          },
+        },
+        orderBy: [{ priorityScore: "desc" }, { createdAt: "asc" }],
       });
 
-      await audit(tx, {
-        actorId,
-        action: "WAITLIST_AUTO_PROMOTED",
-        entityType: "Booking",
-        entityId: topCandidate.id,
-        before: { status: "WAITLISTED", waitlistPosition: topCandidate.waitlistPosition },
-        after: { status: "APPROVED", waitlistPosition: null },
-        reason: `Auto-promoted based on top priority score (${topCandidate.priorityScore}) after cancellation`,
-      });
+      for (const candidate of candidateWaitlists) {
+        // Re-verify conflicts against remaining approved bookings
+        const conflict = await tx.booking.findFirst({
+          where: {
+            resourceId: candidate.resourceId,
+            id: { not: candidate.id },
+            status: { in: ["APPROVED", "CHECKED_IN"] },
+            start: { lt: candidate.end },
+            end: { gt: candidate.start },
+          },
+        });
 
-      await createNotification(tx, {
-        userId: topCandidate.userId,
-        type: "WAITLIST_PROMOTED",
-        message: `Great news! You have been auto-promoted from the waitlist to APPROVED for "${topCandidate.resource.name}".`,
-        link: `/bookings/${topCandidate.id}`,
-      });
+        if (conflict) continue;
 
-      promotedBookingId = topCandidate.id;
+        // Re-verify eligibility
+        const elig = checkEligibility(candidate.user, candidate.resource);
+        if (!elig.eligible) continue;
+
+        // Promote to PENDING for manager/owner review (as specified in plan)
+        await tx.booking.update({
+          where: { id: candidate.id },
+          data: {
+            status: "PENDING",
+            waitlistPosition: null,
+            decisionReason: `Auto-promoted from waitlist to PENDING review upon cancellation of booking #${booking.id}`,
+          },
+        });
+
+        await audit(tx, {
+          actorId,
+          action: "WAITLIST_AUTO_PROMOTED",
+          entityType: "Booking",
+          entityId: candidate.id,
+          before: { status: "WAITLISTED", waitlistPosition: candidate.waitlistPosition },
+          after: { status: "PENDING", waitlistPosition: null },
+          reason: `Auto-promoted to PENDING review based on top priority score (${candidate.priorityScore}) after cancellation`,
+        });
+
+        await createNotification(tx, {
+          userId: candidate.userId,
+          type: "WAITLIST_PROMOTED",
+          message: `Great news! You have been auto-promoted from the waitlist to PENDING review for "${candidate.resource.name}". The owner will review your request.`,
+          link: `/bookings/${candidate.id}`,
+        });
+
+        await createNotification(tx, {
+          userId: candidate.resource.ownerId,
+          type: "BOOKING_REVIEW_REQUIRED",
+          message: `Waitlist candidate ${candidate.user.name} was promoted to pending review for "${candidate.resource.name}".`,
+          link: `/manage`,
+        });
+
+        promotedBookingId = candidate.id;
+        break; // Only promote top eligible candidate
+      }
+    }
 
       // Update remaining waitlist positions
       const remainingWaitlists = candidateWaitlists.slice(1);
@@ -426,6 +501,16 @@ export async function checkInBooking(params: {
     return {
       success: false,
       error: `Cannot check in. Booking must be APPROVED (current: "${booking.status}").`,
+    };
+  }
+
+  // 15-minute check-in window constraint
+  const now = new Date();
+  const earliestCheckIn = new Date(booking.start.getTime() - 15 * 60 * 1000);
+  if (now.getTime() < earliestCheckIn.getTime()) {
+    return {
+      success: false,
+      error: `Too early to check in. Check-in opens 15 minutes before your scheduled start time (${booking.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}).`,
     };
   }
 
@@ -496,9 +581,50 @@ export async function returnBooking(params: {
   }
 
   const checkInReport = booking.conditionReports.find((r) => r.phase === "CHECK_IN");
+  const damageIncidentCreated = Boolean(checkInReport && rating < checkInReport.rating);
+
+  // Compute usage fee
+  const durationHours = Math.max(
+    1,
+    Math.ceil((booking.end.getTime() - booking.start.getTime()) / (1000 * 60 * 60))
+  );
+  const usageCost = durationHours * booking.resource.creditCostPerHour;
+
+  // Compute AI summary OUTSIDE of the database transaction to prevent SQLite transaction timeouts
+  let aiSumm = "";
+  let aiSeverityTag = "MEDIUM";
+  const incidentDesc = damageIncidentCreated
+    ? `Equipment returned with degraded condition: rating fell from ${checkInReport?.rating}/5 at check-in to ${rating}/5 at check-out. Notes: ${notes || "None provided"}`
+    : "";
+
+  if (damageIncidentCreated) {
+    const initialSeverity = rating <= 2 ? "HIGH" : "MEDIUM";
+    try {
+      const aiAnalysis = await summarizeIncident({
+        type: "DAMAGE",
+        severity: initialSeverity,
+        description: incidentDesc,
+        resourceName: booking.resource.name,
+        reporterName: booking.user.name,
+      });
+      aiSumm = aiAnalysis.summary;
+      aiSeverityTag = aiAnalysis.suggestedSeverity;
+    } catch {
+      aiSumm = `Damage incident automatically drafted due to rating drop from ${checkInReport?.rating}/5 to ${rating}/5.`;
+      aiSeverityTag = initialSeverity;
+    }
+  }
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Record checkout condition report
+    // 1. Charge usage credits
+    if (usageCost > 0) {
+      await tx.user.update({
+        where: { id: booking.userId },
+        data: { credits: { decrement: usageCost } },
+      });
+    }
+
+    // 2. Record checkout condition report
     const checkOutReport = await tx.conditionReport.create({
       data: {
         bookingId,
@@ -511,32 +637,20 @@ export async function returnBooking(params: {
       },
     });
 
-    let damageIncidentCreated = false;
     let incidentId: string | null = null;
 
-    // 2. Check for rating drop => Auto-draft DAMAGE incident
-    if (checkInReport && rating < checkInReport.rating) {
-      damageIncidentCreated = true;
-      const severity = rating <= 2 ? "HIGH" : "MEDIUM";
-      const desc = `Equipment returned with degraded condition: rating fell from ${checkInReport.rating}/5 at check-in to ${rating}/5 at check-out. Notes: ${notes || "None provided"}`;
-
-      const aiSumm = await summarizeIncident({
-        type: "DAMAGE",
-        severity,
-        description: desc,
-        resourceName: booking.resource.name,
-        reporterName: booking.user.name,
-      });
-
+    // 3. Draft DAMAGE incident if condition deteriorated
+    if (damageIncidentCreated) {
       const inc = await tx.incident.create({
         data: {
           bookingId,
           resourceId: booking.resourceId,
           reporterId: actorId,
           type: "DAMAGE",
-          severity,
-          description: desc,
+          severity: aiSeverityTag,
+          description: incidentDesc,
           aiSummary: aiSumm,
+          aiSeverity: aiSeverityTag,
           status: "OPEN",
         },
       });
@@ -548,20 +662,21 @@ export async function returnBooking(params: {
         action: "INCIDENT_AUTO_DRAFTED",
         entityType: "Incident",
         entityId: inc.id,
-        after: { type: "DAMAGE", severity, status: "OPEN" },
-        reason: `Auto-drafted damage incident because condition rating dropped from ${checkInReport.rating} to ${rating}.`,
+        after: { type: "DAMAGE", severity: aiSeverityTag, status: "OPEN" },
+        reason: `Auto-drafted damage incident because condition rating dropped from ${checkInReport?.rating} to ${rating}.`,
       });
 
-      // Notify owner & manager
       await createNotification(tx, {
         userId: booking.resource.ownerId,
         type: "INCIDENT_ALERT",
-        message: `Condition degradation detected on "${booking.resource.name}" (${checkInReport.rating}/5 -> ${rating}/5). Incident drafted for manager review.`,
+        message: `Condition degradation detected on "${booking.resource.name}" (${checkInReport?.rating}/5 -> ${rating}/5). Incident drafted for manager review.`,
         link: `/incidents/${inc.id}`,
       });
     }
 
-    // 3. Refund deposit if no damage; hold if damage pending review
+    // 4. Deposit handling:
+    // If NO damage -> refund deposit immediately and mark COMPLETED
+    // If damage drafted -> hold deposit until manager resolution, mark RETURNED
     if (!damageIncidentCreated && booking.depositHeld > 0) {
       await tx.user.update({
         where: { id: booking.userId },
@@ -569,29 +684,34 @@ export async function returnBooking(params: {
       });
     }
 
-    // 4. Update booking status
+    const finalStatus = damageIncidentCreated ? "RETURNED" : "COMPLETED";
+
     await tx.booking.update({
       where: { id: bookingId },
       data: {
-        status: "RETURNED",
+        status: finalStatus,
         depositHeld: damageIncidentCreated ? booking.depositHeld : 0,
       },
     });
 
     await audit(tx, {
       actorId,
-      action: "BOOKING_RETURNED",
+      action: finalStatus === "COMPLETED" ? "BOOKING_COMPLETED" : "BOOKING_RETURNED",
       entityType: "Booking",
       entityId: bookingId,
       before: { status: booking.status },
-      after: { status: "RETURNED", checkoutRating: rating },
-      reason: `Return condition report recorded (Rating: ${rating}/5).`,
+      after: { status: finalStatus, checkoutRating: rating, usageCostCharged: usageCost },
+      reason: `Return condition report recorded (Rating: ${rating}/5). Usage cost: ${usageCost} credits.`,
     });
 
     await createNotification(tx, {
       userId: booking.userId,
       type: "BOOKING_RETURNED",
-      message: `Return complete for "${booking.resource.name}". Thank you for using CampusShare!`,
+      message: `Return processed for "${booking.resource.name}". Billed ${usageCost} credits for ${durationHours}h usage. ${
+        damageIncidentCreated
+          ? "Deposit held pending damage review."
+          : "Deposit refunded in full. Thank you!"
+      }`,
       link: `/bookings/${bookingId}`,
     });
 
@@ -639,8 +759,37 @@ export async function extendBooking(params: {
   }
 
   const addedHours = Math.ceil((newEnd.getTime() - booking.end.getTime()) / (1000 * 60 * 60));
+  const totalDurationHours =
+    (newEnd.getTime() - booking.start.getTime()) / (1000 * 60 * 60);
 
-  // Check conflicts for the extended window
+  // 1. Max hours per booking rule
+  if (
+    booking.resource.maxHoursPerBooking &&
+    totalDurationHours > booking.resource.maxHoursPerBooking
+  ) {
+    return {
+      success: false,
+      error: `Extended duration (${totalDurationHours.toFixed(
+        1
+      )}h) exceeds maximum allowed booking duration (${booking.resource.maxHoursPerBooking}h).`,
+    };
+  }
+
+  // 2. Weekly fairness rules (including 20h campus-wide cap)
+  const fairness = await checkFairnessLimits(
+    booking.userId,
+    booking.resourceId,
+    booking.start,
+    newEnd
+  );
+  if (!fairness.allowed) {
+    return {
+      success: false,
+      error: `Extension exceeds fairness quota: ${fairness.reasons.join("; ")}`,
+    };
+  }
+
+  // 3. Check conflicts for the extended window
   const conflict = await checkBookingConflicts(
     booking.resourceId,
     booking.end,
@@ -655,7 +804,7 @@ export async function extendBooking(params: {
     };
   }
 
-  // Check credit cost
+  // 4. Check credit cost
   const extensionCost = addedHours * booking.resource.creditCostPerHour;
   if (booking.user.credits < extensionCost) {
     return {

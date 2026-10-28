@@ -1,7 +1,8 @@
 import OpenAI from "openai";
+import { z } from "zod";
 
 const apiKey = process.env.OPENAI_API_KEY;
-const openai = apiKey ? new OpenAI({ apiKey }) : null;
+const openai = apiKey ? new OpenAI({ apiKey, timeout: 4000 }) : null;
 
 export const AI_DISCLAIMER = "⚠️ AI suggestion — requires human review";
 
@@ -11,6 +12,18 @@ export interface ResourceMatchResult {
   score: number;
   reason: string;
 }
+
+const AiMatchResponseSchema = z.object({
+  matches: z
+    .array(
+      z.object({
+        resourceId: z.string(),
+        score: z.number().optional().default(85),
+        reason: z.string().optional().default("Matches query criteria"),
+      })
+    )
+    .default([]),
+});
 
 export async function matchResources(
   query: string,
@@ -28,9 +41,11 @@ export async function matchResources(
     return [];
   }
 
+  const validResourceMap = new Map(resources.map((r) => [r.id, r]));
+
   if (openai) {
     try {
-      const prompt = `You are an intelligent campus resource matcher. A student/researcher is searching: "${query}".
+      const prompt = `You are an intelligent campus resource matcher. A campus member is searching: "${query}".
 Here is a list of available campus resources:
 ${JSON.stringify(
   resources.map((r) => ({
@@ -43,10 +58,12 @@ ${JSON.stringify(
   }))
 )}
 
-Select up to 4 most relevant resources for this query. Return valid JSON only with array of objects:
-[
-  { "resourceId": "id", "score": 95, "reason": "Concise reason why it matches the query" }
-]`;
+Select up to 4 most relevant resources for this query. Return valid JSON in this exact structure:
+{
+  "matches": [
+    { "resourceId": "<valid_id_from_above>", "score": 95, "reason": "Concise reason why it matches" }
+  ]
+}`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
@@ -57,17 +74,25 @@ Select up to 4 most relevant resources for this query. Return valid JSON only wi
 
       const content = response.choices[0]?.message?.content;
       if (content) {
-        const parsed = JSON.parse(content);
-        const results = Array.isArray(parsed) ? parsed : parsed.results || parsed.matches || [];
-        return results.map((item: any) => {
-          const res = resources.find((r) => r.id === item.resourceId);
-          return {
-            resourceId: item.resourceId,
-            name: res?.name || "Resource",
-            score: Number(item.score) || 80,
-            reason: item.reason || "Matches search keywords",
-          };
-        });
+        const rawJson = JSON.parse(content);
+        const parsed = AiMatchResponseSchema.safeParse(rawJson);
+        if (parsed.success && parsed.data.matches.length > 0) {
+          const verifiedMatches: ResourceMatchResult[] = [];
+          for (const item of parsed.data.matches) {
+            const actualResource = validResourceMap.get(item.resourceId);
+            if (actualResource) {
+              verifiedMatches.push({
+                resourceId: actualResource.id,
+                name: actualResource.name,
+                score: Math.min(100, Math.max(1, Number(item.score) || 80)),
+                reason: item.reason || "Semantic relevance match",
+              });
+            }
+          }
+          if (verifiedMatches.length > 0) {
+            return verifiedMatches.slice(0, 4);
+          }
+        }
       }
     } catch {
       // Fall through to heuristic fallback
@@ -120,30 +145,59 @@ Select up to 4 most relevant resources for this query. Return valid JSON only wi
     .slice(0, 4);
 }
 
+export interface IncidentSummaryResult {
+  summary: string;
+  suggestedSeverity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+}
+
 export async function summarizeIncident(incident: {
   type: string;
   severity: string;
   description: string;
   resourceName: string;
   reporterName?: string;
-}): Promise<string> {
+}): Promise<IncidentSummaryResult> {
+  const fallbackSeverity = (
+    ["CRITICAL", "HIGH", "MEDIUM", "LOW"].includes(incident.severity)
+      ? incident.severity
+      : "MEDIUM"
+  ) as "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+
   if (openai) {
     try {
-      const prompt = `Summarize this equipment/space incident for a department manager in 2 concise sentences:
+      const prompt = `Analyze this university equipment/space incident for a department manager:
 Resource: ${incident.resourceName}
 Type: ${incident.type}
 Severity: ${incident.severity}
-Report: ${incident.description}
-Highlight the core impact and suggest appropriate inspection priority.`;
+Description: "${incident.description}"
+
+Return JSON only in this exact format:
+{
+  "summary": "2 concise sentences summarizing impact and suggested inspection priority.",
+  "suggestedSeverity": "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"
+}`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
-        temperature: 0.3,
+        response_format: { type: "json_object" },
+        temperature: 0.2,
       });
 
-      const text = response.choices[0]?.message?.content?.trim();
-      if (text) return text;
+      const text = response.choices[0]?.message?.content;
+      if (text) {
+        const parsed = JSON.parse(text);
+        if (parsed.summary) {
+          const sev = (parsed.suggestedSeverity || fallbackSeverity).toUpperCase();
+          const validSev = ["LOW", "MEDIUM", "HIGH", "CRITICAL"].includes(sev)
+            ? (sev as "LOW" | "MEDIUM" | "HIGH" | "CRITICAL")
+            : fallbackSeverity;
+          return {
+            summary: parsed.summary,
+            suggestedSeverity: validSev,
+          };
+        }
+      }
     } catch {
       // Fall through to fallback
     }
@@ -152,12 +206,15 @@ Highlight the core impact and suggest appropriate inspection priority.`;
   // Heuristic summary
   const severityDescriptor =
     incident.severity === "CRITICAL"
-      ? "requires urgent offline status and immediate supervisor attention"
+      ? "requires urgent offline status and immediate supervisor inspection"
       : incident.severity === "HIGH"
       ? "requires prompt physical inspection prior to subsequent bookings"
       : "should be monitored during routine departmental review";
 
-  return `Reported ${incident.type.toLowerCase()} incident on "${incident.resourceName}" (${incident.severity} severity). Detail: "${incident.description}". This ${severityDescriptor}.`;
+  return {
+    summary: `Reported ${incident.type.toLowerCase()} incident on "${incident.resourceName}" (${incident.severity} severity). Detail: "${incident.description}". This ${severityDescriptor}.`,
+    suggestedSeverity: fallbackSeverity,
+  };
 }
 
 export interface CertReviewResult {
@@ -259,11 +316,12 @@ export async function explainSuspiciousUsage(
 
   if (openai) {
     try {
+      // Anonymize user details to safeguard personal identity and data privacy
       const prompt = `Analyze this university user's booking history for suspicious behavior or hoarding:
-User: ${user.name} (${user.department})
-Strikes: ${user.strikes}, Available Credits: ${user.credits}
+Subject: Campus Member (Department: ${user.department})
+Conduct Strikes: ${user.strikes}, Available Credits: ${user.credits}
 Total bookings: ${total}, Cancelled: ${cancelled} (${cancellationRate}%), Overdue: ${overdue}
-Provide a 2-sentence fairness assessment for the administrator.`;
+Provide a 2-sentence objective fairness assessment for the administrator.`;
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",

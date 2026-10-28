@@ -55,9 +55,9 @@ export function checkEligibility(
   const missing: string[] = [];
 
   // 1. Account verification
-  const isAccountVerified = Boolean(user.verified || user.emailVerified);
+  const isAccountVerified = Boolean(user.verified);
   if (isAccountVerified) {
-    met.push("Verified campus member");
+    met.push("Verified campus member (admin verified)");
   } else {
     missing.push("Unverified account: must be verified by admin");
   }
@@ -81,7 +81,7 @@ export function checkEligibility(
     resource.depositCredits || 0,
     resource.creditCostPerHour || 0
   );
-  const creditsSufficient = (user.credits ?? 0) >= requiredCredits;
+  let creditsSufficient = (user.credits ?? 0) >= requiredCredits;
   if (creditsSufficient) {
     met.push(
       `Sufficient credit balance (${user.credits} available, ${requiredCredits} required)`
@@ -96,6 +96,7 @@ export function checkEligibility(
   let roleMet = true;
   let departmentMet = true;
   let trainingsMet = true;
+  let minCreditsMet = true;
 
   const requirements = resource.requirements || [];
 
@@ -121,8 +122,7 @@ export function checkEligibility(
       if (
         user.department === req.requiredDepartment ||
         user.role === "ADMIN" ||
-        user.department === "Campus" ||
-        user.department === "General"
+        user.department === "Campus"
       ) {
         met.push(`Department match: ${req.requiredDepartment}`);
       } else {
@@ -138,6 +138,8 @@ export function checkEligibility(
       if ((user.credits ?? 0) >= req.minCredits) {
         met.push(`Meets minimum credit balance of ${req.minCredits}`);
       } else {
+        minCreditsMet = false;
+        creditsSufficient = false;
         missing.push(
           `Requires minimum ${req.minCredits} credits (you have ${user.credits})`
         );
@@ -175,6 +177,7 @@ export function checkEligibility(
     isAccountVerified &&
     notSuspended &&
     creditsSufficient &&
+    minCreditsMet &&
     roleMet &&
     departmentMet &&
     trainingsMet;
