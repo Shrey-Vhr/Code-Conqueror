@@ -53,6 +53,22 @@ export default async function IncidentDetailPage({
     orderBy: { createdAt: "desc" },
   });
 
+  const otherUnresolvedCount = incident.booking
+    ? await prisma.incident.count({
+        where: {
+          bookingId: incident.booking.id,
+          id: { not: incident.id },
+          status: { not: "RESOLVED" },
+        },
+      })
+    : 0;
+
+  const isFinalIncidentForSettlement = Boolean(
+    incident.booking &&
+      incident.booking.status === "RETURNED" &&
+      otherUnresolvedCount === 0
+  );
+
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* Breadcrumb */}
@@ -169,11 +185,12 @@ export default async function IncidentDetailPage({
           incidentId={incident.id}
           targetUserName={incident.booking?.user?.name}
           hasDepositHeld={Boolean(
-            incident.booking &&
-              incident.booking.status === "RETURNED" &&
+            isFinalIncidentForSettlement &&
+              incident.booking &&
               incident.booking.depositHeld > 0
           )}
           depositAmount={incident.booking?.depositHeld || 0}
+          otherUnresolvedCount={otherUnresolvedCount}
         />
       ) : (
         <div className="p-6 bg-white rounded-2xl border border-slate-200 text-center text-xs text-slate-500">

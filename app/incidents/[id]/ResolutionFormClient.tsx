@@ -9,6 +9,7 @@ interface ResolutionFormClientProps {
   targetUserName?: string;
   hasDepositHeld?: boolean;
   depositAmount?: number;
+  otherUnresolvedCount?: number;
 }
 
 export function ResolutionFormClient({
@@ -16,6 +17,7 @@ export function ResolutionFormClient({
   targetUserName,
   hasDepositHeld = false,
   depositAmount = 0,
+  otherUnresolvedCount = 0,
 }: ResolutionFormClientProps) {
   const router = useRouter();
   const [resolution, setResolution] = useState("");
@@ -112,7 +114,7 @@ export function ResolutionFormClient({
         </select>
       </div>
 
-      {/* Security deposit settlement choice */}
+      {/* Security deposit settlement choice (available on final incident resolution) */}
       {hasDepositHeld && (
         <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200 space-y-1.5">
           <label className="block text-xs font-semibold text-amber-900 uppercase tracking-wider">
@@ -127,7 +129,19 @@ export function ResolutionFormClient({
             <option value="FORFEIT">Forfeit Deposit ({depositAmount} credits retained for repair fund)</option>
           </select>
           <p className="text-[11px] text-amber-700 leading-normal">
-            Resolving this incident will formally settle the escrowed deposit and transition the reservation to COMPLETED.
+            Resolving this final incident will formally settle the escrowed deposit and transition the reservation to COMPLETED.
+          </p>
+        </div>
+      )}
+
+      {/* Escrow note when other incidents remain open */}
+      {!hasDepositHeld && otherUnresolvedCount > 0 && depositAmount > 0 && (
+        <div className="p-3.5 bg-slate-100 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1">
+          <span className="font-semibold text-slate-800 block text-[11px] uppercase tracking-wide">
+            Escrowed Security Deposit ({depositAmount} credits)
+          </span>
+          <p className="text-[11px] text-slate-500 leading-normal">
+            Held in escrow pending resolution of {otherUnresolvedCount} other open incident{otherUnresolvedCount > 1 ? "s" : ""} on this reservation. Deposit settlement (refund or forfeit) will take place upon resolving the final remaining incident.
           </p>
         </div>
       )}
