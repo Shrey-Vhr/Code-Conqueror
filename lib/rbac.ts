@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { getSession, SessionUser } from "./session";
 
 export type Role = "STUDENT" | "RESEARCHER" | "OWNER" | "MANAGER" | "ADMIN";
@@ -5,7 +6,7 @@ export type Role = "STUDENT" | "RESEARCHER" | "OWNER" | "MANAGER" | "ADMIN";
 export async function requireAuth(): Promise<SessionUser> {
   const session = await getSession();
   if (!session) {
-    throw new Error("Unauthorized: You must be logged in to perform this action.");
+    redirect("/login");
   }
   return session;
 }
@@ -13,11 +14,7 @@ export async function requireAuth(): Promise<SessionUser> {
 export async function requireRole(allowedRoles: Role[]): Promise<SessionUser> {
   const session = await requireAuth();
   if (!allowedRoles.includes(session.role as Role)) {
-    throw new Error(
-      `Forbidden: Your role (${session.role}) does not have permission to perform this action. Required: ${allowedRoles.join(
-        ", "
-      )}`
-    );
+    redirect("/resources");
   }
   return session;
 }
