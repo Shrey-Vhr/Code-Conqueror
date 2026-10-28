@@ -116,7 +116,7 @@ export default function LoginPage() {
         {/* Left Column: Traditional Login Box */}
         <div className="lg:col-span-5 bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
           <div className="mb-6">
-            <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-lg mb-3 shadow-sm">
+            <div className="w-10 h-10 rounded-xl bg-secondary text-addon flex items-center justify-center font-extrabold text-lg mb-3 shadow-sm border border-secondary">
               CS
             </div>
             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
@@ -178,7 +178,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2.5 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 cursor-pointer"
+              className="w-full py-2.5 px-4 rounded-lg bg-secondary hover:bg-secondary-hover text-[#F3EBD2] font-bold text-sm transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-addon disabled:opacity-50 cursor-pointer"
             >
               {isLoading ? "Signing in..." : "Sign In with Single Sign-On"}
             </button>
@@ -194,8 +194,8 @@ export default function LoginPage() {
           <div className="flex items-center justify-between mb-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="flex h-2 w-2 rounded-full bg-emerald-500"></span>
-                <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <span className="flex h-2 w-2 rounded-full bg-addon"></span>
+                <span className="text-xs font-bold uppercase tracking-wider text-secondary bg-primary px-2 py-0.5 rounded border border-[#DDD0A9]">
                   Judge Sandbox Ready
                 </span>
               </div>
@@ -249,7 +249,7 @@ export default function LoginPage() {
                       type="button"
                       onClick={() => handleQuickLogin(acc.email)}
                       disabled={isLoggingIn}
-                      className="px-3.5 py-1.5 rounded-lg bg-slate-900 group-hover:bg-blue-600 text-white text-xs font-semibold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                      className="px-3.5 py-1.5 rounded-lg bg-secondary group-hover:bg-[#223F10] text-[#F3EBD2] group-hover:text-addon text-xs font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
                     >
                       {isLoggingIn ? "Switching..." : "Login →"}
                     </button>

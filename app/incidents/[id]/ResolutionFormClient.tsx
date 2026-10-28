@@ -182,7 +182,7 @@ export function ResolutionFormClient({
         <button
           type="submit"
           disabled={isLoading}
-          className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50 transition-colors"
+          className="px-6 py-2.5 bg-secondary hover:bg-secondary-hover text-addon rounded-xl text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50 transition-colors border border-secondary"
         >
           {isLoading ? "Recording Decision..." : "Resolve Incident & Finalize Reservation"}
         </button>

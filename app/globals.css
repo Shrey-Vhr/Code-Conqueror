@@ -1,16 +1,60 @@
 @import "tailwindcss";
 
+@theme {
+  --color-primary: #F3EBD2;
+  --color-primary-hover: #E7DDBC;
+  --color-primary-light: #FAF7EF;
+  --color-primary-dark: #DDD0A9;
+
+  --color-secondary: #172A0B;
+  --color-secondary-hover: #223F10;
+  --color-secondary-light: #2D5216;
+  --color-secondary-dark: #0D1806;
+
+  --color-addon: #D5E84A;
+  --color-addon-hover: #C5DC37;
+  --color-addon-light: #EEF7A6;
+  --color-addon-dark: #98A820;
+
+  --color-blue-50: #FAF6EC;
+  --color-blue-100: #F3EBD2;
+  --color-blue-200: #E5DBBA;
+  --color-blue-300: #D5E84A;
+  --color-blue-400: #B8CD33;
+  --color-blue-500: #2C4E15;
+  --color-blue-600: #172A0B;
+  --color-blue-700: #0F1D07;
+  --color-blue-800: #0A1405;
+  --color-blue-900: #050A02;
+
+  --color-slate-50: #FAF7F0;
+  --color-slate-100: #F3EBD2;
+  --color-slate-200: #E5DBBD;
+  --color-slate-300: #D2C4A0;
+  --color-slate-400: #9A8F74;
+  --color-slate-500: #6B634E;
+  --color-slate-600: #464234;
+  --color-slate-700: #2B3322;
+  --color-slate-800: #1E2816;
+  --color-slate-900: #172A0B;
+  --color-slate-950: #0D1806;
+}
+
 @layer base {
   :root {
-    --background: #f8fafc;
-    --foreground: #0f172a;
-    --card: #ffffff;
-    --card-foreground: #0f172a;
-    --primary: #2563eb;
-    --primary-foreground: #ffffff;
-    --muted: #f1f5f9;
-    --muted-foreground: #64748b;
-    --border: #e2e8f0;
+    --background: #FAF7F0;
+    --foreground: #172A0B;
+    --card: #FFFFFF;
+    --card-foreground: #172A0B;
+    --primary: #F3EBD2;
+    --primary-foreground: #172A0B;
+    --secondary: #172A0B;
+    --secondary-foreground: #FFFFFF;
+    --accent: #D5E84A;
+    --accent-foreground: #172A0B;
+    --muted: #F3EBD2;
+    --muted-foreground: #6B634E;
+    --border: #E5DBBD;
   }
 
   body {

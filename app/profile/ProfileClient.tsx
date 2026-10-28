@@ -66,7 +66,7 @@ export function ProfileClient({
 
         <button
           onClick={() => setShowSubmitModal(!showSubmitModal)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
+          className="px-4 py-2 bg-secondary hover:bg-secondary-hover text-addon rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer border border-secondary"
         >
           + Submit Safety Credential
         </button>
@@ -130,7 +130,7 @@ export function ProfileClient({
             <button
               type="submit"
               disabled={isPending}
-              className="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50"
+              className="px-5 py-1.5 bg-secondary hover:bg-secondary-hover text-addon rounded-lg text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50 border border-secondary"
             >
               {isPending ? "Submitting..." : "Submit to Admin for Verification"}
             </button>

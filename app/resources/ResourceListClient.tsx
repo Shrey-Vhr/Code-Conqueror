@@ -107,10 +107,10 @@ export function ResourceListClient({
         {canCreateResource && (
           <Link
             href="/resources/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-colors shrink-0"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary-hover text-[#F3EBD2] hover:text-addon rounded-xl text-sm font-bold shadow-sm transition-colors shrink-0 border border-secondary"
           >
             <svg
-              className="w-4 h-4"
+              className="w-4 h-4 text-addon"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth="2.5"
@@ -124,11 +124,11 @@ export function ResourceListClient({
       </div>
 
       {/* AI Smart Search Box */}
-      <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/60 to-purple-50/80 p-5 rounded-2xl border border-blue-200/80 shadow-xs">
+      <div className="bg-gradient-to-r from-primary/80 via-[#FDFBF7] to-primary/60 p-5 rounded-2xl border border-[#DDD0A9] shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
           <div className="flex items-center gap-2">
-            <span className="flex h-2 w-2 rounded-full bg-blue-600 animate-pulse"></span>
-            <span className="text-xs font-bold uppercase tracking-wider text-blue-900">
+            <span className="flex h-2 w-2 rounded-full bg-addon animate-pulse"></span>
+            <span className="text-xs font-bold uppercase tracking-wider text-secondary">
               AI Intelligent Resource Matcher
             </span>
           </div>
@@ -144,7 +144,7 @@ export function ResourceListClient({
               value={aiQuery}
               onChange={(e) => setAiQuery(e.target.value)}
               placeholder="Describe your project (e.g. 'I need to 3D print a robotics gear housing' or 'High frame rate video capture for biomechanics')"
-              className="w-full px-4 py-2.5 rounded-xl border border-blue-200 bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs"
+              className="w-full px-4 py-2.5 rounded-xl border border-[#DDD0A9] bg-white text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-secondary shadow-2xs"
             />
             {aiQuery && (
               <button
@@ -159,13 +159,13 @@ export function ResourceListClient({
           <button
             type="submit"
             disabled={isAiSearching || !aiQuery.trim()}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-xs disabled:opacity-50 transition-colors shrink-0 flex items-center justify-center gap-2 cursor-pointer"
+            className="px-5 py-2.5 bg-secondary hover:bg-secondary-hover text-addon rounded-xl text-sm font-bold shadow-xs disabled:opacity-50 transition-colors shrink-0 flex items-center justify-center gap-2 cursor-pointer border border-secondary"
           >
             {isAiSearching ? (
               <span>Analyzing...</span>
             ) : (
               <>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                <svg className="w-4 h-4 text-addon" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
                 </svg>
                 <span>AI Smart Match</span>
@@ -395,7 +395,7 @@ export function ResourceListClient({
 
                     <Link
                       href={`/resources/${res.id}`}
-                      className="block text-center w-full py-2 bg-slate-900 group-hover:bg-blue-600 text-white rounded-xl text-xs font-semibold shadow-2xs transition-colors"
+                      className="block text-center w-full py-2 bg-secondary group-hover:bg-[#223F10] text-[#F3EBD2] group-hover:text-addon rounded-xl text-xs font-bold shadow-2xs transition-colors border border-secondary"
                     >
                       View Details & Reserve →
                     </Link>

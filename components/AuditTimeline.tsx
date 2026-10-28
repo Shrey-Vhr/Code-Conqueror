@@ -36,7 +36,7 @@ export function AuditTimeline({ logs, className = "" }: AuditTimelineProps) {
     if (action.includes("APPROVED") || action.includes("VERIFIED")) return "bg-emerald-500 text-white";
     if (action.includes("REJECTED") || action.includes("CANCELLED") || action.includes("OVERDUE") || action.includes("INCIDENT"))
       return "bg-rose-500 text-white";
-    if (action.includes("CHECKED_IN") || action.includes("PROMOTED")) return "bg-blue-500 text-white";
+    if (action.includes("CHECKED_IN") || action.includes("PROMOTED")) return "bg-addon text-secondary font-bold";
     return "bg-slate-500 text-white";
   };
 

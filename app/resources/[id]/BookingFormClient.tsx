@@ -225,7 +225,7 @@ export function BookingFormClient({
           </div>
           <div className="pt-2 border-t border-slate-200 flex justify-between font-bold text-slate-900 text-sm">
             <span>Total Credits Required</span>
-            <span className="text-blue-700">{totalCreditsNeeded} credits</span>
+            <span className="text-secondary">{totalCreditsNeeded} credits</span>
           </div>
           <div className="flex justify-between text-[11px] text-slate-500">
             <span>Your Available Balance</span>
@@ -241,7 +241,7 @@ export function BookingFormClient({
         <button
           type="submit"
           disabled={isSubmitting || !isEligible}
-          className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:pointer-events-none"
+          className="w-full py-3 bg-secondary hover:bg-secondary-hover text-[#F3EBD2] hover:text-addon rounded-xl font-bold text-sm shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:pointer-events-none border border-secondary"
         >
           {isSubmitting ? "Submitting Request..." : "Request Booking"}
         </button>

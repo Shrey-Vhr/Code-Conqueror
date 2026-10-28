@@ -52,7 +52,7 @@ export function ReviewItemClient({ bookingId }: ReviewItemClientProps) {
             setShowInput("APPROVE");
             setReason("Approved for academic and departmental schedule priority.");
           }}
-          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-2xs transition-colors cursor-pointer"
+          className="px-3.5 py-1.5 bg-secondary hover:bg-secondary-hover text-addon rounded-lg text-xs font-bold shadow-2xs transition-colors cursor-pointer border border-secondary"
         >
           Approve Request
         </button>
@@ -100,8 +100,8 @@ export function ReviewItemClient({ bookingId }: ReviewItemClientProps) {
         <button
           onClick={() => handleAction(showInput)}
           disabled={isLoading}
-          className={`px-4 py-1.5 rounded-lg text-xs font-bold text-white shadow-2xs cursor-pointer disabled:opacity-50 ${
-            showInput === "APPROVE" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-rose-600 hover:bg-rose-700"
+          className={`px-4 py-1.5 rounded-lg text-xs font-bold shadow-2xs cursor-pointer disabled:opacity-50 ${
+            showInput === "APPROVE" ? "bg-secondary hover:bg-secondary-hover text-addon border border-secondary" : "bg-rose-700 hover:bg-rose-800 text-white"
           }`}
         >
           {isLoading ? "Submitting..." : `Confirm ${showInput === "APPROVE" ? "Approval" : "Rejection"}`}

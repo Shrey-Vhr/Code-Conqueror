@@ -99,7 +99,7 @@ export function NotificationBell({
     <div className="relative inline-block text-left" ref={dropdownRef}>
       <button
         onClick={handleToggle}
-        className="relative p-2 text-slate-600 hover:text-slate-900 rounded-full hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+        className="relative p-2 text-slate-600 hover:text-secondary rounded-full hover:bg-primary/50 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
         aria-label="Notifications"
       >
         <svg
@@ -139,7 +139,7 @@ export function NotificationBell({
               <button
                 onClick={handleMarkAllRead}
                 disabled={loading}
-                className="text-xs text-blue-600 hover:text-blue-800 font-medium cursor-pointer"
+                className="text-xs text-secondary hover:text-[#254212] font-bold cursor-pointer"
               >
                 Mark all read
               </button>
@@ -162,7 +162,7 @@ export function NotificationBell({
                     key={notif.id}
                     onClick={() => handleItemClick(notif)}
                     className={`p-3.5 hover:bg-slate-50 transition-colors cursor-pointer text-sm ${
-                      !notif.read ? "bg-blue-50/50" : ""
+                      !notif.read ? "bg-primary/30" : ""
                     }`}
                   >
                     {notif.link ? (
@@ -170,7 +170,7 @@ export function NotificationBell({
                         <div className="flex items-start gap-2.5">
                           <span
                             className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${
-                              !notif.read ? "bg-blue-600" : "bg-transparent"
+                              !notif.read ? "bg-secondary" : "bg-transparent"
                             }`}
                           />
                           <div className="flex-1">

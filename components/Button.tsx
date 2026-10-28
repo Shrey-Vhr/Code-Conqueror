@@ -7,7 +7,8 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     | "destructive"
     | "outline"
     | "ghost"
-    | "success";
+    | "success"
+    | "addon";
   size?: "sm" | "md" | "lg";
   isLoading?: boolean;
 }
@@ -32,17 +33,19 @@ export function Button({
 
   const variantStyles = {
     default:
-      "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-sm",
+      "bg-secondary text-white hover:bg-secondary-hover focus:ring-addon shadow-sm font-semibold",
     secondary:
-      "bg-slate-100 text-slate-800 hover:bg-slate-200 focus:ring-slate-400 border border-slate-200",
+      "bg-primary text-secondary hover:bg-primary-hover focus:ring-secondary border border-slate-300 font-semibold",
     destructive:
-      "bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500 shadow-sm",
+      "bg-rose-700 text-white hover:bg-rose-800 focus:ring-rose-500 shadow-sm font-semibold",
     outline:
-      "bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 focus:ring-blue-500 shadow-sm",
+      "bg-white text-secondary border border-slate-300 hover:bg-primary-light focus:ring-secondary shadow-2xs font-semibold",
     ghost:
-      "bg-transparent text-slate-700 hover:bg-slate-100 focus:ring-slate-400",
+      "bg-transparent text-secondary hover:bg-primary focus:ring-secondary font-medium",
     success:
-      "bg-emerald-600 text-white hover:bg-emerald-700 focus:ring-emerald-500 shadow-sm",
+      "bg-[#1C360E] text-[#D5E84A] hover:bg-secondary focus:ring-addon shadow-sm font-bold",
+    addon:
+      "bg-addon text-secondary hover:bg-addon-hover focus:ring-secondary font-bold shadow-sm",
   };
 
   return (

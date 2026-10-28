@@ -18,14 +18,14 @@ export default async function HomePage() {
       <div className="space-y-16 py-8 sm:py-12">
         {/* Hero Section */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold shadow-2xs">
-            <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary border border-[#DDD0A9] text-secondary text-xs font-bold shadow-2xs">
+            <span className="w-2 h-2 rounded-full bg-addon animate-pulse" />
             Northfield University CampusShare Platform
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-black text-slate-900 tracking-tight leading-tight">
+          <h1 className="text-4xl sm:text-6xl font-black text-secondary tracking-tight leading-tight">
             Fair, Transparent, and Automated{" "}
-            <span className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-secondary via-[#294B15] to-[#40681B] bg-clip-text text-transparent">
               Campus Resource Sharing
             </span>
           </h1>
@@ -37,13 +37,14 @@ export default async function HomePage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link
               href="/login"
-              className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-sm transition-all transform hover:-translate-y-0.5"
+              className="w-full sm:w-auto px-8 py-3.5 bg-secondary hover:bg-secondary-hover text-[#F3EBD2] rounded-xl text-sm font-bold shadow-sm transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2 group"
             >
-              Get Started / Sign In →
+              <span>Get Started / Sign In</span>
+              <span className="text-addon group-hover:translate-x-0.5 transition-transform font-black">→</span>
             </Link>
             <Link
               href="/resources"
-              className="w-full sm:w-auto px-6 py-3.5 bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 rounded-xl text-sm font-semibold shadow-2xs transition-all"
+              className="w-full sm:w-auto px-6 py-3.5 bg-primary hover:bg-primary-hover text-secondary border border-[#DDD0A9] rounded-xl text-sm font-bold shadow-2xs transition-all"
             >
               Explore 12 Campus Resources
             </Link>
@@ -54,22 +55,22 @@ export default async function HomePage() {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-white rounded-3xl border border-slate-200 shadow-2xs">
             <div className="text-center p-3">
-              <span className="text-3xl sm:text-4xl font-black text-blue-600 block">{totalResources || 12}</span>
+              <span className="text-3xl sm:text-4xl font-black text-secondary block">{totalResources || 12}</span>
               <span className="text-xs font-semibold text-slate-500 uppercase mt-1 block">Shared Resources</span>
               <span className="text-[11px] text-slate-400">Lasers, 3D printers, GPUs, studios</span>
             </div>
             <div className="text-center p-3 border-l border-slate-100">
-              <span className="text-3xl sm:text-4xl font-black text-indigo-600 block">4</span>
+              <span className="text-3xl sm:text-4xl font-black text-[#244212] block">4</span>
               <span className="text-xs font-semibold text-slate-500 uppercase mt-1 block">Academic Colleges</span>
               <span className="text-[11px] text-slate-400">Engineering, Biology, Media, Library</span>
             </div>
             <div className="text-center p-3 border-l border-slate-100">
-              <span className="text-3xl sm:text-4xl font-black text-purple-600 block">{totalUsers || 6}</span>
+              <span className="text-3xl sm:text-4xl font-black text-[#385E1A] block">{totalUsers || 6}</span>
               <span className="text-xs font-semibold text-slate-500 uppercase mt-1 block">Demo User Roles</span>
               <span className="text-[11px] text-slate-400">Student, Researcher, Owner, Manager, Admin</span>
             </div>
             <div className="text-center p-3 border-l border-slate-100">
-              <span className="text-3xl sm:text-4xl font-black text-emerald-600 block">100%</span>
+              <span className="text-3xl sm:text-4xl font-black text-secondary block">100%</span>
               <span className="text-xs font-semibold text-slate-500 uppercase mt-1 block">Audit Traceability</span>
               <span className="text-[11px] text-slate-400">Immutable lifecycle records</span>
             </div>
@@ -231,7 +232,7 @@ export default async function HomePage() {
       {/* Personalized Welcome Header */}
       <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-2xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-purple-600 text-white font-extrabold text-2xl flex items-center justify-center shadow-xs">
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#172A0B] via-[#244212] to-[#2E5316] text-[#D5E84A] font-extrabold text-2xl flex items-center justify-center shadow-xs border border-secondary">
             {user.name.charAt(0)}
           </div>
           <div className="space-y-1">
@@ -239,7 +240,7 @@ export default async function HomePage() {
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
                 Welcome back, {user.name}
               </h1>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full border bg-blue-50 text-blue-800 border-blue-200">
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full border bg-primary text-secondary border-[#DDD0A9]">
                 {user.role}
               </span>
               <span className="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700">
@@ -256,7 +257,7 @@ export default async function HomePage() {
         <div className="flex items-center gap-3 shrink-0 flex-wrap">
           <div className="p-3 bg-slate-50 rounded-2xl border border-slate-100 text-center min-w-[95px]">
             <span className="text-[10px] font-semibold text-slate-500 uppercase block">Credits</span>
-            <span className="text-xl font-bold text-blue-700">{user.credits}</span>
+            <span className="text-xl font-bold text-secondary">{user.credits}</span>
             <span className="text-[10px] text-slate-400 block">/ 500</span>
           </div>
 

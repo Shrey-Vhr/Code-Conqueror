@@ -31,8 +31,8 @@ export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
       );
     case "CHECKED_IN":
       return (
-        <Badge variant="default" className={className}>
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>
+        <Badge variant="addon" className={className}>
+          <span className="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5 animate-pulse"></span>
           CHECKED IN
         </Badge>
       );

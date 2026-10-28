@@ -303,7 +303,7 @@ export function BookingActionPanels({
               onClick={() =>
                 setActiveAction(activeAction === "CHECK_IN" ? "IDLE" : "CHECK_IN")
               }
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
+              className="px-4 py-2 bg-secondary hover:bg-secondary-hover text-addon rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer border border-secondary"
             >
               Check-In Inspection →
             </button>
@@ -314,10 +314,10 @@ export function BookingActionPanels({
               onClick={() =>
                 setActiveAction(activeAction === "RETURN" ? "IDLE" : "RETURN")
               }
-              className={`px-4 py-2 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer ${
                 status === "OVERDUE"
-                  ? "bg-rose-600 hover:bg-rose-700 animate-pulse"
-                  : "bg-blue-600 hover:bg-blue-700"
+                  ? "bg-rose-700 hover:bg-rose-800 text-white animate-pulse"
+                  : "bg-secondary hover:bg-secondary-hover text-addon border border-secondary"
               }`}
             >
               Return Condition Check-out →
@@ -332,8 +332,8 @@ export function BookingActionPanels({
               disabled={isLoading}
               className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer border ${
                 activeAction === "EXTEND"
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200"
+                  ? "bg-secondary text-addon border-secondary font-bold"
+                  : "bg-primary hover:bg-primary-hover text-secondary border-[#DDD0A9]"
               }`}
             >
               Extend Session +

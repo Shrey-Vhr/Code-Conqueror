@@ -117,7 +117,7 @@ export function WeeklyAvailabilityGrid({
                 key={idx}
                 className={`py-1 rounded-lg ${
                   day.toDateString() === now.toDateString()
-                    ? "bg-blue-50 text-blue-700 font-extrabold border border-blue-200"
+                    ? "bg-primary text-secondary font-extrabold border border-[#DDD0A9]"
                     : "text-slate-700 bg-slate-50"
                 }`}
               >

@@ -17,11 +17,11 @@ export async function Navbar() {
   }
 
   const rolePillStyles: Record<string, string> = {
-    STUDENT: "bg-blue-100 text-blue-800 border-blue-200",
-    RESEARCHER: "bg-emerald-100 text-emerald-800 border-emerald-200",
-    OWNER: "bg-amber-100 text-amber-800 border-amber-200",
-    MANAGER: "bg-purple-100 text-purple-800 border-purple-200",
-    ADMIN: "bg-rose-100 text-rose-800 border-rose-200",
+    STUDENT: "bg-primary text-secondary border-[#DDD0A9]",
+    RESEARCHER: "bg-[#254212] text-white border-secondary",
+    OWNER: "bg-amber-100 text-amber-900 border-amber-300",
+    MANAGER: "bg-purple-100 text-purple-900 border-purple-200",
+    ADMIN: "bg-rose-100 text-rose-900 border-rose-200",
   };
 
   const isStaff =
@@ -38,14 +38,14 @@ export async function Navbar() {
           {/* Brand Logo */}
           <div className="flex items-center gap-6">
             <Link href="/resources" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 to-indigo-500 flex items-center justify-center text-white font-bold text-lg shadow-sm group-hover:scale-105 transition-transform">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#172A0B] to-[#2B4E15] flex items-center justify-center text-[#D5E84A] font-extrabold text-lg shadow-sm group-hover:scale-105 transition-transform border border-[#172A0B]">
                 CS
               </div>
               <div>
                 <span className="font-bold text-slate-900 text-lg tracking-tight">
                   CampusShare
                 </span>
-                <span className="hidden sm:inline-block ml-2 text-[11px] font-semibold tracking-wider uppercase text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
+                <span className="hidden sm:inline-block ml-2 text-[11px] font-bold tracking-wider uppercase text-secondary bg-primary px-2 py-0.5 rounded-md border border-[#DDD0A9]">
                   Northfield Univ
                 </span>
               </div>
@@ -117,7 +117,7 @@ export async function Navbar() {
                         type="submit"
                         className={`px-2 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
                           session.email === "alice@northfield.edu"
-                            ? "bg-white text-blue-700 shadow-2xs font-semibold"
+                            ? "bg-secondary text-[#D5E84A] shadow-2xs font-bold"
                             : "text-slate-600 hover:text-slate-900"
                         }`}
                         title="Student (Active, all certs)"
@@ -130,7 +130,7 @@ export async function Navbar() {
                         type="submit"
                         className={`px-2 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
                           session.email === "bob@northfield.edu"
-                            ? "bg-white text-blue-700 shadow-2xs font-semibold"
+                            ? "bg-secondary text-[#D5E84A] shadow-2xs font-bold"
                             : "text-slate-600 hover:text-slate-900"
                         }`}
                         title="Student (Missing cert, overdue demo)"
@@ -143,7 +143,7 @@ export async function Navbar() {
                         type="submit"
                         className={`px-2 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
                           session.email === "carol@northfield.edu"
-                            ? "bg-white text-blue-700 shadow-2xs font-semibold"
+                            ? "bg-secondary text-[#D5E84A] shadow-2xs font-bold"
                             : "text-slate-600 hover:text-slate-900"
                         }`}
                         title="Researcher (High priority)"
@@ -156,7 +156,7 @@ export async function Navbar() {
                         type="submit"
                         className={`px-2 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
                           session.email === "dave@northfield.edu"
-                            ? "bg-white text-blue-700 shadow-2xs font-semibold"
+                            ? "bg-secondary text-[#D5E84A] shadow-2xs font-bold"
                             : "text-slate-600 hover:text-slate-900"
                         }`}
                         title="Owner (Engineering)"
@@ -169,7 +169,7 @@ export async function Navbar() {
                         type="submit"
                         className={`px-2 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
                           session.email === "eve@northfield.edu"
-                            ? "bg-white text-blue-700 shadow-2xs font-semibold"
+                            ? "bg-secondary text-[#D5E84A] shadow-2xs font-bold"
                             : "text-slate-600 hover:text-slate-900"
                         }`}
                         title="Manager (Incident resolution)"
@@ -182,7 +182,7 @@ export async function Navbar() {
                         type="submit"
                         className={`px-2 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
                           session.email === "frank@northfield.edu"
-                            ? "bg-white text-blue-700 shadow-2xs font-semibold"
+                            ? "bg-secondary text-[#D5E84A] shadow-2xs font-bold"
                             : "text-slate-600 hover:text-slate-900"
                         }`}
                         title="Admin (Global audits & approvals)"
@@ -236,9 +236,10 @@ export async function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 shadow-sm transition-colors"
+                className="px-4 py-2 bg-secondary hover:bg-secondary-hover text-[#F3EBD2] rounded-lg text-sm font-bold shadow-sm transition-colors border border-secondary flex items-center gap-1.5"
               >
-                Sign In
+                <span>Sign In</span>
+                <span className="text-addon font-black">→</span>
               </Link>
             )}
           </div>
