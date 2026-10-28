@@ -37,6 +37,18 @@ export function BookingActionPanels({
   const [photoUrl, setPhotoUrl] = useState<string>("");
   const [cancelReason, setCancelReason] = useState<string>("");
 
+  const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (typeof event.target?.result === "string") {
+        setPhotoUrl(event.target.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Extension duration in hours
   const [extensionHours, setExtensionHours] = useState<number>(1);
 
@@ -500,6 +512,46 @@ export function BookingActionPanels({
             />
           </div>
 
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              Physical Condition Evidence Photo
+            </label>
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoFileChange}
+                className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200 cursor-pointer"
+              />
+              <span className="text-xs text-slate-400">or URL:</span>
+              <input
+                type="text"
+                placeholder="https://..."
+                value={photoUrl.startsWith("data:") ? "(Attached file)" : photoUrl}
+                onChange={(e) => setPhotoUrl(e.target.value)}
+                className="px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white flex-1"
+              />
+              {photoUrl && (
+                <button
+                  type="button"
+                  onClick={() => setPhotoUrl("")}
+                  className="text-xs text-rose-600 font-bold hover:underline"
+                >
+                  Clear Photo
+                </button>
+              )}
+            </div>
+            {photoUrl && (
+              <div className="mt-2">
+                <img
+                  src={photoUrl}
+                  alt="Condition evidence preview"
+                  className="h-24 w-36 object-cover rounded-lg border border-emerald-300 shadow-2xs"
+                />
+              </div>
+            )}
+          </div>
+
           <div className="flex items-center justify-end gap-2 pt-2">
             <button
               type="button"
@@ -602,6 +654,46 @@ export function BookingActionPanels({
               placeholder="State any incidents, clean-up actions taken, or observations..."
               className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              Return Condition Evidence Photo
+            </label>
+            <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handlePhotoFileChange}
+                className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-800 hover:file:bg-blue-200 cursor-pointer"
+              />
+              <span className="text-xs text-slate-400">or URL:</span>
+              <input
+                type="text"
+                placeholder="https://..."
+                value={photoUrl.startsWith("data:") ? "(Attached file)" : photoUrl}
+                onChange={(e) => setPhotoUrl(e.target.value)}
+                className="px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white flex-1"
+              />
+              {photoUrl && (
+                <button
+                  type="button"
+                  onClick={() => setPhotoUrl("")}
+                  className="text-xs text-rose-600 font-bold hover:underline"
+                >
+                  Clear Photo
+                </button>
+              )}
+            </div>
+            {photoUrl && (
+              <div className="mt-2">
+                <img
+                  src={photoUrl}
+                  alt="Return evidence preview"
+                  className="h-24 w-36 object-cover rounded-lg border border-blue-300 shadow-2xs"
+                />
+              </div>
+            )}
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-2">

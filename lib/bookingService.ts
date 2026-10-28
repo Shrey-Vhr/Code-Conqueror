@@ -426,6 +426,37 @@ export async function cancelBooking(params: {
     let promotedBookingId: string | null = null;
 
     if (booking.status === "APPROVED" || booking.status === "CHECKED_IN") {
+      // Recalculate waitlist priority scores including active waitlist-age bonus
+      const allWaitlisted = await tx.booking.findMany({
+        where: {
+          resourceId: booking.resourceId,
+          status: "WAITLISTED",
+        },
+        include: { user: true },
+      });
+
+      const now = new Date();
+      for (const w of allWaitlisted) {
+        const hoursWaiting = (now.getTime() - w.createdAt.getTime()) / (1000 * 60 * 60);
+        const userRecentHours = await getUserRecentHours(w.userId);
+        const breakdown = computePriorityScore({
+          baseScore: 100,
+          recentHours30d: userRecentHours,
+          hoursWaiting,
+          purpose: w.purpose,
+          strikes: w.user.strikes,
+          role: w.user.role,
+        });
+
+        await tx.booking.update({
+          where: { id: w.id },
+          data: {
+            priorityScore: breakdown.finalScore,
+            priorityBreakdown: JSON.stringify(breakdown),
+          },
+        });
+      }
+
       const candidateWaitlists = await tx.booking.findMany({
         where: {
           resourceId: booking.resourceId,
@@ -507,7 +538,6 @@ export async function cancelBooking(params: {
         promotedBookingId = candidate.id;
         break; // Only promote top eligible candidate
       }
-    }
 
       // Update remaining waitlist positions
       const remainingWaitlists = candidateWaitlists.slice(1);
@@ -902,3 +932,48 @@ export async function extendBooking(params: {
     return { success: true, newEnd };
   });
 }
+
+export async function recalculateWaitlistScores(resourceId: string, tx?: any) {
+  const client = tx || prisma;
+  const waitlists = await client.booking.findMany({
+    where: { resourceId, status: "WAITLISTED" },
+    include: { user: true },
+    orderBy: { createdAt: "asc" },
+  });
+
+  if (waitlists.length === 0) return;
+
+  const now = new Date();
+  const scored = [];
+  for (const b of waitlists) {
+    const hoursWaiting = (now.getTime() - b.createdAt.getTime()) / (1000 * 60 * 60);
+    const recentHours = await getUserRecentHours(b.userId);
+    const breakdown = computePriorityScore({
+      baseScore: 100,
+      recentHours30d: recentHours,
+      hoursWaiting,
+      purpose: b.purpose,
+      strikes: b.user.strikes,
+      role: b.user.role,
+    });
+    scored.push({ id: b.id, breakdown, createdAt: b.createdAt });
+  }
+
+  scored.sort(
+    (a, b) =>
+      b.breakdown.finalScore - a.breakdown.finalScore ||
+      a.createdAt.getTime() - b.createdAt.getTime()
+  );
+
+  for (let i = 0; i < scored.length; i++) {
+    await client.booking.update({
+      where: { id: scored[i].id },
+      data: {
+        waitlistPosition: i + 1,
+        priorityScore: scored[i].breakdown.finalScore,
+        priorityBreakdown: JSON.stringify(scored[i].breakdown),
+      },
+    });
+  }
+}
+

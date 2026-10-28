@@ -2,17 +2,20 @@ import { prisma } from "./prisma";
 import { audit } from "./audit";
 import { createNotification } from "./notifications";
 import { addMinutes } from "date-fns";
+import { recalculateWaitlistScores } from "./bookingService";
 
 export async function sweepOverdue(): Promise<{
   overdueCount: number;
   noShowCount: number;
   remindersSent: number;
+  completedCount: number;
   updatedBookingIds: string[];
 }> {
   const now = new Date();
   const updatedBookingIds: string[] = [];
   let noShowCount = 0;
   let remindersSent = 0;
+  let completedCount = 0;
 
   // 1. SWEEP ACTIVE CHECKED-IN OVERDUE SESSIONS
   const overdueBookings = await prisma.booking.findMany({
@@ -163,10 +166,59 @@ export async function sweepOverdue(): Promise<{
     }
   }
 
+  // 4. TRANSITION CLEAN RETURNED BOOKINGS TO COMPLETED
+  const returnedBookings = await prisma.booking.findMany({
+    where: { status: "RETURNED" },
+    include: {
+      incidents: {
+        where: { status: "OPEN" },
+      },
+    },
+  });
+
+  for (const b of returnedBookings) {
+    if (b.incidents.length === 0) {
+      await prisma.$transaction(async (tx) => {
+        if (b.depositHeld > 0) {
+          await tx.user.update({
+            where: { id: b.userId },
+            data: { credits: { increment: b.depositHeld } },
+          });
+        }
+        await tx.booking.update({
+          where: { id: b.id },
+          data: { status: "COMPLETED", depositHeld: 0 },
+        });
+        await audit(tx, {
+          actorId: null,
+          action: "BOOKING_AUTO_COMPLETED",
+          entityType: "Booking",
+          entityId: b.id,
+          before: { status: "RETURNED" },
+          after: { status: "COMPLETED" },
+          reason: "Booking auto-completed following return with no outstanding incidents",
+        });
+        completedCount++;
+      });
+    }
+  }
+
+  // 5. REFRESH WAITLIST SCORES & POSITIONS FOR ALL RESOURCES WITH ACTIVE WAITLISTS
+  const waitlistedResources = await prisma.booking.findMany({
+    where: { status: "WAITLISTED" },
+    select: { resourceId: true },
+    distinct: ["resourceId"],
+  });
+
+  for (const item of waitlistedResources) {
+    await recalculateWaitlistScores(item.resourceId);
+  }
+
   return {
     overdueCount: updatedBookingIds.length,
     noShowCount,
     remindersSent,
+    completedCount,
     updatedBookingIds,
   };
 }

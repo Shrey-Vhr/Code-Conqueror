@@ -60,7 +60,7 @@ export async function cancelBookingUserAction(
 
   const parseResult = CancelBookingSchema.safeParse({ bookingId, reason });
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid input" };
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid input" };
   }
 
   const booking = await prisma.booking.findUnique({
@@ -117,7 +117,7 @@ export async function checkInUserAction(formData: FormData) {
   });
 
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid input" };
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid input" };
   }
 
   const { bookingId, rating, checklist, notes, photoUrl } = parseResult.data;
@@ -179,7 +179,7 @@ export async function returnUserAction(formData: FormData) {
   });
 
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid input" };
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid input" };
   }
 
   const { bookingId, rating, checklist, notes, photoUrl } = parseResult.data;
@@ -224,7 +224,7 @@ export async function extendBookingAction(
 
   const parseResult = ExtendBookingSchema.safeParse({ bookingId, extension });
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid input" };
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid input" };
   }
 
   const booking = await prisma.booking.findUnique({
@@ -276,7 +276,7 @@ export async function reportIncidentAction(formData: FormData) {
   });
 
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid incident details." };
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid incident details." };
   }
 
   const { bookingId, resourceId, type, severity, description } = parseResult.data;

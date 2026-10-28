@@ -27,7 +27,7 @@ export async function submitBookingRequest(formData: FormData) {
   });
 
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid reservation details." };
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid reservation details." };
   }
 
   const { resourceId, date, startTime, endTime, purpose, purposeDetails } = parseResult.data;

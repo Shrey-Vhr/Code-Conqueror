@@ -62,7 +62,7 @@ export async function createResourceAction(formData: FormData) {
 
   const parseResult = ResourceInputSchema.safeParse(rawData);
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid resource data" };
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid resource data" };
   }
 
   const data = parseResult.data;
@@ -181,7 +181,7 @@ export async function updateResourceAction(id: string, formData: FormData) {
 
   const parseResult = ResourceInputSchema.safeParse(rawData);
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid resource data" };
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid resource data" };
   }
 
   const data = parseResult.data;

@@ -37,7 +37,7 @@ export async function resolveIncidentAction(formData: FormData) {
   });
 
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid resolution parameters" };
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid resolution parameters" };
   }
 
   const { incidentId, resolution, penaltyType, penaltyCredits, suspendDays, depositAction } = parseResult.data;

@@ -22,11 +22,11 @@ export async function approveBookingReviewAction(
   bookingId: string,
   decisionReason: string
 ) {
-  const session = await requireRole(["OWNER", "STAFF", "MANAGER", "ADMIN"]);
+  const session = await requireRole(["OWNER", "MANAGER", "ADMIN"]);
 
   const parseResult = ReviewDecisionSchema.safeParse({ bookingId, decisionReason });
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid review decision" };
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid review decision" };
   }
 
   const booking = await prisma.booking.findUnique({
@@ -59,11 +59,11 @@ export async function rejectBookingReviewAction(
   bookingId: string,
   decisionReason: string
 ) {
-  const session = await requireRole(["OWNER", "STAFF", "MANAGER", "ADMIN"]);
+  const session = await requireRole(["OWNER", "MANAGER", "ADMIN"]);
 
   const parseResult = ReviewDecisionSchema.safeParse({ bookingId, decisionReason });
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid review decision" };
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid review decision" };
   }
 
   const booking = await prisma.booking.findUnique({
@@ -93,11 +93,11 @@ export async function rejectBookingReviewAction(
 }
 
 export async function promoteWaitlistToPendingAction(bookingId: string) {
-  const session = await requireRole(["OWNER", "STAFF", "MANAGER", "ADMIN"]);
+  const session = await requireRole(["OWNER", "MANAGER", "ADMIN"]);
 
   const parseResult = BookingIdSchema.safeParse({ bookingId });
   if (!parseResult.success) {
-    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid booking ID" };
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid booking ID" };
   }
 
   const booking = await prisma.booking.findUnique({
@@ -150,7 +150,7 @@ export async function promoteWaitlistToPendingAction(bookingId: string) {
 }
 
 export async function manualSweepAction(): Promise<void> {
-  await requireRole(["OWNER", "STAFF", "MANAGER", "ADMIN"]);
+  await requireRole(["OWNER", "MANAGER", "ADMIN"]);
   await sweepOverdue();
   revalidatePath("/manage");
 }

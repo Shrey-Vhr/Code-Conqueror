@@ -245,6 +245,51 @@ export default async function NewResourcePage() {
                 <option value="STUDENT">STUDENT role only</option>
               </select>
             </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                Department Restriction
+              </label>
+              <select
+                name="requiredDepartment"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">No department restriction (Open to all)</option>
+                <option value="Engineering">Engineering only</option>
+                <option value="Media">Media Arts only</option>
+                <option value="Biology">Biology only</option>
+                <option value="Computer Science">Computer Science only</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                Minimum Credit Balance Required
+              </label>
+              <input
+                type="number"
+                name="minCredits"
+                placeholder="e.g. 20 (optional)"
+                min={0}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Operating Hours Windows */}
+          <div className="pt-4 border-t border-slate-100 space-y-2">
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              Operating Availability Schedule (JSON)
+            </label>
+            <input
+              type="text"
+              name="availabilityWindows"
+              defaultValue='[{"dayOfWeek":1,"start":"08:00","end":"20:00"},{"dayOfWeek":2,"start":"08:00","end":"20:00"},{"dayOfWeek":3,"start":"08:00","end":"20:00"},{"dayOfWeek":4,"start":"08:00","end":"20:00"},{"dayOfWeek":5,"start":"08:00","end":"20:00"}]'
+              className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono"
+            />
+            <p className="text-[11px] text-slate-400">
+              Format: Array of objects with dayOfWeek (0=Sun, 1=Mon... 6=Sat), start (&quot;08:00&quot;), end (&quot;20:00&quot;). Default: Mon-Fri 08:00-20:00.
+            </p>
           </div>
 
           {/* Supervision Checkbox */}

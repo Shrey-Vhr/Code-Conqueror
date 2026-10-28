@@ -22,7 +22,7 @@ export async function loginAction(formData: FormData) {
     });
 
     if (!validated.success) {
-      return { success: false, error: validated.error.errors[0].message };
+      return { success: false, error: validated.error.issues[0]?.message || "Validation failed" };
     }
 
     const { email, password } = validated.data;
