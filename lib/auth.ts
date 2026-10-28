@@ -86,6 +86,11 @@ export async function quickLoginAction(email: string) {
   }
 }
 
+export async function switchRoleAction(email: string): Promise<void> {
+  await quickLoginAction(email);
+  redirect("/resources");
+}
+
 export async function logoutAction() {
   await deleteSession();
   redirect("/login");
