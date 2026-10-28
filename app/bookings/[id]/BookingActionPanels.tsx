@@ -40,11 +40,52 @@ export function BookingActionPanels({
   const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image file (JPEG, PNG, WebP).");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (event) => {
-      if (typeof event.target?.result === "string") {
-        setPhotoUrl(event.target.result);
-      }
+      const rawDataUrl = event.target?.result;
+      if (typeof rawDataUrl !== "string") return;
+
+      const img = new Image();
+      img.onload = () => {
+        const MAX_DIM = 1200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_DIM) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          }
+        } else {
+          if (height > MAX_DIM) {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          // Compress to JPEG with 0.72 quality, well under 200KB for Server Action limits
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.72);
+          setPhotoUrl(compressedDataUrl);
+        } else {
+          setPhotoUrl(rawDataUrl);
+        }
+      };
+      img.onerror = () => {
+        setPhotoUrl(rawDataUrl);
+      };
+      img.src = rawDataUrl;
     };
     reader.readAsDataURL(file);
   };

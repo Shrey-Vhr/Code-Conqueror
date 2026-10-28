@@ -2,7 +2,7 @@ import { prisma } from "./prisma";
 import { audit } from "./audit";
 import { createNotification } from "./notifications";
 import { addMinutes } from "date-fns";
-import { recalculateWaitlistScores } from "./bookingService";
+import { cancelBooking, recalculateWaitlistScores } from "./bookingService";
 
 export async function sweepOverdue(): Promise<{
   overdueCount: number;
@@ -98,40 +98,30 @@ export async function sweepOverdue(): Promise<{
   });
 
   for (const booking of noShowBookings) {
-    await prisma.$transaction(async (tx) => {
-      await tx.booking.update({
-        where: { id: booking.id },
-        data: {
-          status: "CANCELLED",
-          decisionReason: "Automatically cancelled due to no-show (>30 minutes past start time)",
-        },
-      });
+    // 1. Increment conduct strike
+    await prisma.user.update({
+      where: { id: booking.userId },
+      data: { strikes: { increment: 1 } },
+    });
 
-      // Apply 1 conduct strike for no-show
-      await tx.user.update({
-        where: { id: booking.userId },
-        data: { strikes: { increment: 1 } },
-      });
+    // 2. Cancel booking, forfeit deposit, and auto-promote top waitlist candidate into freed slot
+    await cancelBooking({
+      bookingId: booking.id,
+      actorId: "system",
+      reason: "Automatically cancelled due to user no-show (>30 minutes past start time). Security deposit forfeited.",
+      forfeitDeposit: true,
+    });
 
-      await audit(tx, {
-        actorId: null,
-        action: "BOOKING_NO_SHOW_CANCELLED",
-        entityType: "Booking",
-        entityId: booking.id,
-        before: { status: "APPROVED" },
-        after: { status: "CANCELLED" },
-        reason: "Cancelled automatically due to user no-show (30 min grace period expired)",
-      });
-
-      await createNotification(tx, {
+    await prisma.notification.create({
+      data: {
         userId: booking.userId,
         type: "NO_SHOW_PENALTY",
-        message: `Your reservation for "${booking.resource.name}" was cancelled due to no-show. 1 conduct strike has been assigned.`,
+        message: `Your reservation for "${booking.resource.name}" was cancelled due to no-show. 1 conduct strike was assigned and your security deposit was forfeited.`,
         link: `/bookings/${booking.id}`,
-      });
-
-      noShowCount++;
+      },
     });
+
+    noShowCount++;
   }
 
   // 3. DISPATCH REMINDER NOTIFICATIONS (bookings starting within 1 hour)
@@ -171,7 +161,7 @@ export async function sweepOverdue(): Promise<{
     where: { status: "RETURNED" },
     include: {
       incidents: {
-        where: { status: "OPEN" },
+        where: { status: { not: "RESOLVED" } },
       },
     },
   });

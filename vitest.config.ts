@@ -7,6 +7,10 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    globalSetup: ["./test/globalSetup.ts"],
+    env: {
+      DATABASE_URL: "file:./test.db",
+    },
   },
   resolve: {
     alias: {

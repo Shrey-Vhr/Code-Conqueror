@@ -168,6 +168,8 @@ export default async function IncidentDetailPage({
         <ResolutionFormClient
           incidentId={incident.id}
           targetUserName={incident.booking?.user?.name}
+          hasDepositHeld={Boolean(incident.booking && incident.booking.depositHeld > 0)}
+          depositAmount={incident.booking?.depositHeld || 0}
         />
       ) : (
         <div className="p-6 bg-white rounded-2xl border border-slate-200 text-center text-xs text-slate-500">

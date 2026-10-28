@@ -122,8 +122,8 @@ export async function resolveIncidentAction(formData: FormData) {
             data: { depositHeld: 0 },
           });
           depositSettledText = ` Security deposit of ${b.depositHeld} credits forfeited to department repair pool.`;
-        } else if (depositAction === "REFUND" || penaltyType === "NONE") {
-          // Deposit refunded back to user
+        } else {
+          // Default: refund deposit back to user
           await tx.user.update({
             where: { id: b.userId },
             data: { credits: { increment: b.depositHeld } },
@@ -136,8 +136,8 @@ export async function resolveIncidentAction(formData: FormData) {
         }
       }
 
-      // Transition RETURNED booking to COMPLETED
-      if (b.status === "RETURNED") {
+      // Transition booking to COMPLETED if not already completed
+      if (b.status !== "COMPLETED") {
         await tx.booking.update({
           where: { id: b.id },
           data: { status: "COMPLETED" },
@@ -148,7 +148,7 @@ export async function resolveIncidentAction(formData: FormData) {
           action: "BOOKING_COMPLETED",
           entityType: "Booking",
           entityId: b.id,
-          before: { status: "RETURNED" },
+          before: { status: b.status },
           after: { status: "COMPLETED" },
           reason: `Incident ${incidentId} resolved; booking marked completed.`,
         });

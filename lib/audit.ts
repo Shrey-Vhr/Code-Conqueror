@@ -29,7 +29,7 @@ export async function audit(
 
   await db.auditLog.create({
     data: {
-      actorId: params.actorId ?? null,
+      actorId: params.actorId && params.actorId !== "system" ? params.actorId : null,
       action: params.action,
       entityType: params.entityType,
       entityId: params.entityId,

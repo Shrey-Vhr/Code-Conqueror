@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach } from "vitest";
 import { prisma } from "@/lib/prisma";
 import {
   requestBooking,
@@ -84,13 +84,14 @@ describe("CampusShare End-to-End Integration Suite", () => {
     });
 
     expect(reqRes.success).toBe(true);
+    if (!reqRes.success) throw new Error("Expected reqRes to succeed");
     expect(reqRes.status).toBe("PENDING");
-    const bookingId = (reqRes as any).bookingId;
+    const bookingId = reqRes.bookingId;
 
     // Verify booking in DB
-    let b = await prisma.booking.findUnique({ where: { id: bookingId } });
-    expect(b?.status).toBe("PENDING");
-    expect(b?.depositHeld).toBe(printerResource.depositCredits);
+    const pendingBooking = await prisma.booking.findUnique({ where: { id: bookingId } });
+    expect(pendingBooking?.status).toBe("PENDING");
+    expect(pendingBooking?.depositHeld).toBe(printerResource.depositCredits);
 
     // 2. Owner approves
     const appRes = await approveBooking({
@@ -100,9 +101,9 @@ describe("CampusShare End-to-End Integration Suite", () => {
     });
     expect(appRes.success).toBe(true);
 
-    b = await prisma.booking.findUnique({ where: { id: bookingId } });
-    expect(b?.status).toBe("APPROVED");
-    expect(b?.reviewerId).toBe(daveOwner.id);
+    const approvedBooking = await prisma.booking.findUnique({ where: { id: bookingId } });
+    expect(approvedBooking?.status).toBe("APPROVED");
+    expect(approvedBooking?.reviewerId).toBe(daveOwner.id);
 
     // 3. Check-in inspection (simulate active time window)
     await prisma.booking.update({
@@ -120,14 +121,14 @@ describe("CampusShare End-to-End Integration Suite", () => {
     });
     expect(checkInRes.success).toBe(true);
 
-    b = await prisma.booking.findUnique({
+    const checkedInBooking = await prisma.booking.findUnique({
       where: { id: bookingId },
       include: { conditionReports: true },
     });
-    expect(b?.status).toBe("CHECKED_IN");
-    expect(b?.conditionReports.length).toBe(1);
-    expect(b?.conditionReports[0].phase).toBe("CHECK_IN");
-    expect(b?.conditionReports[0].rating).toBe(5);
+    expect(checkedInBooking?.status).toBe("CHECKED_IN");
+    expect(checkedInBooking?.conditionReports.length).toBe(1);
+    expect(checkedInBooking?.conditionReports[0].phase).toBe("CHECK_IN");
+    expect(checkedInBooking?.conditionReports[0].rating).toBe(5);
 
     // 4. Return inspection checkout (clean return)
     const initialCredits = (await prisma.user.findUnique({ where: { id: aliceUser.id } }))?.credits || 0;
@@ -142,14 +143,14 @@ describe("CampusShare End-to-End Integration Suite", () => {
     });
     expect(returnRes.success).toBe(true);
 
-    b = await prisma.booking.findUnique({
+    const completedBooking = await prisma.booking.findUnique({
       where: { id: bookingId },
       include: { conditionReports: true },
     });
     // Clean return transitions directly to COMPLETED and releases deposit
-    expect(b?.status).toBe("COMPLETED");
-    expect(b?.depositHeld).toBe(0);
-    expect(b?.conditionReports.length).toBe(2);
+    expect(completedBooking?.status).toBe("COMPLETED");
+    expect(completedBooking?.depositHeld).toBe(0);
+    expect(completedBooking?.conditionReports.length).toBe(2);
 
     // Verify credits settled
     const updatedCredits = (await prisma.user.findUnique({ where: { id: aliceUser.id } }))?.credits || 0;
@@ -169,8 +170,9 @@ describe("CampusShare End-to-End Integration Suite", () => {
       purposeDetails: "Bio-compatible scaffold test print",
     });
     expect(req1.success).toBe(true);
+    if (!req1.success) throw new Error("Expected req1 to succeed");
     expect(req1.status).toBe("PENDING");
-    const booking1Id = (req1 as any).bookingId;
+    const booking1Id = req1.bookingId;
 
     // Bob requests overlapping slot (starts 1 hour into Alice's slot)
     const overlapStart = new Date(slotStart.getTime() + 1000 * 60 * 60);
@@ -185,8 +187,9 @@ describe("CampusShare End-to-End Integration Suite", () => {
       purposeDetails: "Formula SAE bracket print",
     });
     expect(req2.success).toBe(true);
+    if (!req2.success) throw new Error("Expected req2 to succeed");
     expect(req2.status).toBe("PENDING");
-    const booking2Id = (req2 as any).bookingId;
+    const booking2Id = req2.bookingId;
 
     // Owner approves Alice's request
     const appRes = await approveBooking({
@@ -208,7 +211,9 @@ describe("CampusShare End-to-End Integration Suite", () => {
       decisionReason: "Approval attempt on waitlisted booking",
     });
     expect(doubleApproveWaitlisted.success).toBe(false);
-    expect(doubleApproveWaitlisted.error).toContain("Cannot approve booking in status \"WAITLISTED\"");
+    if (!doubleApproveWaitlisted.success) {
+      expect(doubleApproveWaitlisted.error).toContain("Cannot approve booking in status \"WAITLISTED\"");
+    }
 
     // If an overlapping booking is PENDING, the transaction conflict check catches and rejects it
     await prisma.booking.update({
@@ -216,13 +221,17 @@ describe("CampusShare End-to-End Integration Suite", () => {
       data: { status: "PENDING" },
     });
 
-    await expect(
-      approveBooking({
-        bookingId: booking2Id,
-        reviewerId: daveOwner.id,
-        decisionReason: "Double approval attempt on overlapping pending slot",
-      })
-    ).rejects.toThrow("Cannot approve: this time slot conflicts with an already approved or active booking.");
+    const doubleApprovePending = await approveBooking({
+      bookingId: booking2Id,
+      reviewerId: daveOwner.id,
+      decisionReason: "Double approval attempt on overlapping pending slot",
+    });
+    expect(doubleApprovePending.success).toBe(false);
+    if (!doubleApprovePending.success) {
+      expect(doubleApprovePending.error).toContain(
+        "Cannot approve: this time slot conflicts with an already approved or active booking."
+      );
+    }
   });
 
   it("3. Transparent Waitlist Auto-Promotion: Cancellation promotes top waitlisted candidate to PENDING", async () => {
@@ -236,7 +245,9 @@ describe("CampusShare End-to-End Integration Suite", () => {
       end: slotEnd,
       purpose: "RESEARCH",
     });
-    const aliceId = (reqAlice as any).bookingId;
+    expect(reqAlice.success).toBe(true);
+    if (!reqAlice.success) throw new Error("Expected reqAlice to succeed");
+    const aliceId = reqAlice.bookingId;
 
     await approveBooking({
       bookingId: aliceId,
@@ -252,8 +263,10 @@ describe("CampusShare End-to-End Integration Suite", () => {
       end: slotEnd,
       purpose: "COURSEWORK",
     });
+    expect(reqBob.success).toBe(true);
+    if (!reqBob.success) throw new Error("Expected reqBob to succeed");
     expect(reqBob.status).toBe("WAITLISTED");
-    const bobId = (reqBob as any).bookingId;
+    const bobId = reqBob.bookingId;
 
     // 3. Alice cancels her approved reservation
     const cancelRes = await cancelBooking({
@@ -263,6 +276,7 @@ describe("CampusShare End-to-End Integration Suite", () => {
     });
 
     expect(cancelRes.success).toBe(true);
+    if (!cancelRes.success) throw new Error("Expected cancelRes to succeed");
     expect(cancelRes.promotedBookingId).toBe(bobId);
 
     // Bob's booking MUST be promoted to PENDING for owner review

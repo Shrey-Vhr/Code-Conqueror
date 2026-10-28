@@ -8,6 +8,7 @@ import {
   checkFairnessLimits,
   getUserRecentHours,
   grantMonthlyCreditsIfDue,
+  getFairnessPolicy,
 } from "./fairness";
 import { summarizeIncident } from "./ai";
 
@@ -20,7 +21,24 @@ export interface RequestBookingParams {
   purposeDetails?: string;
 }
 
-export async function requestBooking(params: RequestBookingParams) {
+export type RequestBookingResult =
+  | {
+      success: true;
+      bookingId: string;
+      status: string;
+      waitlistPosition: number | null;
+      priorityScore: number;
+    }
+  | {
+      success: false;
+      error: string;
+      missing?: string[];
+      reasons?: string[];
+    };
+
+export async function requestBooking(
+  params: RequestBookingParams
+): Promise<RequestBookingResult> {
   const { userId, resourceId, start, end, purpose, purposeDetails } = params;
 
   // Validate timing
@@ -78,12 +96,16 @@ export async function requestBooking(params: RequestBookingParams) {
   }
 
   // 4. Compute priority score
-  const recentHours = await getUserRecentHours(userId);
+  const [recentHours, policy] = await Promise.all([
+    getUserRecentHours(userId),
+    getFairnessPolicy(),
+  ]);
   const priorityBreakdown = computePriorityScore({
     recentHours30d: recentHours,
     purpose,
     strikes: user.strikes,
     role: user.role,
+    policy,
   });
 
   // 5. Deposit and credit cost calculation
@@ -227,9 +249,11 @@ export async function approveBooking(params: {
     });
 
     if (conflict) {
-      throw new Error(
-        "Cannot approve: this time slot conflicts with an already approved or active booking."
-      );
+      return {
+        success: false,
+        error:
+          "Cannot approve: this time slot conflicts with an already approved or active booking.",
+      };
     }
 
     const updated = await tx.booking.update({
@@ -368,12 +392,23 @@ export async function rejectBooking(params: {
   });
 }
 
+export type CancelBookingResult =
+  | {
+      success: true;
+      promotedBookingId: string | null;
+    }
+  | {
+      success: false;
+      error: string;
+    };
+
 export async function cancelBooking(params: {
   bookingId: string;
   actorId: string;
   reason?: string;
-}) {
-  const { bookingId, actorId, reason } = params;
+  forfeitDeposit?: boolean;
+}): Promise<CancelBookingResult> {
+  const { bookingId, actorId, reason, forfeitDeposit = false } = params;
 
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
@@ -393,8 +428,8 @@ export async function cancelBooking(params: {
   }
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Refund deposit
-    if (booking.depositHeld > 0) {
+    // 1. Settle deposit: refund unless forfeited (e.g. no-show penalty)
+    if (booking.depositHeld > 0 && !forfeitDeposit) {
       await tx.user.update({
         where: { id: booking.userId },
         data: { credits: { increment: booking.depositHeld } },
@@ -668,16 +703,16 @@ export async function returnBooking(params: {
   // Compute AI summary OUTSIDE of the database transaction to prevent SQLite transaction timeouts
   let aiSumm = "";
   let aiSeverityTag = "MEDIUM";
+  const deterministicSeverity = rating <= 2 ? "HIGH" : "MEDIUM";
   const incidentDesc = damageIncidentCreated
     ? `Equipment returned with degraded condition: rating fell from ${checkInReport?.rating}/5 at check-in to ${rating}/5 at check-out. Notes: ${notes || "None provided"}`
     : "";
 
   if (damageIncidentCreated) {
-    const initialSeverity = rating <= 2 ? "HIGH" : "MEDIUM";
     try {
       const aiAnalysis = await summarizeIncident({
         type: "DAMAGE",
-        severity: initialSeverity,
+        severity: deterministicSeverity,
         description: incidentDesc,
         resourceName: booking.resource.name,
         reporterName: booking.user.name,
@@ -686,7 +721,7 @@ export async function returnBooking(params: {
       aiSeverityTag = aiAnalysis.suggestedSeverity;
     } catch {
       aiSumm = `Damage incident automatically drafted due to rating drop from ${checkInReport?.rating}/5 to ${rating}/5.`;
-      aiSeverityTag = initialSeverity;
+      aiSeverityTag = deterministicSeverity;
     }
   }
 
@@ -722,7 +757,7 @@ export async function returnBooking(params: {
           resourceId: booking.resourceId,
           reporterId: actorId,
           type: "DAMAGE",
-          severity: aiSeverityTag,
+          severity: deterministicSeverity,
           description: incidentDesc,
           aiSummary: aiSumm,
           aiSeverity: aiSeverityTag,
@@ -737,7 +772,12 @@ export async function returnBooking(params: {
         action: "INCIDENT_AUTO_DRAFTED",
         entityType: "Incident",
         entityId: inc.id,
-        after: { type: "DAMAGE", severity: aiSeverityTag, status: "OPEN" },
+        after: {
+          type: "DAMAGE",
+          severity: deterministicSeverity,
+          aiSeverity: aiSeverityTag,
+          status: "OPEN",
+        },
         reason: `Auto-drafted damage incident because condition rating dropped from ${checkInReport?.rating} to ${rating}.`,
       });
 
@@ -850,12 +890,13 @@ export async function extendBooking(params: {
     };
   }
 
-  // 2. Weekly fairness rules (including 20h campus-wide cap)
+  // 2. Weekly fairness rules (including campus-wide cap, excluding current booking so it isn't double-counted)
   const fairness = await checkFairnessLimits(
     booking.userId,
     booking.resourceId,
     booking.start,
-    newEnd
+    newEnd,
+    booking.id
   );
   if (!fairness.allowed) {
     return {
@@ -879,23 +920,17 @@ export async function extendBooking(params: {
     };
   }
 
-  // 4. Check credit cost
-  const extensionCost = addedHours * booking.resource.creditCostPerHour;
-  if (booking.user.credits < extensionCost) {
+  // 4. Verify user has sufficient credits to cover the full revised reservation duration
+  const totalCost = Math.ceil(totalDurationHours) * booking.resource.creditCostPerHour;
+  if (booking.user.credits < totalCost) {
     return {
       success: false,
-      error: `Insufficient credits for extension. Required: ${extensionCost}, available: ${booking.user.credits}.`,
+      error: `Insufficient credits for extension. Total required for reservation: ${totalCost}, available: ${booking.user.credits}.`,
     };
   }
 
   return await prisma.$transaction(async (tx) => {
-    if (extensionCost > 0) {
-      await tx.user.update({
-        where: { id: booking.userId },
-        data: { credits: { decrement: extensionCost } },
-      });
-    }
-
+    // Usage credits are billed cleanly at checkout in returnBooking to prevent double charging
     await tx.booking.update({
       where: { id: bookingId },
       data: { end: newEnd },
@@ -944,17 +979,19 @@ export async function recalculateWaitlistScores(resourceId: string, tx?: any) {
   if (waitlists.length === 0) return;
 
   const now = new Date();
+  const policy = await getFairnessPolicy();
   const scored = [];
   for (const b of waitlists) {
     const hoursWaiting = (now.getTime() - b.createdAt.getTime()) / (1000 * 60 * 60);
     const recentHours = await getUserRecentHours(b.userId);
     const breakdown = computePriorityScore({
-      baseScore: 100,
+      baseScore: policy.basePriorityScore,
       recentHours30d: recentHours,
       hoursWaiting,
       purpose: b.purpose,
       strikes: b.user.strikes,
       role: b.user.role,
+      policy,
     });
     scored.push({ id: b.id, breakdown, createdAt: b.createdAt });
   }

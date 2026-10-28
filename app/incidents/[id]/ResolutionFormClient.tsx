@@ -7,17 +7,22 @@ import { resolveIncidentAction } from "./actions";
 interface ResolutionFormClientProps {
   incidentId: string;
   targetUserName?: string;
+  hasDepositHeld?: boolean;
+  depositAmount?: number;
 }
 
 export function ResolutionFormClient({
   incidentId,
   targetUserName,
+  hasDepositHeld = false,
+  depositAmount = 0,
 }: ResolutionFormClientProps) {
   const router = useRouter();
   const [resolution, setResolution] = useState("");
   const [penaltyType, setPenaltyType] = useState<string>("NONE");
   const [penaltyCredits, setPenaltyCredits] = useState<number>(20);
   const [suspendDays, setSuspendDays] = useState<number>(7);
+  const [depositAction, setDepositAction] = useState<"REFUND" | "FORFEIT">("REFUND");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,6 +42,7 @@ export function ResolutionFormClient({
     formData.append("penaltyType", penaltyType);
     formData.append("penaltyCredits", penaltyCredits.toString());
     formData.append("suspendDays", suspendDays.toString());
+    formData.append("depositAction", depositAction);
 
     try {
       const res = await resolveIncidentAction(formData);
@@ -89,15 +95,42 @@ export function ResolutionFormClient({
         </label>
         <select
           value={penaltyType}
-          onChange={(e) => setPenaltyType(e.target.value)}
+          onChange={(e) => {
+            const val = e.target.value;
+            setPenaltyType(val);
+            if (val === "FORFEIT_DEPOSIT") {
+              setDepositAction("FORFEIT");
+            }
+          }}
           className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <option value="NONE">No Penalty (Accidental wear / Warning issued)</option>
+          <option value="NONE">No Conduct Penalty (Accidental wear / Warning issued)</option>
+          <option value="FORFEIT_DEPOSIT">Forfeit Security Deposit (Direct repair offset)</option>
           <option value="STRIKE">Issue Conduct Strike (+1 Strike)</option>
           <option value="CREDIT_FINE">Fine / Deduct Account Credits</option>
           <option value="SUSPENSION">Temporary Reservation Suspension</option>
         </select>
       </div>
+
+      {/* Security deposit settlement choice */}
+      {hasDepositHeld && (
+        <div className="p-3.5 bg-amber-50 rounded-xl border border-amber-200 space-y-1.5">
+          <label className="block text-xs font-semibold text-amber-900 uppercase tracking-wider">
+            Deposit Settlement ({depositAmount} credits currently escrowed)
+          </label>
+          <select
+            value={depositAction}
+            onChange={(e) => setDepositAction(e.target.value as "REFUND" | "FORFEIT")}
+            className="w-full px-3 py-2 rounded-lg border border-amber-300 text-xs bg-white font-medium focus:outline-none focus:ring-2 focus:ring-amber-500"
+          >
+            <option value="REFUND">Refund Deposit ({depositAmount} credits returned to user balance)</option>
+            <option value="FORFEIT">Forfeit Deposit ({depositAmount} credits retained for repair fund)</option>
+          </select>
+          <p className="text-[11px] text-amber-700 leading-normal">
+            Resolving this incident will formally settle the escrowed deposit and transition the reservation to COMPLETED.
+          </p>
+        </div>
+      )}
 
       {penaltyType === "CREDIT_FINE" && (
         <div>
@@ -137,7 +170,7 @@ export function ResolutionFormClient({
           disabled={isLoading}
           className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50 transition-colors"
         >
-          {isLoading ? "Recording Decision..." : "Resolve Incident & Record Penalty"}
+          {isLoading ? "Recording Decision..." : "Resolve Incident & Finalize Reservation"}
         </button>
       </div>
     </form>

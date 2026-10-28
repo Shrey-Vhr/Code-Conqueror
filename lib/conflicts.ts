@@ -26,6 +26,49 @@ export function checkTimeOverlap(
   return startA.getTime() < endB.getTime() && endA.getTime() > startB.getTime();
 }
 
+function getCampusZonedTime(d: Date, customTz?: string) {
+  const tz = customTz || process.env.CAMPUS_TIMEZONE;
+  if (!tz) {
+    return {
+      day: d.getDay(),
+      minutes: d.getHours() * 60 + d.getMinutes(),
+    };
+  }
+  try {
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      hour12: false,
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    const parts = formatter.formatToParts(d);
+    const partMap: Record<string, string> = {};
+    for (const p of parts) partMap[p.type] = p.value;
+    const dayMap: Record<string, number> = {
+      Sun: 0,
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
+    };
+    const day = dayMap[partMap.weekday] ?? d.getDay();
+    const hour = parseInt(partMap.hour || "0", 10) % 24;
+    const minute = parseInt(partMap.minute || "0", 10);
+    return {
+      day,
+      minutes: hour * 60 + minute,
+    };
+  } catch {
+    return {
+      day: d.getDay(),
+      minutes: d.getHours() * 60 + d.getMinutes(),
+    };
+  }
+}
+
 export function isWithinAvailabilityWindows(
   start: Date,
   end: Date,
@@ -44,17 +87,18 @@ export function isWithinAvailabilityWindows(
 
   if (windows.length === 0) return { valid: true };
 
-  // For multi-day or single-day: check if start day and end day match window
-  const startDay = start.getDay();
-  const endDay = end.getDay();
+  // For multi-day or single-day: check if start day and end day match window in campus timezone
+  const startZoned = getCampusZonedTime(start);
+  const endZoned = getCampusZonedTime(end);
 
-  if (startDay !== endDay) {
+  if (startZoned.day !== endZoned.day) {
     return {
       valid: false,
       reason: "Bookings cannot span across multiple calendar days.",
     };
   }
 
+  const startDay = startZoned.day;
   const dayWindows = windows.filter((w) => w.dayOfWeek === startDay);
   if (dayWindows.length === 0) {
     const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -64,8 +108,8 @@ export function isWithinAvailabilityWindows(
     };
   }
 
-  const startMinutes = start.getHours() * 60 + start.getMinutes();
-  const endMinutes = end.getHours() * 60 + end.getMinutes();
+  const startMinutes = startZoned.minutes;
+  const endMinutes = endZoned.minutes;
 
   const fitsWindow = dayWindows.some((w) => {
     const [wStartH, wStartM] = w.start.split(":").map(Number);

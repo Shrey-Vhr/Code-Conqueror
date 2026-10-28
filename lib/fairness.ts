@@ -15,6 +15,54 @@ export interface PriorityBreakdown {
   finalScore: number;
 }
 
+export interface FairnessPolicyValues {
+  weeklyHourCap: number;
+  basePriorityScore: number;
+  recentHourWeight: number;
+  researchBonus: number;
+  courseworkBonus: number;
+  clubBonus: number;
+  strikePenalty: number;
+  waitlistBonusPerHour: number;
+  monthlyCreditGrant: number;
+}
+
+export const DEFAULT_FAIRNESS_POLICY: FairnessPolicyValues = {
+  weeklyHourCap: 20,
+  basePriorityScore: 100,
+  recentHourWeight: 2.5,
+  researchBonus: 25,
+  courseworkBonus: 20,
+  clubBonus: 5,
+  strikePenalty: 25,
+  waitlistBonusPerHour: 2.0,
+  monthlyCreditGrant: 50,
+};
+
+export async function getFairnessPolicy(): Promise<FairnessPolicyValues> {
+  try {
+    const policy = await prisma.fairnessSetting.findUnique({
+      where: { id: "default" },
+    });
+    if (policy) {
+      return {
+        weeklyHourCap: policy.weeklyHourCap,
+        basePriorityScore: policy.basePriorityScore,
+        recentHourWeight: policy.recentHourWeight,
+        researchBonus: policy.researchBonus,
+        courseworkBonus: policy.courseworkBonus,
+        clubBonus: policy.clubBonus,
+        strikePenalty: policy.strikePenalty,
+        waitlistBonusPerHour: policy.waitlistBonusPerHour,
+        monthlyCreditGrant: policy.monthlyCreditGrant,
+      };
+    }
+  } catch {
+    // fallback if table not accessible
+  }
+  return DEFAULT_FAIRNESS_POLICY;
+}
+
 export interface FairnessCheckResult {
   allowed: boolean;
   reasons: string[];
@@ -31,31 +79,33 @@ export function computePriorityScore(params: {
   purpose: string;
   strikes: number;
   role: string;
+  policy?: Partial<FairnessPolicyValues>;
 }): PriorityBreakdown {
-  const baseScore = params.baseScore ?? 100;
+  const policy = { ...DEFAULT_FAIRNESS_POLICY, ...params.policy };
+  const baseScore = params.baseScore ?? policy.basePriorityScore;
   
-  // Usage penalty: 2 points per hour used in past 30 days
-  const recentUsagePenalty = Math.round(params.recentHours30d * 2.5);
+  // Usage penalty: dynamic weight per hour used in past 30 days
+  const recentUsagePenalty = Math.round(params.recentHours30d * policy.recentHourWeight);
 
-  // Waitlist age bonus: 2 points per hour waiting, up to 30
+  // Waitlist age bonus: dynamic weight per hour waiting, capped at 30
   const hoursWaiting = params.hoursWaiting ?? 0;
-  const waitlistAgeBonus = Math.min(30, Math.floor(hoursWaiting * 2));
+  const waitlistAgeBonus = Math.min(30, Math.floor(hoursWaiting * policy.waitlistBonusPerHour));
 
-  // Purpose bonus
+  // Purpose bonus from dynamic policy
   let purposeBonus = 0;
   const normalizedPurpose = params.purpose.toUpperCase();
   if (normalizedPurpose === "RESEARCH") {
-    purposeBonus = 25;
+    purposeBonus = policy.researchBonus;
   } else if (normalizedPurpose === "COURSEWORK") {
-    purposeBonus = 20;
+    purposeBonus = policy.courseworkBonus;
   } else if (normalizedPurpose === "CLUB") {
-    purposeBonus = 5;
+    purposeBonus = policy.clubBonus;
   } else {
     purposeBonus = 0;
   }
 
-  // Strikes penalty: 25 points per strike
-  const strikesPenalty = params.strikes * 25;
+  // Strikes penalty from dynamic policy
+  const strikesPenalty = params.strikes * policy.strikePenalty;
 
   // Role bonus
   let roleBonus = 0;
@@ -114,11 +164,15 @@ export async function checkFairnessLimits(
   userId: string,
   resourceId: string,
   requestedStart: Date,
-  requestedEnd: Date
+  requestedEnd: Date,
+  excludeBookingId?: string
 ): Promise<FairnessCheckResult> {
-  const resource = await prisma.resource.findUnique({
-    where: { id: resourceId },
-  });
+  const [resource, policy] = await Promise.all([
+    prisma.resource.findUnique({
+      where: { id: resourceId },
+    }),
+    getFairnessPolicy(),
+  ]);
 
   if (!resource) {
     return {
@@ -134,11 +188,12 @@ export async function checkFairnessLimits(
   const weekStart = startOfWeek(requestedStart, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(requestedStart, { weekStartsOn: 1 });
 
-  // 1. Weekly active / completed bookings for this resource
+  // 1. Weekly active / completed bookings for this resource (excluding current booking if extending)
   const weeklyBookings = await prisma.booking.findMany({
     where: {
       userId,
       resourceId,
+      id: excludeBookingId ? { not: excludeBookingId } : undefined,
       status: {
         in: ["PENDING", "APPROVED", "CHECKED_IN", "RETURNED", "COMPLETED"],
       },
@@ -160,10 +215,11 @@ export async function checkFairnessLimits(
   const requestedHours =
     (requestedEnd.getTime() - requestedStart.getTime()) / (1000 * 60 * 60);
 
-  // Cross-resource campus weekly cap (default 20 hours)
+  // Cross-resource campus weekly cap (from dynamic policy, excluding current booking if extending)
   const allWeeklyBookings = await prisma.booking.findMany({
     where: {
       userId,
+      id: excludeBookingId ? { not: excludeBookingId } : undefined,
       status: {
         in: ["PENDING", "APPROVED", "CHECKED_IN", "RETURNED", "COMPLETED"],
       },
@@ -195,11 +251,11 @@ export async function checkFairnessLimits(
     );
   }
 
-  if (totalCampusWeeklyHours + requestedHours > 20) {
+  if (totalCampusWeeklyHours + requestedHours > policy.weeklyHourCap) {
     reasons.push(
-      `Campus-wide 20-hour weekly fair-usage cap exceeded (${(totalCampusWeeklyHours + requestedHours).toFixed(
-        1
-      )}h / 20.0h).`
+      `Campus-wide ${policy.weeklyHourCap}-hour weekly fair-usage cap exceeded (${(
+        totalCampusWeeklyHours + requestedHours
+      ).toFixed(1)}h / ${policy.weeklyHourCap}.0h).`
     );
   }
 
@@ -229,8 +285,8 @@ export async function grantMonthlyCreditsIfDue(userId: string): Promise<boolean>
       now.getMonth() > lastGranted.getMonth();
 
     if (isDue) {
-      const policy = await prisma.fairnessSetting.findUnique({ where: { id: "default" } });
-      const grantAmount = policy?.monthlyCreditGrant ?? 50;
+      const policy = await getFairnessPolicy();
+      const grantAmount = policy.monthlyCreditGrant;
 
       await prisma.user.update({
         where: { id: userId },
