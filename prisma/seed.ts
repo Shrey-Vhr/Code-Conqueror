@@ -916,6 +916,23 @@ async function main() {
     ],
   });
 
+  await prisma.fairnessSetting.upsert({
+    where: { id: "default" },
+    update: {},
+    create: {
+      id: "default",
+      weeklyHourCap: 20,
+      basePriorityScore: 100.0,
+      recentHourWeight: 2.5,
+      researchBonus: 25.0,
+      courseworkBonus: 20.0,
+      clubBonus: 5.0,
+      strikePenalty: 25.0,
+      waitlistBonusPerHour: 0.5,
+      monthlyCreditGrant: 50,
+    },
+  });
+
   console.log("Full seed completed successfully!");
 }
 

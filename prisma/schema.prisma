@@ -19,6 +19,8 @@ model User {
   credits        Int       @default(100)
   strikes        Int       @default(0)
   suspendedUntil DateTime?
+  aiUsageAssessment String?
+  monthlyCreditsGrantedAt DateTime?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
@@ -52,9 +54,10 @@ model UserCertification {
   id           String    @id @default(cuid())
   userId       String
   trainingId   String
-  status       String    @default("PENDING") // PENDING, VERIFIED, EXPIRED
+  status       String    @default("PENDING") // PENDING, VERIFIED, REJECTED, EXPIRED
   expiresAt    DateTime?
   documentNote String?
+  aiEvaluation String?
   verifiedById String?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -154,6 +157,7 @@ model Incident {
   severity       String    @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
   description    String
   aiSummary      String?
+  aiSeverity     String?
   status         String    @default("OPEN") // OPEN, UNDER_REVIEW, RESOLVED
   resolution     String?
   penaltyApplied String?   // JSON or text description of penalty applied
@@ -191,4 +195,18 @@ model AuditLog {
   createdAt  DateTime @default(now())
 
   actor User? @relation("UserAuditLogs", fields: [actorId], references: [id])
+}
+
+model FairnessSetting {
+  id                   String   @id @default("default")
+  weeklyHourCap        Int      @default(20)
+  basePriorityScore    Float    @default(100.0)
+  recentHourWeight     Float    @default(2.5)
+  researchBonus        Float    @default(25.0)
+  courseworkBonus      Float    @default(20.0)
+  clubBonus            Float    @default(5.0)
+  strikePenalty        Float    @default(25.0)
+  waitlistBonusPerHour Float    @default(0.5)
+  monthlyCreditGrant   Int      @default(50)
+  updatedAt            DateTime @updatedAt
 }
