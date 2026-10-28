@@ -9,6 +9,7 @@ import {
   extendBookingAction,
   reportIncidentAction,
 } from "../bookingActions";
+import { AI_DISCLAIMER } from "@/lib/ai";
 
 interface BookingActionPanelsProps {
   bookingId: string;
@@ -36,6 +37,9 @@ export function BookingActionPanels({
   const [photoUrl, setPhotoUrl] = useState<string>("");
   const [cancelReason, setCancelReason] = useState<string>("");
 
+  // Extension duration in hours
+  const [extensionHours, setExtensionHours] = useState<number>(1);
+
   // Checklist items
   const [checklist, setChecklist] = useState<Record<string, boolean>>({
     "Power system & indicators verified": true,
@@ -51,6 +55,7 @@ export function BookingActionPanels({
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const toggleChecklistItem = (item: string) => {
     setChecklist((prev) => ({ ...prev, [item]: !prev[item] }));
@@ -60,6 +65,7 @@ export function BookingActionPanels({
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
 
     const checkedItems = Object.keys(checklist).filter((k) => checklist[k]);
     const formData = new FormData();
@@ -75,7 +81,11 @@ export function BookingActionPanels({
         setActiveAction("IDLE");
         router.refresh();
       } else {
-        setError(("error" in res && typeof res.error === "string") ? res.error : "Check-in failed");
+        setError(
+          "error" in res && typeof res.error === "string"
+            ? res.error
+            : "Check-in failed"
+        );
       }
     } catch {
       setError("An unexpected error occurred during check-in.");
@@ -88,6 +98,7 @@ export function BookingActionPanels({
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
 
     const checkedItems = Object.keys(checklist).filter((k) => checklist[k]);
     const formData = new FormData();
@@ -103,7 +114,11 @@ export function BookingActionPanels({
         setActiveAction("IDLE");
         router.refresh();
       } else {
-        setError(("error" in res && typeof res.error === "string") ? res.error : "Return failed");
+        setError(
+          "error" in res && typeof res.error === "string"
+            ? res.error
+            : "Return failed"
+        );
       }
     } catch {
       setError("An unexpected error occurred during return.");
@@ -112,16 +127,24 @@ export function BookingActionPanels({
     }
   };
 
-  const handleExtend = async () => {
+  const handleExtendSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
+
     try {
-      const res = await extendBookingAction(bookingId, 1);
+      const res = await extendBookingAction(bookingId, extensionHours);
       if (res.success) {
         setActiveAction("IDLE");
+        setSuccessMessage(`Session successfully extended by ${extensionHours} hour(s)!`);
         router.refresh();
       } else {
-        setError(("error" in res && typeof res.error === "string") ? res.error : "Failed to extend session");
+        setError(
+          "error" in res && typeof res.error === "string"
+            ? res.error
+            : "Failed to extend session. A schedule conflict or quota limit prevented this extension."
+        );
       }
     } catch {
       setError("Network error while attempting extension.");
@@ -133,13 +156,19 @@ export function BookingActionPanels({
   const handleCancel = async () => {
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
+
     try {
       const res = await cancelBookingUserAction(bookingId, cancelReason);
       if (res.success) {
         setActiveAction("IDLE");
         router.refresh();
       } else {
-        setError(("error" in res && typeof res.error === "string") ? res.error : "Cancellation failed");
+        setError(
+          "error" in res && typeof res.error === "string"
+            ? res.error
+            : "Cancellation failed"
+        );
       }
     } catch {
       setError("Failed to cancel reservation.");
@@ -152,6 +181,7 @@ export function BookingActionPanels({
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+    setSuccessMessage(null);
 
     const formData = new FormData();
     formData.append("bookingId", bookingId);
@@ -165,9 +195,14 @@ export function BookingActionPanels({
       if (res.success) {
         setActiveAction("IDLE");
         setIncidentDescription("");
+        setSuccessMessage("Incident report successfully logged and routed to department manager.");
         router.refresh();
       } else {
-        setError(("error" in res && typeof res.error === "string") ? res.error : "Failed to submit incident");
+        setError(
+          "error" in res && typeof res.error === "string"
+            ? res.error
+            : "Failed to submit incident"
+        );
       }
     } catch {
       setError("Failed to report incident.");
@@ -177,21 +212,34 @@ export function BookingActionPanels({
   };
 
   const canCheckIn = status === "APPROVED" && (isBooker || isOwnerOrManager);
-  const canReturn = (status === "CHECKED_IN" || status === "OVERDUE") && (isBooker || isOwnerOrManager);
-  const canExtend = status === "CHECKED_IN" && (isBooker || isOwnerOrManager);
+  const canReturn =
+    (status === "CHECKED_IN" || status === "OVERDUE") &&
+    (isBooker || isOwnerOrManager);
+  const canExtend =
+    (status === "APPROVED" || status === "CHECKED_IN") &&
+    (isBooker || isOwnerOrManager);
   const canCancel =
     (status === "PENDING" || status === "APPROVED" || status === "WAITLISTED") &&
     (isBooker || isOwnerOrManager);
+  const canReportIncident =
+    status === "APPROVED" ||
+    status === "CHECKED_IN" ||
+    status === "RETURNED" ||
+    status === "OVERDUE" ||
+    isOwnerOrManager;
 
   return (
-    <div id="condition-actions" className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-6 space-y-5">
+    <div
+      id="condition-actions"
+      className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-6 space-y-5"
+    >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
         <div>
           <h3 className="text-base font-bold text-slate-900">
             Session Controls & Lifecycle Operations
           </h3>
           <p className="text-xs text-slate-500">
-            Record physical condition reports, manage duration, or report operational incidents.
+            Record physical condition reports, manage session duration, or report operational incidents.
           </p>
         </div>
 
@@ -199,7 +247,9 @@ export function BookingActionPanels({
         <div className="flex items-center gap-2 flex-wrap">
           {canCheckIn && (
             <button
-              onClick={() => setActiveAction(activeAction === "CHECK_IN" ? "IDLE" : "CHECK_IN")}
+              onClick={() =>
+                setActiveAction(activeAction === "CHECK_IN" ? "IDLE" : "CHECK_IN")
+              }
               className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer"
             >
               Check-In Inspection →
@@ -208,7 +258,9 @@ export function BookingActionPanels({
 
           {canReturn && (
             <button
-              onClick={() => setActiveAction(activeAction === "RETURN" ? "IDLE" : "RETURN")}
+              onClick={() =>
+                setActiveAction(activeAction === "RETURN" ? "IDLE" : "RETURN")
+              }
               className={`px-4 py-2 text-white rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer ${
                 status === "OVERDUE"
                   ? "bg-rose-600 hover:bg-rose-700 animate-pulse"
@@ -221,24 +273,42 @@ export function BookingActionPanels({
 
           {canExtend && (
             <button
-              onClick={handleExtend}
+              onClick={() =>
+                setActiveAction(activeAction === "EXTEND" ? "IDLE" : "EXTEND")
+              }
               disabled={isLoading}
-              className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
+              className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer border ${
+                activeAction === "EXTEND"
+                  ? "bg-indigo-600 text-white border-indigo-600"
+                  : "bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200"
+              }`}
             >
-              +1 Hour Extension
+              Extend Session +
             </button>
           )}
 
-          <button
-            onClick={() => setActiveAction(activeAction === "REPORT_INCIDENT" ? "IDLE" : "REPORT_INCIDENT")}
-            className="px-3.5 py-2 border border-rose-200 hover:bg-rose-50 text-rose-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-          >
-            Report Incident
-          </button>
+          {canReportIncident && (
+            <button
+              onClick={() =>
+                setActiveAction(
+                  activeAction === "REPORT_INCIDENT" ? "IDLE" : "REPORT_INCIDENT"
+                )
+              }
+              className={`px-3.5 py-2 border rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+                activeAction === "REPORT_INCIDENT"
+                  ? "bg-rose-600 text-white border-rose-600"
+                  : "border-rose-200 hover:bg-rose-50 text-rose-700"
+              }`}
+            >
+              Report Incident 🚨
+            </button>
+          )}
 
           {canCancel && (
             <button
-              onClick={() => setActiveAction(activeAction === "CANCEL" ? "IDLE" : "CANCEL")}
+              onClick={() =>
+                setActiveAction(activeAction === "CANCEL" ? "IDLE" : "CANCEL")
+              }
               className="px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
             >
               Cancel Reservation
@@ -247,18 +317,114 @@ export function BookingActionPanels({
         </div>
       </div>
 
+      {successMessage && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+          <svg
+            className="w-4 h-4 shrink-0 text-emerald-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          <span>{successMessage}</span>
+        </div>
+      )}
+
       {error && (
         <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
-          <svg className="w-4 h-4 shrink-0 text-rose-600" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          <svg
+            className="w-4 h-4 shrink-0 text-rose-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth="2"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+            />
           </svg>
           <span>{error}</span>
         </div>
       )}
 
+      {/* EXTEND FORM PANEL */}
+      {activeAction === "EXTEND" && (
+        <form
+          onSubmit={handleExtendSubmit}
+          className="p-5 bg-indigo-50/50 rounded-xl border border-indigo-200 space-y-4"
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-bold text-indigo-900 text-sm">
+                Request Session Extension
+              </h4>
+              <p className="text-xs text-indigo-700">
+                Extend your active reservation without forfeiting setup time.
+              </p>
+            </div>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
+              ACID Safe
+            </span>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+              Extension Duration
+            </label>
+            <div className="flex items-center gap-3">
+              {[1, 2, 3].map((hrs) => (
+                <button
+                  key={hrs}
+                  type="button"
+                  onClick={() => setExtensionHours(hrs)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                    extensionHours === hrs
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                      : "bg-white text-slate-700 border-slate-200 hover:border-indigo-300"
+                  }`}
+                >
+                  +{hrs} Hour{hrs > 1 ? "s" : ""}
+                </button>
+              ))}
+            </div>
+            <p className="text-[11px] text-slate-500 mt-2">
+              Extensions verify in real time that no succeeding reservation or waitlist conflict exists, and your weekly 20-hour quota is not exceeded.
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => setActiveAction("IDLE")}
+              className="px-3.5 py-1.5 border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-100"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="px-5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50"
+            >
+              {isLoading ? "Verifying & Extending..." : `Confirm +${extensionHours}h Extension`}
+            </button>
+          </div>
+        </form>
+      )}
+
       {/* CHECK-IN FORM PANEL */}
       {activeAction === "CHECK_IN" && (
-        <form onSubmit={handleCheckInSubmit} className="p-5 bg-emerald-50/50 rounded-xl border border-emerald-200 space-y-4">
+        <form
+          onSubmit={handleCheckInSubmit}
+          className="p-5 bg-emerald-50/50 rounded-xl border border-emerald-200 space-y-4"
+        >
           <div className="flex items-center justify-between">
             <h4 className="font-bold text-emerald-900 text-sm">
               Check-In Condition Report: &quot;{resourceName}&quot;
@@ -305,7 +471,10 @@ export function BookingActionPanels({
             </label>
             <div className="space-y-1.5">
               {Object.keys(checklist).map((item) => (
-                <label key={item} className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer">
+                <label
+                  key={item}
+                  className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer"
+                >
                   <input
                     type="checkbox"
                     checked={checklist[item]}
@@ -352,7 +521,10 @@ export function BookingActionPanels({
 
       {/* RETURN FORM PANEL */}
       {activeAction === "RETURN" && (
-        <form onSubmit={handleReturnSubmit} className="p-5 bg-blue-50/50 rounded-xl border border-blue-200 space-y-4">
+        <form
+          onSubmit={handleReturnSubmit}
+          className="p-5 bg-blue-50/50 rounded-xl border border-blue-200 space-y-4"
+        >
           <div className="flex items-center justify-between">
             <h4 className="font-bold text-blue-900 text-sm">
               Return Inspection Report: &quot;{resourceName}&quot;
@@ -403,7 +575,10 @@ export function BookingActionPanels({
             </label>
             <div className="space-y-1.5">
               {Object.keys(checklist).map((item) => (
-                <label key={item} className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer">
+                <label
+                  key={item}
+                  className="flex items-center gap-2.5 text-xs text-slate-700 cursor-pointer"
+                >
                   <input
                     type="checkbox"
                     checked={checklist[item]}
@@ -482,12 +657,28 @@ export function BookingActionPanels({
 
       {/* REPORT INCIDENT PANEL */}
       {activeAction === "REPORT_INCIDENT" && (
-        <form onSubmit={handleIncidentSubmit} className="p-5 bg-rose-50/50 rounded-xl border border-rose-200 space-y-4">
+        <form
+          onSubmit={handleIncidentSubmit}
+          className="p-5 bg-rose-50/50 rounded-xl border border-rose-200 space-y-4"
+        >
           <div className="flex items-center justify-between">
             <h4 className="font-bold text-rose-900 text-sm">
               Log Incident or Equipment Malfunction
             </h4>
             <span className="text-xs text-rose-700 font-medium">Logged to Department Review</span>
+          </div>
+
+          {/* AI Human Review Contract Disclaimer */}
+          <div className="p-3 bg-amber-50/90 rounded-lg border border-amber-200/80 text-xs text-amber-900 flex items-start gap-2.5">
+            <span className="text-sm shrink-0">⚠️</span>
+            <div className="space-y-1">
+              <span className="font-bold block text-amber-800">
+                {AI_DISCLAIMER}
+              </span>
+              <p className="text-[11px] text-amber-700 leading-normal">
+                CampusShare AI automatically drafts incident triage summaries and repair quotes. All final sanctions, account holds, or repair approvals require human department manager sign-off.
+              </p>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
