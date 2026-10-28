@@ -607,9 +607,10 @@ export async function returnBooking(params: {
 export async function extendBooking(params: {
   bookingId: string;
   actorId: string;
-  additionalHours: number;
+  additionalHours?: number;
+  newEndDate?: Date | string;
 }) {
-  const { bookingId, actorId, additionalHours } = params;
+  const { bookingId, actorId, additionalHours, newEndDate } = params;
 
   const booking = await prisma.booking.findUnique({
     where: { id: bookingId },
@@ -617,14 +618,27 @@ export async function extendBooking(params: {
   });
 
   if (!booking) return { success: false, error: "Booking not found." };
-  if (booking.status !== "CHECKED_IN") {
+  if (booking.status !== "APPROVED" && booking.status !== "CHECKED_IN") {
     return {
       success: false,
-      error: `Only active CHECKED_IN bookings can be extended. Current: "${booking.status}".`,
+      error: `Only APPROVED or CHECKED_IN bookings can be extended. Current: "${booking.status}".`,
     };
   }
 
-  const newEnd = new Date(booking.end.getTime() + additionalHours * 60 * 60 * 1000);
+  let newEnd: Date;
+  if (newEndDate) {
+    newEnd = new Date(newEndDate);
+  } else if (additionalHours && additionalHours > 0) {
+    newEnd = new Date(booking.end.getTime() + additionalHours * 60 * 60 * 1000);
+  } else {
+    return { success: false, error: "Please provide a valid new end time or additional hours." };
+  }
+
+  if (newEnd.getTime() <= booking.end.getTime()) {
+    return { success: false, error: "New end time must be after the current scheduled end time." };
+  }
+
+  const addedHours = Math.ceil((newEnd.getTime() - booking.end.getTime()) / (1000 * 60 * 60));
 
   // Check conflicts for the extended window
   const conflict = await checkBookingConflicts(
@@ -642,7 +656,7 @@ export async function extendBooking(params: {
   }
 
   // Check credit cost
-  const extensionCost = additionalHours * booking.resource.creditCostPerHour;
+  const extensionCost = addedHours * booking.resource.creditCostPerHour;
   if (booking.user.credits < extensionCost) {
     return {
       success: false,
@@ -670,15 +684,26 @@ export async function extendBooking(params: {
       entityId: bookingId,
       before: { end: booking.end.toISOString() },
       after: { end: newEnd.toISOString() },
-      reason: `Extended by ${additionalHours} hour(s)`,
+      reason: `Extended by ${addedHours} hour(s) until ${newEnd.toISOString()}`,
     });
 
+    // Notify borrower
     await createNotification(tx, {
       userId: booking.userId,
       type: "BOOKING_EXTENDED",
-      message: `Your booking for "${booking.resource.name}" has been extended by ${additionalHours} hour(s). New end time: ${newEnd.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.`,
+      message: `Your booking for "${booking.resource.name}" has been extended. New end time: ${newEnd.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.`,
       link: `/bookings/${bookingId}`,
     });
+
+    // Notify owner/manager if actor is borrower
+    if (booking.resource.ownerId !== actorId) {
+      await createNotification(tx, {
+        userId: booking.resource.ownerId,
+        type: "BOOKING_EXTENDED",
+        message: `Booking for "${booking.resource.name}" was extended by ${booking.user.name} until ${newEnd.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}.`,
+        link: `/bookings/${bookingId}`,
+      });
+    }
 
     return { success: true, newEnd };
   });

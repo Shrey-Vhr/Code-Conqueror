@@ -113,13 +113,18 @@ export async function returnUserAction(formData: FormData) {
   return result;
 }
 
-export async function extendBookingAction(bookingId: string, additionalHours: number) {
+export async function extendBookingAction(
+  bookingId: string,
+  extension: number | string | Date
+) {
   const session = await requireAuth();
 
+  const isHours = typeof extension === "number";
   const result = await extendBooking({
     bookingId,
     actorId: session.id,
-    additionalHours,
+    additionalHours: isHours ? extension : undefined,
+    newEndDate: !isHours ? extension : undefined,
   });
 
   if (result.success) {
