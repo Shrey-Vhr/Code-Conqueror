@@ -10,7 +10,7 @@ import {
 } from "@/lib/bookingService";
 import { sweepOverdue } from "@/lib/overdue";
 import { canManageResource, canReviewBooking, isStaff } from "@/lib/rbac";
-import { resolveIncident } from "@/app/incidents/[id]/actions";
+import { resolveIncident } from "@/lib/incidentService";
 
 function getFutureWeekdaySlot(daysAhead: number, startHour = 10, durationHours = 2) {
   const d = new Date();
@@ -412,5 +412,73 @@ describe("CampusShare End-to-End Integration Suite", () => {
     });
     expect(completedBooking?.status).toBe("COMPLETED");
     expect(completedBooking?.depositHeld).toBe(0);
+  });
+
+  it("7. Multi-Incident Safety: Returned booking with 2 incidents only completes when BOTH are resolved", async () => {
+    // 1. Create a simulated returned booking with 2 open incidents
+    const testBooking = await prisma.booking.create({
+      data: {
+        userId: carolUser.id,
+        resourceId: printerResource.id,
+        start: new Date(Date.now() - 1000 * 60 * 120),
+        end: new Date(Date.now() - 1000 * 60 * 60),
+        purpose: "COURSEWORK",
+        status: "RETURNED",
+        depositHeld: 20,
+      },
+    });
+
+    const inc1 = await prisma.incident.create({
+      data: {
+        bookingId: testBooking.id,
+        resourceId: printerResource.id,
+        reporterId: daveOwner.id,
+        type: "DELAY",
+        severity: "LOW",
+        description: "Late return by 30 mins",
+        status: "OPEN",
+      },
+    });
+
+    const inc2 = await prisma.incident.create({
+      data: {
+        bookingId: testBooking.id,
+        resourceId: printerResource.id,
+        reporterId: daveOwner.id,
+        type: "DAMAGE",
+        severity: "MEDIUM",
+        description: "Scratched glass bed surface",
+        status: "OPEN",
+      },
+    });
+
+    // 2. Manager resolves FIRST incident (inc1)
+    const res1 = await resolveIncident({
+      incidentId: inc1.id,
+      resolution: "Warned about late return.",
+      penaltyType: "NONE",
+      actorId: eveManager.id,
+    });
+    expect(res1.success).toBe(true);
+
+    // CRITICAL: Booking MUST remain RETURNED and deposit MUST still be held because inc2 is still OPEN!
+    const midBooking = await prisma.booking.findUnique({ where: { id: testBooking.id } });
+    expect(midBooking?.status).toBe("RETURNED");
+    expect(midBooking?.depositHeld).toBe(20);
+
+    // 3. Manager resolves SECOND incident (inc2)
+    const res2 = await resolveIncident({
+      incidentId: inc2.id,
+      resolution: "Minor surface wear, no charge.",
+      penaltyType: "NONE",
+      depositAction: "REFUND",
+      actorId: eveManager.id,
+    });
+    expect(res2.success).toBe(true);
+
+    // Now that ALL incidents on the returned booking are resolved, it completes and deposit is settled
+    const finalBooking = await prisma.booking.findUnique({ where: { id: testBooking.id } });
+    expect(finalBooking?.status).toBe("COMPLETED");
+    expect(finalBooking?.depositHeld).toBe(0);
   });
 });
