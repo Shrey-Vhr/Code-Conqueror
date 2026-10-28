@@ -44,7 +44,7 @@ export function canReviewBooking(
 }
 
 export function isStaff(role: string): boolean {
-  return role === "OWNER" || role === "MANAGER" || role === "ADMIN";
+  return ["OWNER", "MANAGER", "ADMIN"].includes(role);
 }
 
 export function isManagerOrAdmin(role: string): boolean {
