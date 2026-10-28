@@ -1,0 +1,194 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String
+  password       String
+  role           String    @default("STUDENT") // STUDENT, RESEARCHER, OWNER, MANAGER, ADMIN
+  department     String    @default("General")
+  verified       Boolean   @default(false)
+  emailVerified  Boolean   @default(true)
+  credits        Int       @default(100)
+  strikes        Int       @default(0)
+  suspendedUntil DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  resources              Resource[]           @relation("ResourceOwner")
+  bookings               Booking[]            @relation("UserBookings")
+  reviewedBookings       Booking[]            @relation("ReviewedBookings")
+  certifications         UserCertification[]  @relation("UserCertifications")
+  verifiedCertifications UserCertification[]  @relation("VerifiedCertifications")
+  conditionReports       ConditionReport[]    @relation("UserConditionReports")
+  reportedIncidents      Incident[]           @relation("UserReportedIncidents")
+  resolvedIncidents      Incident[]           @relation("ManagerResolvedIncidents")
+  notifications          Notification[]       @relation("UserNotifications")
+  auditLogs              AuditLog[]           @relation("UserAuditLogs")
+}
+
+model Training {
+  id                String   @id @default(cuid())
+  name              String
+  code              String   @unique
+  description       String
+  department        String
+  validDurationDays Int      @default(365)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  certifications UserCertification[]
+  requirements   ResourceRequirement[]
+}
+
+model UserCertification {
+  id           String    @id @default(cuid())
+  userId       String
+  trainingId   String
+  status       String    @default("PENDING") // PENDING, VERIFIED, EXPIRED
+  expiresAt    DateTime?
+  documentNote String?
+  verifiedById String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user       User     @relation("UserCertifications", fields: [userId], references: [id], onDelete: Cascade)
+  training   Training @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+  verifiedBy User?    @relation("VerifiedCertifications", fields: [verifiedById], references: [id])
+}
+
+model Resource {
+  id                  String   @id @default(cuid())
+  name                String
+  type                String   // SPACE, EQUIPMENT, TOOL, COMPUTE
+  category            String
+  location            String
+  description         String
+  image               String?
+  rules               String?
+  ownerId             String
+  department          String
+  requiresSupervision Boolean  @default(false)
+  depositCredits      Int      @default(0)
+  creditCostPerHour   Int      @default(0)
+  maxHoursPerBooking  Int      @default(4)
+  maxBookingsPerWeek  Int      @default(3)
+  status              String   @default("ACTIVE") // ACTIVE, MAINTENANCE, RETIRED
+  availabilityWindows String   @default("[]") // JSON: [{ "dayOfWeek": 1, "start": "08:00", "end": "20:00" }, ...]
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  owner        User                  @relation("ResourceOwner", fields: [ownerId], references: [id])
+  requirements ResourceRequirement[]
+  bookings     Booking[]
+  incidents    Incident[]
+}
+
+model ResourceRequirement {
+  id                 String   @id @default(cuid())
+  resourceId         String
+  trainingId         String?
+  requiredRole       String?  // e.g. RESEARCHER
+  requiredDepartment String?  // e.g. Engineering
+  minCredits         Int?
+  createdAt          DateTime @default(now())
+
+  resource Resource  @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  training Training? @relation(fields: [trainingId], references: [id], onDelete: Cascade)
+}
+
+model Booking {
+  id                  String    @id @default(cuid())
+  userId              String
+  resourceId          String
+  start               DateTime
+  end                 DateTime
+  purpose             String    // COURSEWORK, RESEARCH, PERSONAL, CLUB
+  purposeDetails      String?
+  status              String    @default("PENDING") // PENDING, APPROVED, REJECTED, WAITLISTED, CANCELLED, CHECKED_IN, RETURNED, OVERDUE, COMPLETED
+  waitlistPosition    Int?
+  priorityScore       Float     @default(100.0)
+  priorityBreakdown   String?   // JSON
+  decisionReason      String?
+  reviewerId          String?
+  eligibilitySnapshot String?   // JSON
+  depositHeld         Int       @default(0)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  user             User              @relation("UserBookings", fields: [userId], references: [id])
+  resource         Resource          @relation(fields: [resourceId], references: [id])
+  reviewer         User?             @relation("ReviewedBookings", fields: [reviewerId], references: [id])
+  conditionReports ConditionReport[]
+  incidents        Incident[]
+}
+
+model ConditionReport {
+  id          String   @id @default(cuid())
+  bookingId   String
+  phase       String   // CHECK_IN, CHECK_OUT
+  rating      Int      // 1 to 5
+  checklist   String   // JSON string of checked items
+  notes       String?
+  photoUrl    String?
+  recordedById String
+  createdAt   DateTime @default(now())
+
+  booking    Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  recordedBy User    @relation("UserConditionReports", fields: [recordedById], references: [id])
+}
+
+model Incident {
+  id             String    @id @default(cuid())
+  bookingId      String?
+  resourceId     String
+  reporterId     String
+  type           String    // DAMAGE, DELAY, MISUSE, CONFLICT, OTHER
+  severity       String    @default("MEDIUM") // LOW, MEDIUM, HIGH, CRITICAL
+  description    String
+  aiSummary      String?
+  status         String    @default("OPEN") // OPEN, UNDER_REVIEW, RESOLVED
+  resolution     String?
+  penaltyApplied String?   // JSON or text description of penalty applied
+  resolvedById   String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  booking    Booking?  @relation(fields: [bookingId], references: [id])
+  resource   Resource  @relation(fields: [resourceId], references: [id])
+  reporter   User      @relation("UserReportedIncidents", fields: [reporterId], references: [id])
+  resolvedBy User?     @relation("ManagerResolvedIncidents", fields: [resolvedById], references: [id])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // BOOKING_REQUEST, BOOKING_APPROVED, etc.
+  message   String
+  read      Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  user User @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String   // RESOURCE_CREATED, BOOKING_REQUESTED, etc.
+  entityType String   // Booking, Resource, Incident, User, UserCertification
+  entityId   String
+  before     String?  // JSON
+  after      String?  // JSON
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation("UserAuditLogs", fields: [actorId], references: [id])
+}
