@@ -2,11 +2,18 @@
 
 import { prisma } from "@/lib/prisma";
 import { matchResources } from "@/lib/ai";
+import { requireAuth } from "@/lib/rbac";
 
 export async function aiSearchResources(query: string) {
+  // Authentication required to prevent unauthenticated consumption of OpenAI API credits
+  await requireAuth();
+
   if (!query || query.trim().length === 0) {
     return { success: true, matches: [] };
   }
+
+  // Rate limiting / abuse guard: truncate query to reasonable length
+  const safeQuery = query.trim().slice(0, 200);
 
   const allResources = await prisma.resource.findMany({
     where: { status: { not: "RETIRED" } },
@@ -21,6 +28,6 @@ export async function aiSearchResources(query: string) {
     },
   });
 
-  const matches = await matchResources(query, allResources);
+  const matches = await matchResources(safeQuery, allResources);
   return { success: true, matches };
 }

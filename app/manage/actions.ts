@@ -1,6 +1,7 @@
 "use server";
 
-import { requireRole } from "@/lib/rbac";
+import { z } from "zod";
+import { requireRole, canReviewBooking } from "@/lib/rbac";
 import { approveBooking, rejectBooking } from "@/lib/bookingService";
 import { sweepOverdue } from "@/lib/overdue";
 import { prisma } from "@/lib/prisma";
@@ -8,20 +9,41 @@ import { audit } from "@/lib/audit";
 import { createNotification } from "@/lib/notifications";
 import { revalidatePath } from "next/cache";
 
+const ReviewDecisionSchema = z.object({
+  bookingId: z.string().min(1, "Booking ID is required"),
+  decisionReason: z.string().min(2, "Decision note must be at least 2 characters").max(500),
+});
+
+const BookingIdSchema = z.object({
+  bookingId: z.string().min(1, "Booking ID is required"),
+});
+
 export async function approveBookingReviewAction(
   bookingId: string,
   decisionReason: string
 ) {
-  const session = await requireRole(["OWNER", "MANAGER", "ADMIN"]);
+  const session = await requireRole(["OWNER", "STAFF", "MANAGER", "ADMIN"]);
 
-  if (!decisionReason || decisionReason.trim().length === 0) {
-    return { success: false, error: "A decision note/reason is required." };
+  const parseResult = ReviewDecisionSchema.safeParse({ bookingId, decisionReason });
+  if (!parseResult.success) {
+    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid review decision" };
+  }
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: parseResult.data.bookingId },
+    include: { resource: true },
+  });
+
+  if (!booking) return { success: false, error: "Booking not found." };
+
+  if (!canReviewBooking(session, { ownerId: booking.resource.ownerId, department: booking.resource.department })) {
+    return { success: false, error: "Forbidden: You are not authorized to review reservations for this resource." };
   }
 
   const result = await approveBooking({
-    bookingId,
+    bookingId: parseResult.data.bookingId,
     reviewerId: session.id,
-    decisionReason,
+    decisionReason: parseResult.data.decisionReason,
   });
 
   if (result.success) {
@@ -37,16 +59,28 @@ export async function rejectBookingReviewAction(
   bookingId: string,
   decisionReason: string
 ) {
-  const session = await requireRole(["OWNER", "MANAGER", "ADMIN"]);
+  const session = await requireRole(["OWNER", "STAFF", "MANAGER", "ADMIN"]);
 
-  if (!decisionReason || decisionReason.trim().length === 0) {
-    return { success: false, error: "A rejection reason is mandatory." };
+  const parseResult = ReviewDecisionSchema.safeParse({ bookingId, decisionReason });
+  if (!parseResult.success) {
+    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid review decision" };
+  }
+
+  const booking = await prisma.booking.findUnique({
+    where: { id: parseResult.data.bookingId },
+    include: { resource: true },
+  });
+
+  if (!booking) return { success: false, error: "Booking not found." };
+
+  if (!canReviewBooking(session, { ownerId: booking.resource.ownerId, department: booking.resource.department })) {
+    return { success: false, error: "Forbidden: You are not authorized to review reservations for this resource." };
   }
 
   const result = await rejectBooking({
-    bookingId,
+    bookingId: parseResult.data.bookingId,
     reviewerId: session.id,
-    decisionReason,
+    decisionReason: parseResult.data.decisionReason,
   });
 
   if (result.success) {
@@ -59,14 +93,24 @@ export async function rejectBookingReviewAction(
 }
 
 export async function promoteWaitlistToPendingAction(bookingId: string) {
-  const session = await requireRole(["OWNER", "MANAGER", "ADMIN"]);
+  const session = await requireRole(["OWNER", "STAFF", "MANAGER", "ADMIN"]);
+
+  const parseResult = BookingIdSchema.safeParse({ bookingId });
+  if (!parseResult.success) {
+    return { success: false, error: parseResult.error.errors[0]?.message || "Invalid booking ID" };
+  }
 
   const booking = await prisma.booking.findUnique({
-    where: { id: bookingId },
+    where: { id: parseResult.data.bookingId },
     include: { resource: true, user: true },
   });
 
   if (!booking) return { success: false, error: "Booking not found." };
+
+  if (!canReviewBooking(session, { ownerId: booking.resource.ownerId, department: booking.resource.department })) {
+    return { success: false, error: "Forbidden: You are not authorized to manage waitlists for this resource." };
+  }
+
   if (booking.status !== "WAITLISTED") {
     return { success: false, error: `Cannot promote booking with status "${booking.status}". Must be WAITLISTED.` };
   }
@@ -106,7 +150,7 @@ export async function promoteWaitlistToPendingAction(bookingId: string) {
 }
 
 export async function manualSweepAction(): Promise<void> {
-  await requireRole(["OWNER", "MANAGER", "ADMIN"]);
+  await requireRole(["OWNER", "STAFF", "MANAGER", "ADMIN"]);
   await sweepOverdue();
   revalidatePath("/manage");
 }

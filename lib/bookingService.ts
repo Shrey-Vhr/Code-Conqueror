@@ -241,6 +241,51 @@ export async function approveBooking(params: {
       },
     });
 
+    // Move any competing PENDING bookings for overlapping times to WAITLISTED
+    const overlappingPending = await tx.booking.findMany({
+      where: {
+        resourceId: booking.resourceId,
+        id: { not: bookingId },
+        status: "PENDING",
+        start: { lt: booking.end },
+        end: { gt: booking.start },
+      },
+    });
+
+    for (const pend of overlappingPending) {
+      const currentMax = await tx.booking.findFirst({
+        where: { resourceId: booking.resourceId, status: "WAITLISTED" },
+        orderBy: { waitlistPosition: "desc" },
+        select: { waitlistPosition: true },
+      });
+      const nextPos = (currentMax?.waitlistPosition || 0) + 1;
+      await tx.booking.update({
+        where: { id: pend.id },
+        data: {
+          status: "WAITLISTED",
+          waitlistPosition: nextPos,
+          decisionReason: "Time slot was claimed by another approved reservation; queued on waitlist",
+        },
+      });
+
+      await audit(tx, {
+        actorId: reviewerId,
+        action: "BOOKING_AUTO_WAITLISTED",
+        entityType: "Booking",
+        entityId: pend.id,
+        before: { status: "PENDING" },
+        after: { status: "WAITLISTED", waitlistPosition: nextPos },
+        reason: `Overlapping slot approved for booking ${bookingId}`,
+      });
+
+      await createNotification(tx, {
+        userId: pend.userId,
+        type: "WAITLIST_PLACED",
+        message: `Another reservation for "${booking.resource.name}" was approved for your requested time slot. Your request has been queued at waitlist position #${nextPos}.`,
+        link: `/bookings/${pend.id}`,
+      });
+    }
+
     await audit(tx, {
       actorId: reviewerId,
       action: "BOOKING_APPROVED",

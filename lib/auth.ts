@@ -63,6 +63,10 @@ export async function loginAction(formData: FormData) {
 }
 
 export async function quickLoginAction(email: string) {
+  if (process.env.DEMO_MODE !== "true") {
+    return { success: false, error: "Demo login is disabled in this environment." };
+  }
+
   try {
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
@@ -70,6 +74,15 @@ export async function quickLoginAction(email: string) {
 
     if (!user) {
       return { success: false, error: "Demo user not found" };
+    }
+
+    if (user.suspendedUntil && new Date(user.suspendedUntil) > new Date()) {
+      return {
+        success: false,
+        error: `Account suspended until ${new Date(
+          user.suspendedUntil
+        ).toLocaleDateString()}`,
+      };
     }
 
     await createSession({
@@ -87,6 +100,9 @@ export async function quickLoginAction(email: string) {
 }
 
 export async function switchRoleAction(email: string): Promise<void> {
+  if (process.env.DEMO_MODE !== "true") {
+    throw new Error("Demo role switching is disabled in this environment.");
+  }
   await quickLoginAction(email);
   redirect("/resources");
 }
