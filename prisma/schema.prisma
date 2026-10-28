@@ -206,7 +206,7 @@ model FairnessSetting {
   courseworkBonus      Float    @default(20.0)
   clubBonus            Float    @default(5.0)
   strikePenalty        Float    @default(25.0)
-  waitlistBonusPerHour Float    @default(0.5)
+  waitlistBonusPerHour Float    @default(2.0)
   monthlyCreditGrant   Int      @default(50)
   updatedAt            DateTime @updatedAt
 }

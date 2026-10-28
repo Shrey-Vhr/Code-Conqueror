@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { requestBooking } from "@/lib/bookingService";
 import { requireAuth } from "@/lib/rbac";
+import { parseCampusDateTime } from "@/lib/conflicts";
 import { revalidatePath } from "next/cache";
 
 const BookingRequestSchema = z.object({
@@ -33,8 +34,8 @@ export async function submitBookingRequest(formData: FormData) {
   const { resourceId, date, startTime, endTime, purpose, purposeDetails } = parseResult.data;
 
   try {
-    const start = new Date(`${date}T${startTime}:00`);
-    const end = new Date(`${date}T${endTime}:00`);
+    const start = parseCampusDateTime(date, startTime);
+    const end = parseCampusDateTime(date, endTime);
 
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return { success: false, error: "Invalid date or time provided." };

@@ -144,7 +144,7 @@ export default async function AdminPage() {
     courseworkBonus: 20.0,
     clubBonus: 5.0,
     strikePenalty: 25.0,
-    waitlistBonusPerHour: 0.5,
+    waitlistBonusPerHour: 2.0,
     monthlyCreditGrant: 50,
     updatedAt: new Date(),
   };

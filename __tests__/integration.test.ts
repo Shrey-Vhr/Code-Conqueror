@@ -10,6 +10,7 @@ import {
 } from "@/lib/bookingService";
 import { sweepOverdue } from "@/lib/overdue";
 import { canManageResource, canReviewBooking, isStaff } from "@/lib/rbac";
+import { resolveIncident } from "@/app/incidents/[id]/actions";
 
 function getFutureWeekdaySlot(daysAhead: number, startHour = 10, durationHours = 2) {
   const d = new Date();
@@ -364,5 +365,52 @@ describe("CampusShare End-to-End Integration Suite", () => {
         { ownerId: "someone-else", department: "Biology" }
       )
     ).toBe(false);
+  });
+
+  it("6. Incident Lifecycle: Resolving an incident on an OVERDUE booking keeps it OVERDUE until returned", async () => {
+    // Bob's seeded overdue booking with a DELAY incident
+    const bobOverdueBooking = await prisma.booking.findUnique({
+      where: { id: "booking-demo-bob-overdue" },
+      include: { incidents: true },
+    });
+    expect(bobOverdueBooking?.status).toBe("OVERDUE");
+    expect(bobOverdueBooking?.depositHeld).toBe(10);
+    const delayIncident = bobOverdueBooking?.incidents.find((i) => i.id === "incident-demo-delay");
+    expect(delayIncident).toBeDefined();
+    expect(delayIncident?.status).toBe("OPEN");
+
+    // Eve (Manager) resolves the DELAY incident
+    const resResult = await resolveIncident({
+      incidentId: "incident-demo-delay",
+      resolution: "Warned user about unannounced extension. Grace period granted.",
+      penaltyType: "NONE",
+      actorId: eveManager.id,
+      actorName: eveManager.name,
+    });
+    expect(resResult.success).toBe(true);
+
+    // CRITICAL: The booking MUST REMAIN OVERDUE, NOT COMPLETED!
+    const postResolveBooking = await prisma.booking.findUnique({
+      where: { id: "booking-demo-bob-overdue" },
+    });
+    expect(postResolveBooking?.status).toBe("OVERDUE");
+    expect(postResolveBooking?.depositHeld).toBe(10);
+
+    // Now Bob returns the equipment
+    const returnRes = await returnBooking({
+      bookingId: "booking-demo-bob-overdue",
+      actorId: bobUser.id,
+      rating: 4,
+      checklist: ["Returned to lab tech", "Power cord included"],
+      notes: "Returned clean and undamaged",
+    });
+    expect(returnRes.success).toBe(true);
+
+    // Now that the booking has been returned and all incidents are resolved, it transitions to COMPLETED
+    const completedBooking = await prisma.booking.findUnique({
+      where: { id: "booking-demo-bob-overdue" },
+    });
+    expect(completedBooking?.status).toBe("COMPLETED");
+    expect(completedBooking?.depositHeld).toBe(0);
   });
 });

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { checkTimeOverlap, isWithinAvailabilityWindows } from "@/lib/conflicts";
+import { checkTimeOverlap, isWithinAvailabilityWindows, parseCampusDateTime } from "@/lib/conflicts";
 
 describe("Time & Operating Conflict Engine", () => {
   it("should accurately identify overlapping time windows", () => {
@@ -60,5 +60,22 @@ describe("Time & Operating Conflict Engine", () => {
     const check = isWithinAvailabilityWindows(start, end, windowsJson);
     expect(check.valid).toBe(false);
     expect(check.reason).toContain("cannot span across multiple calendar days");
+  });
+
+  it("should parse date and time in campus timezone consistently", () => {
+    // When CAMPUS_TIMEZONE is unset, parses in local machine time
+    const localParsed = parseCampusDateTime("2026-11-02", "10:00");
+    expect(localParsed.getHours()).toBe(10);
+
+    // When custom timezone is passed (e.g. America/New_York)
+    const nyParsed = parseCampusDateTime("2026-11-02", "10:00", "America/New_York");
+    // Verify it evaluates to 10:00 on Monday in America/New_York
+    const check = isWithinAvailabilityWindows(
+      nyParsed,
+      new Date(nyParsed.getTime() + 1000 * 60 * 60 * 2),
+      JSON.stringify([{ dayOfWeek: 1, start: "08:00", end: "20:00" }]),
+      "America/New_York"
+    );
+    expect(check.valid).toBe(true);
   });
 });

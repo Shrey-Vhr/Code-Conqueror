@@ -26,6 +26,47 @@ export function checkTimeOverlap(
   return startA.getTime() < endB.getTime() && endA.getTime() > startB.getTime();
 }
 
+export function parseCampusDateTime(
+  dateStr: string,
+  timeStr: string,
+  customTz?: string
+): Date {
+  const tz = customTz || process.env.CAMPUS_TIMEZONE;
+  if (!tz) {
+    return new Date(`${dateStr}T${timeStr}:00`);
+  }
+  try {
+    const guessUtc = new Date(`${dateStr}T${timeStr}:00.000Z`);
+    if (isNaN(guessUtc.getTime())) {
+      return new Date(`${dateStr}T${timeStr}:00`);
+    }
+
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      hour12: false,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    const parts = formatter.formatToParts(guessUtc);
+    const map: Record<string, string> = {};
+    for (const p of parts) map[p.type] = p.value;
+
+    const asInTz = new Date(
+      `${map.year}-${map.month}-${map.day}T${map.hour === "24" ? "00" : map.hour}:${map.minute}:${map.second}.000Z`
+    );
+
+    const offsetMs = guessUtc.getTime() - asInTz.getTime();
+    return new Date(guessUtc.getTime() + offsetMs);
+  } catch {
+    return new Date(`${dateStr}T${timeStr}:00`);
+  }
+}
+
 function getCampusZonedTime(d: Date, customTz?: string) {
   const tz = customTz || process.env.CAMPUS_TIMEZONE;
   if (!tz) {
@@ -72,7 +113,8 @@ function getCampusZonedTime(d: Date, customTz?: string) {
 export function isWithinAvailabilityWindows(
   start: Date,
   end: Date,
-  windowsJson: string | null | undefined
+  windowsJson: string | null | undefined,
+  timeZone?: string
 ): { valid: boolean; reason?: string } {
   if (!windowsJson || windowsJson === "[]" || windowsJson === "") {
     return { valid: true };
@@ -88,8 +130,8 @@ export function isWithinAvailabilityWindows(
   if (windows.length === 0) return { valid: true };
 
   // For multi-day or single-day: check if start day and end day match window in campus timezone
-  const startZoned = getCampusZonedTime(start);
-  const endZoned = getCampusZonedTime(end);
+  const startZoned = getCampusZonedTime(start, timeZone);
+  const endZoned = getCampusZonedTime(end, timeZone);
 
   if (startZoned.day !== endZoned.day) {
     return {

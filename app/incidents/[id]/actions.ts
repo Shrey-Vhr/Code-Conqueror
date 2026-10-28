@@ -17,30 +17,26 @@ const ResolveIncidentSchema = z.object({
   depositAction: z.enum(["REFUND", "FORFEIT", "NONE"]).default("NONE"),
 });
 
-export async function resolveIncidentAction(formData: FormData) {
-  const session = await requireRole(["MANAGER", "ADMIN"]);
-
-  const rawIncidentId = formData.get("incidentId");
-  const rawResolution = formData.get("resolution");
-  const rawPenaltyType = formData.get("penaltyType");
-  const rawPenaltyCredits = formData.get("penaltyCredits");
-  const rawSuspendDays = formData.get("suspendDays");
-  const rawDepositAction = formData.get("depositAction");
-
-  const parseResult = ResolveIncidentSchema.safeParse({
-    incidentId: rawIncidentId,
-    resolution: rawResolution,
-    penaltyType: rawPenaltyType || "NONE",
-    penaltyCredits: rawPenaltyCredits || 0,
-    suspendDays: rawSuspendDays || 0,
-    depositAction: rawDepositAction || "NONE",
-  });
-
-  if (!parseResult.success) {
-    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid resolution parameters" };
-  }
-
-  const { incidentId, resolution, penaltyType, penaltyCredits, suspendDays, depositAction } = parseResult.data;
+export async function resolveIncident(params: {
+  incidentId: string;
+  resolution: string;
+  penaltyType?: "NONE" | "STRIKE" | "CREDIT_FINE" | "SUSPENSION" | "FORFEIT_DEPOSIT";
+  penaltyCredits?: number;
+  suspendDays?: number;
+  depositAction?: "REFUND" | "FORFEIT" | "NONE";
+  actorId: string;
+  actorName?: string;
+}) {
+  const {
+    incidentId,
+    resolution,
+    penaltyType = "NONE",
+    penaltyCredits = 0,
+    suspendDays = 0,
+    depositAction = "NONE",
+    actorId,
+    actorName = "Manager",
+  } = params;
 
   const incident = await prisma.incident.findUnique({
     where: { id: incidentId },
@@ -52,14 +48,6 @@ export async function resolveIncidentAction(formData: FormData) {
   });
 
   if (!incident) return { success: false, error: "Incident not found" };
-
-  // Authorization check: Manager must belong to resource department (or Campus/Admin)
-  if (!canManageResource(session, incident.resource)) {
-    return {
-      success: false,
-      error: `Forbidden: You are not authorized to manage incidents for ${incident.resource.department} department resources.`,
-    };
-  }
 
   // Target user for penalty is STRICTLY the booker, NEVER the reporter!
   const targetUserId = incident.booking?.userId || null;
@@ -109,8 +97,8 @@ export async function resolveIncidentAction(formData: FormData) {
       penaltyDescription = `Note: No responsible booker associated with incident; ${penaltyType} recorded without user penalty.`;
     }
 
-    // Deposit settlement and Booking completion
-    if (incident.booking) {
+    // Deposit settlement and Booking completion ONLY if booking is RETURNED
+    if (incident.booking && incident.booking.status === "RETURNED") {
       const b = incident.booking;
       let depositSettledText = "";
 
@@ -136,23 +124,20 @@ export async function resolveIncidentAction(formData: FormData) {
         }
       }
 
-      // Transition booking to COMPLETED if not already completed
-      if (b.status !== "COMPLETED") {
-        await tx.booking.update({
-          where: { id: b.id },
-          data: { status: "COMPLETED" },
-        });
+      await tx.booking.update({
+        where: { id: b.id },
+        data: { status: "COMPLETED" },
+      });
 
-        await audit(tx, {
-          actorId: session.id,
-          action: "BOOKING_COMPLETED",
-          entityType: "Booking",
-          entityId: b.id,
-          before: { status: b.status },
-          after: { status: "COMPLETED" },
-          reason: `Incident ${incidentId} resolved; booking marked completed.`,
-        });
-      }
+      await audit(tx, {
+        actorId,
+        action: "BOOKING_COMPLETED",
+        entityType: "Booking",
+        entityId: b.id,
+        before: { status: "RETURNED" },
+        after: { status: "COMPLETED" },
+        reason: `Incident ${incidentId} resolved; returned booking marked completed.`,
+      });
 
       penaltyDescription += depositSettledText;
     }
@@ -163,12 +148,12 @@ export async function resolveIncidentAction(formData: FormData) {
         status: "RESOLVED",
         resolution: resolution.trim(),
         penaltyApplied: penaltyDescription,
-        resolvedById: session.id,
+        resolvedById: actorId,
       },
     });
 
     await audit(tx, {
-      actorId: session.id,
+      actorId,
       action: "INCIDENT_RESOLVED",
       entityType: "Incident",
       entityId: incidentId,
@@ -178,7 +163,7 @@ export async function resolveIncidentAction(formData: FormData) {
         resolution: resolution.trim(),
         penaltyApplied: penaltyDescription,
       },
-      reason: `Incident resolved by Manager ${session.name}`,
+      reason: `Incident resolved by ${actorName}`,
     });
 
     // Notify the target user if applicable
@@ -186,11 +171,72 @@ export async function resolveIncidentAction(formData: FormData) {
       await createNotification(tx, {
         userId: targetUserId,
         type: "INCIDENT_RESOLVED",
-        message: `Incident regarding "${incident.resource.name}" has been resolved by ${session.name}. Resolution: "${resolution.trim()}". Penalty: ${penaltyDescription}`,
+        message: `Incident regarding "${incident.resource.name}" has been resolved by ${actorName}. Resolution: "${resolution.trim()}". Penalty: ${penaltyDescription}`,
         link: `/incidents/${incidentId}`,
       });
     }
 
     return { success: true, incident: updated };
   });
+}
+
+export async function resolveIncidentAction(formData: FormData) {
+  const session = await requireRole(["MANAGER", "ADMIN"]);
+
+  const rawIncidentId = formData.get("incidentId");
+  const rawResolution = formData.get("resolution");
+  const rawPenaltyType = formData.get("penaltyType");
+  const rawPenaltyCredits = formData.get("penaltyCredits");
+  const rawSuspendDays = formData.get("suspendDays");
+  const rawDepositAction = formData.get("depositAction");
+
+  const parseResult = ResolveIncidentSchema.safeParse({
+    incidentId: rawIncidentId,
+    resolution: rawResolution,
+    penaltyType: rawPenaltyType || "NONE",
+    penaltyCredits: rawPenaltyCredits || 0,
+    suspendDays: rawSuspendDays || 0,
+    depositAction: rawDepositAction || "NONE",
+  });
+
+  if (!parseResult.success) {
+    return { success: false, error: parseResult.error.issues[0]?.message || "Invalid resolution parameters" };
+  }
+
+  const { incidentId, resolution, penaltyType, penaltyCredits, suspendDays, depositAction } = parseResult.data;
+
+  const incident = await prisma.incident.findUnique({
+    where: { id: incidentId },
+    include: {
+      resource: true,
+    },
+  });
+
+  if (!incident) return { success: false, error: "Incident not found" };
+
+  // Authorization check: Manager must belong to resource department (or Campus/Admin)
+  if (!canManageResource(session, incident.resource)) {
+    return {
+      success: false,
+      error: `Forbidden: You are not authorized to manage incidents for ${incident.resource.department} department resources.`,
+    };
+  }
+
+  const result = await resolveIncident({
+    incidentId,
+    resolution,
+    penaltyType,
+    penaltyCredits,
+    suspendDays,
+    depositAction,
+    actorId: session.id,
+    actorName: `Manager ${session.name}`,
+  });
+
+  if (result.success) {
+    revalidatePath(`/incidents/${incidentId}`);
+    revalidatePath("/manage");
+  }
+
+  return result;
 }

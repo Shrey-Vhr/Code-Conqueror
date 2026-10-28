@@ -574,8 +574,15 @@ export async function cancelBooking(params: {
         break; // Only promote top eligible candidate
       }
 
-      // Update remaining waitlist positions
-      const remainingWaitlists = candidateWaitlists.slice(1);
+      // Re-index remaining waitlisted bookings for this resource to guarantee consecutive positions
+      const remainingWaitlists = await tx.booking.findMany({
+        where: {
+          resourceId: booking.resourceId,
+          status: "WAITLISTED",
+        },
+        orderBy: [{ priorityScore: "desc" }, { createdAt: "asc" }],
+      });
+
       for (let i = 0; i < remainingWaitlists.length; i++) {
         await tx.booking.update({
           where: { id: remainingWaitlists[i].id },
@@ -679,6 +686,7 @@ export async function returnBooking(params: {
       resource: true,
       user: true,
       conditionReports: true,
+      incidents: true,
     },
   });
 
@@ -790,22 +798,26 @@ export async function returnBooking(params: {
     }
 
     // 4. Deposit handling:
-    // If NO damage -> refund deposit immediately and mark COMPLETED
-    // If damage drafted -> hold deposit until manager resolution, mark RETURNED
-    if (!damageIncidentCreated && booking.depositHeld > 0) {
+    // If NO damage and NO unresolved incidents -> refund deposit immediately and mark COMPLETED
+    // If damage drafted or unresolved incident remains -> hold deposit until manager resolution, mark RETURNED
+    const hasUnresolvedIncidents =
+      damageIncidentCreated ||
+      Boolean(booking.incidents && booking.incidents.some((i) => i.status !== "RESOLVED"));
+
+    if (!hasUnresolvedIncidents && booking.depositHeld > 0) {
       await tx.user.update({
         where: { id: booking.userId },
         data: { credits: { increment: booking.depositHeld } },
       });
     }
 
-    const finalStatus = damageIncidentCreated ? "RETURNED" : "COMPLETED";
+    const finalStatus = hasUnresolvedIncidents ? "RETURNED" : "COMPLETED";
 
     await tx.booking.update({
       where: { id: bookingId },
       data: {
         status: finalStatus,
-        depositHeld: damageIncidentCreated ? booking.depositHeld : 0,
+        depositHeld: hasUnresolvedIncidents ? booking.depositHeld : 0,
       },
     });
 

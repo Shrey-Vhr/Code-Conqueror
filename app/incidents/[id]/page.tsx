@@ -168,7 +168,11 @@ export default async function IncidentDetailPage({
         <ResolutionFormClient
           incidentId={incident.id}
           targetUserName={incident.booking?.user?.name}
-          hasDepositHeld={Boolean(incident.booking && incident.booking.depositHeld > 0)}
+          hasDepositHeld={Boolean(
+            incident.booking &&
+              incident.booking.status === "RETURNED" &&
+              incident.booking.depositHeld > 0
+          )}
           depositAmount={incident.booking?.depositHeld || 0}
         />
       ) : (
