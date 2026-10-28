@@ -30,7 +30,10 @@ export default async function EditResourcePage({
     orderBy: { name: "asc" },
   });
 
-  const existingReq = resource.requirements[0];
+  const existingTrainingId = resource.requirements.find((r) => r.trainingId)?.trainingId || "";
+  const existingRole = resource.requirements.find((r) => r.requiredRole)?.requiredRole || "";
+  const existingDepartment = resource.requirements.find((r) => r.requiredDepartment)?.requiredDepartment || "";
+  const existingMinCredits = resource.requirements.find((r) => r.minCredits !== null)?.minCredits ?? "";
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -258,7 +261,7 @@ export default async function EditResourcePage({
               </label>
               <select
                 name="trainingId"
-                defaultValue={existingReq?.trainingId || ""}
+                defaultValue={existingTrainingId}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">No training required (Open access)</option>
@@ -276,7 +279,7 @@ export default async function EditResourcePage({
               </label>
               <select
                 name="requiredRole"
-                defaultValue={existingReq?.requiredRole || ""}
+                defaultValue={existingRole}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">Any authenticated campus user</option>
@@ -291,7 +294,7 @@ export default async function EditResourcePage({
               </label>
               <select
                 name="requiredDepartment"
-                defaultValue={existingReq?.requiredDepartment || ""}
+                defaultValue={existingDepartment}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="">No department restriction (Open to all)</option>
@@ -309,7 +312,7 @@ export default async function EditResourcePage({
               <input
                 type="number"
                 name="minCredits"
-                defaultValue={existingReq?.minCredits ?? ""}
+                defaultValue={existingMinCredits}
                 placeholder="e.g. 20 (optional)"
                 min={0}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

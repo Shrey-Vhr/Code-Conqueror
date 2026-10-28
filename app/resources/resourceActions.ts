@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 
 const ResourceInputSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
-  type: z.enum(["EQUIPMENT", "SPACE", "COMPUTE", "MAKERSPACE", "VEHICLE", "OTHER"]),
+  type: z.enum(["EQUIPMENT", "SPACE", "TOOL", "COMPUTE", "MAKERSPACE", "VEHICLE", "OTHER"]),
   category: z.string().min(2, "Category is required").max(50),
   department: z.string().min(2, "Department is required").max(50).optional(),
   location: z.string().min(2, "Location is required").max(100),
@@ -81,10 +81,13 @@ export async function createResourceAction(formData: FormData) {
   let availability = defaultAvailability;
   if (data.availabilityWindows) {
     try {
-      JSON.parse(data.availabilityWindows);
+      const parsed = JSON.parse(data.availabilityWindows);
+      if (!Array.isArray(parsed)) {
+        return { success: false, error: "Availability schedule must be a JSON array of daily operating windows." };
+      }
       availability = data.availabilityWindows;
     } catch {
-      availability = defaultAvailability;
+      return { success: false, error: "Invalid availability schedule: Please provide valid JSON format or use default schedule." };
     }
   }
 
@@ -111,16 +114,25 @@ export async function createResourceAction(formData: FormData) {
         },
       });
 
-      // Handle requirements
-      if (data.trainingId || data.requiredRole || data.requiredDepartment || data.minCredits) {
+      // Handle multiple distinct requirements
+      if (data.trainingId) {
         await tx.resourceRequirement.create({
-          data: {
-            resourceId: res.id,
-            trainingId: data.trainingId || null,
-            requiredRole: data.requiredRole || null,
-            requiredDepartment: data.requiredDepartment || null,
-            minCredits: data.minCredits || null,
-          },
+          data: { resourceId: res.id, trainingId: data.trainingId },
+        });
+      }
+      if (data.requiredRole) {
+        await tx.resourceRequirement.create({
+          data: { resourceId: res.id, requiredRole: data.requiredRole },
+        });
+      }
+      if (data.requiredDepartment) {
+        await tx.resourceRequirement.create({
+          data: { resourceId: res.id, requiredDepartment: data.requiredDepartment },
+        });
+      }
+      if (data.minCredits !== null && data.minCredits !== undefined && data.minCredits > 0) {
+        await tx.resourceRequirement.create({
+          data: { resourceId: res.id, minCredits: data.minCredits },
         });
       }
 
@@ -193,10 +205,13 @@ export async function updateResourceAction(id: string, formData: FormData) {
   let availability = existing.availabilityWindows;
   if (data.availabilityWindows) {
     try {
-      JSON.parse(data.availabilityWindows);
+      const parsed = JSON.parse(data.availabilityWindows);
+      if (!Array.isArray(parsed)) {
+        return { success: false, error: "Availability schedule must be a JSON array of daily operating windows." };
+      }
       availability = data.availabilityWindows;
     } catch {
-      // keep existing
+      return { success: false, error: "Invalid availability schedule: Please provide valid JSON format or leave unchanged." };
     }
   }
 
@@ -223,26 +238,46 @@ export async function updateResourceAction(id: string, formData: FormData) {
         },
       });
 
-      // Update requirement: preserve existing requirements unless updated
+      // Update requirements: preserve existing unless explicitly updated
       await tx.resourceRequirement.deleteMany({
         where: { resourceId: id },
       });
 
-      // Check if new requirement fields were submitted or if existing should be retained
-      const trainingId = data.trainingId !== undefined ? data.trainingId : existing.requirements[0]?.trainingId;
-      const requiredRole = data.requiredRole !== undefined ? data.requiredRole : existing.requirements[0]?.requiredRole;
-      const requiredDepartment = data.requiredDepartment !== undefined ? data.requiredDepartment : existing.requirements[0]?.requiredDepartment;
-      const minCredits = data.minCredits !== undefined ? data.minCredits : existing.requirements[0]?.minCredits;
+      const trainingId =
+        data.trainingId !== undefined
+          ? data.trainingId
+          : existing.requirements.find((r) => r.trainingId)?.trainingId;
+      const requiredRole =
+        data.requiredRole !== undefined
+          ? data.requiredRole
+          : existing.requirements.find((r) => r.requiredRole)?.requiredRole;
+      const requiredDepartment =
+        data.requiredDepartment !== undefined
+          ? data.requiredDepartment
+          : existing.requirements.find((r) => r.requiredDepartment)?.requiredDepartment;
+      const minCredits =
+        data.minCredits !== undefined
+          ? data.minCredits
+          : existing.requirements.find((r) => r.minCredits !== null)?.minCredits;
 
-      if (trainingId || requiredRole || requiredDepartment || minCredits) {
+      if (trainingId) {
         await tx.resourceRequirement.create({
-          data: {
-            resourceId: id,
-            trainingId: trainingId || null,
-            requiredRole: requiredRole || null,
-            requiredDepartment: requiredDepartment || null,
-            minCredits: minCredits || null,
-          },
+          data: { resourceId: id, trainingId },
+        });
+      }
+      if (requiredRole) {
+        await tx.resourceRequirement.create({
+          data: { resourceId: id, requiredRole },
+        });
+      }
+      if (requiredDepartment) {
+        await tx.resourceRequirement.create({
+          data: { resourceId: id, requiredDepartment },
+        });
+      }
+      if (minCredits !== null && minCredits !== undefined && minCredits > 0) {
+        await tx.resourceRequirement.create({
+          data: { resourceId: id, minCredits },
         });
       }
 

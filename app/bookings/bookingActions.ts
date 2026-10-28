@@ -47,7 +47,15 @@ const ExtendBookingSchema = z.object({
 const IncidentReportSchema = z.object({
   bookingId: z.string().min(1).nullable().optional(),
   resourceId: z.string().min(1, "Resource ID is required"),
-  type: z.enum(["DAMAGE", "DELAY", "MALFUNCTION", "SAFETY_VIOLATION", "OTHER"]),
+  type: z.enum([
+    "DAMAGE",
+    "DELAY",
+    "MALFUNCTION",
+    "SAFETY_VIOLATION",
+    "MISUSE",
+    "CONFLICT",
+    "OTHER",
+  ]),
   severity: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]),
   description: z.string().min(5, "Description must be at least 5 characters").max(2000),
 });
