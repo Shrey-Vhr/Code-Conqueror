@@ -9,7 +9,8 @@ import { canManageResource } from "@/lib/rbac";
 import { StatusBadge } from "@/components/StatusBadge";
 import { EligibilityChecklist } from "@/components/EligibilityChecklist";
 import { BookingFormClient } from "./BookingFormClient";
-import { format } from "date-fns";
+import { WeeklyAvailabilityGrid } from "./WeeklyAvailabilityGrid";
+import { format, startOfWeek, addDays } from "date-fns";
 
 export default async function ResourceDetailPage({
   params,
@@ -91,6 +92,22 @@ export default async function ResourceDetailPage({
   } catch {
     availabilityWindows = [];
   }
+
+  // Load bookings for weekly availability grid
+  const currentWeekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
+  const gridBookings = await prisma.booking.findMany({
+    where: {
+      resourceId: id,
+      status: { in: ["APPROVED", "CHECKED_IN", "OVERDUE", "PENDING", "WAITLISTED"] },
+      end: { gte: currentWeekStart },
+    },
+    select: {
+      id: true,
+      status: true,
+      start: true,
+      end: true,
+    },
+  });
 
   const daysOfWeek = [
     "Sunday",
@@ -304,6 +321,12 @@ export default async function ResourceDetailPage({
               </Link>
             </div>
           )}
+
+          {/* Weekly Availability Calendar Grid */}
+          <WeeklyAvailabilityGrid
+            availabilityWindows={availabilityWindows}
+            bookings={gridBookings}
+          />
         </div>
       </div>
     </div>
