@@ -7,7 +7,9 @@ import { sweepOverdue } from "@/lib/overdue";
 import { StatusBadge } from "@/components/StatusBadge";
 import { PriorityBreakdown } from "@/components/PriorityBreakdown";
 import { ReviewItemClient } from "./ReviewItemClient";
+import { WaitlistPromoteButton } from "./WaitlistPromoteButton";
 import { manualSweepAction } from "./actions";
+import { AI_DISCLAIMER } from "@/lib/ai";
 import { format, formatDistanceToNow } from "date-fns";
 
 export default async function ManagePage() {
@@ -87,6 +89,21 @@ export default async function ManagePage() {
       },
     },
     orderBy: { createdAt: "desc" },
+  });
+
+  // 5. Waitlisted Bookings Queue
+  const waitlistedBookings = await prisma.booking.findMany({
+    where: {
+      status: "WAITLISTED",
+      resource: departmentFilter,
+    },
+    include: {
+      resource: true,
+      user: {
+        select: { id: true, name: true, email: true, department: true, role: true, credits: true, strikes: true },
+      },
+    },
+    orderBy: [{ priorityScore: "desc" }, { createdAt: "asc" }],
   });
 
   return (
@@ -370,9 +387,12 @@ export default async function ManagePage() {
                     {inc.description}
                   </p>
                   {inc.aiSummary && (
-                    <p className="text-[11px] text-amber-800 bg-amber-50 px-2 py-1 rounded border border-amber-200 font-medium">
-                      ⚠️ AI: {inc.aiSummary}
-                    </p>
+                    <div className="text-[11px] text-amber-900 bg-amber-50 px-2.5 py-1.5 rounded-lg border border-amber-200 font-medium space-y-1">
+                      <span className="inline-block text-[10px] font-bold text-amber-900 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-300">
+                        {AI_DISCLAIMER}
+                      </span>
+                      <p>{inc.aiSummary}</p>
+                    </div>
                   )}
                 </div>
 
@@ -382,6 +402,85 @@ export default async function ManagePage() {
                 >
                   Review & Resolve →
                 </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 5. WAITLISTED REQUESTS SECTION */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-slate-900">
+              Waitlisted Requests Queue
+            </h2>
+            <span className="bg-purple-100 text-purple-800 text-xs font-bold px-2 py-0.5 rounded-full">
+              {waitlistedBookings.length} In Queue
+            </span>
+          </div>
+          <span className="text-xs text-slate-500">
+            Sorted by fairness priority score descending • Auto-promoted upon cancellation
+          </span>
+        </div>
+
+        {waitlistedBookings.length === 0 ? (
+          <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-xs text-slate-400">
+            No reservations currently waiting on waitlists for your department resources.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {waitlistedBookings.map((b) => (
+              <div
+                key={b.id}
+                className="bg-white rounded-2xl border border-purple-200 hover:border-purple-300 p-5 shadow-2xs transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+              >
+                <div className="space-y-1.5 flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs font-bold text-purple-800 bg-purple-100 px-2.5 py-0.5 rounded-full border border-purple-200">
+                      Position #{b.waitlistPosition || 1}
+                    </span>
+                    <span className="font-bold text-slate-900 text-sm">
+                      {b.resource.name}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                      {b.resource.type}
+                    </span>
+                    <StatusBadge status={b.status} />
+                  </div>
+
+                  <p className="text-xs text-slate-600">
+                    Applicant: <strong>{b.user.name}</strong> ({b.user.role} • {b.user.department}) •{" "}
+                    Requested Window:{" "}
+                    <strong className="text-slate-800">
+                      {format(new Date(b.start), "MMM d, HH:mm")} – {format(new Date(b.end), "HH:mm")}
+                    </strong>{" "}
+                    ({formatDistanceToNow(new Date(b.start), { addSuffix: true })})
+                  </p>
+
+                  <div className="flex items-center gap-3 text-xs text-slate-500 flex-wrap">
+                    <span>Purpose: <strong className="text-slate-700">{b.purpose}</strong></span>
+                    <span>•</span>
+                    <PriorityBreakdown score={b.priorityScore} compact={true} />
+                    <span>•</span>
+                    <span>Deposit: <strong>{b.depositHeld} credits</strong></span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0 w-full md:w-auto justify-end pt-3 md:pt-0 border-t md:border-t-0 border-slate-100">
+                  <WaitlistPromoteButton
+                    bookingId={b.id}
+                    resourceName={b.resource.name}
+                    userName={b.user.name}
+                  />
+
+                  <Link
+                    href={`/bookings/${b.id}`}
+                    className="px-3.5 py-1.5 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg text-xs font-semibold transition-colors"
+                  >
+                    Inspect Booking →
+                  </Link>
+                </div>
               </div>
             ))}
           </div>
