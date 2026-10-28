@@ -235,6 +235,20 @@ async function main() {
     },
   });
 
+  await prisma.userCertification.upsert({
+    where: { id: "cert-bob-hpc" },
+    update: {},
+    create: {
+      id: "cert-bob-hpc",
+      userId: bob.id,
+      trainingId: hpcTraining.id,
+      status: "VERIFIED",
+      expiresAt: addDays(new Date(), 365),
+      documentNote: "Completed HPC Slurm workload & multi-GPU training workshop.",
+      verifiedById: frank.id,
+    },
+  });
+
   // Carol has: BSL-2 + HPC
   await prisma.userCertification.upsert({
     where: { id: "cert-carol-bsl2" },
@@ -375,7 +389,6 @@ async function main() {
       status: "ACTIVE",
       availabilityWindows: defaultAvailability,
       trainingRequiredId: hpcTraining.id,
-      requiredRole: "RESEARCHER",
     },
     {
       id: "res-sony-fx6",
@@ -553,19 +566,21 @@ async function main() {
 
   const now = new Date();
 
-  // Booking A: OVERDUE booking (Bob Martinez borrowed oscilloscope 4 hours ago, was supposed to return 1 hour ago)
-  const overdueStart = subHours(now, 4);
-  const overdueEnd = subHours(now, 1);
+  // 1. OVERDUE BOOKING:
+  // Bob has a CHECKED_IN booking on the Oscilloscope that ended 2 hours ago
+  // (so the overdue sweep marks it OVERDUE immediately).
+  const overdueStart = subHours(now, 6);
+  const overdueEnd = subHours(now, 2);
   const bookingOverdue = await prisma.booking.create({
     data: {
-      id: "booking-demo-overdue",
+      id: "booking-demo-bob-overdue",
       userId: bob.id,
       resourceId: "res-keysight-oscilloscope",
       start: overdueStart,
       end: overdueEnd,
       purpose: "COURSEWORK",
       purposeDetails: "Senior capstone power supply transient ripple measurement",
-      status: "OVERDUE",
+      status: "CHECKED_IN",
       priorityScore: 95.0,
       priorityBreakdown: JSON.stringify({
         baseScore: 100,
@@ -581,7 +596,7 @@ async function main() {
     },
   });
 
-  // Add check-in condition report for Bob's overdue booking
+  // Check-in condition report for Bob's overdue booking (rating 4)
   await prisma.conditionReport.create({
     data: {
       bookingId: bookingOverdue.id,
@@ -594,7 +609,7 @@ async function main() {
     },
   });
 
-  // Add DELAY Incident for the overdue booking
+  // Open DELAY incident for Bob's overdue booking
   const delayIncident = await prisma.incident.create({
     data: {
       id: "incident-demo-delay",
@@ -603,60 +618,28 @@ async function main() {
       reporterId: dave.id,
       type: "DELAY",
       severity: "HIGH",
-      description: "Equipment was due back 1 hour ago at Station 4. Another lab team is waiting to calibrate their circuits.",
-      aiSummary: "Delay incident on Keysight Oscilloscope. Borrower Bob Martinez has exceeded the return window by over an hour. Immediate return required.",
+      description: "Equipment was due back 2 hours ago at Station 4. Another lab team is waiting to calibrate their circuits.",
+      aiSummary: "Delay incident on Keysight Oscilloscope. Borrower Bob Martinez has exceeded the return window by 2 hours. Immediate return required.",
       status: "OPEN",
     },
   });
 
-  // Booking B: Active session checked-in right now (Alice with 3D printer)
-  const activeStart = subHours(now, 1);
-  const activeEnd = addHours(now, 3);
-  const bookingActive = await prisma.booking.create({
-    data: {
-      id: "booking-demo-active",
-      userId: alice.id,
-      resourceId: "res-ultimaker-3d",
-      start: activeStart,
-      end: activeEnd,
-      purpose: "COURSEWORK",
-      purposeDetails: "Robotics arm gear mechanism prototype print",
-      status: "CHECKED_IN",
-      priorityScore: 120.0,
-      decisionReason: "Approved for senior robotics capstone project.",
-      reviewerId: dave.id,
-      depositHeld: 10,
-    },
-  });
-
-  await prisma.conditionReport.create({
-    data: {
-      bookingId: bookingActive.id,
-      phase: "CHECK_IN",
-      rating: 5,
-      checklist: JSON.stringify(["Build plate clean and leveled", "Filament loaded smoothly", "No nozzle residue"]),
-      notes: "Machine is in pristine condition. Extruder temperature stable at 210C.",
-      recordedById: alice.id,
-      createdAt: activeStart,
-    },
-  });
-
-  // Booking C & D: WAITLIST COMPETITION!
-  // Same slot tomorrow 14:00 - 16:00 on the Epilog Laser Cutter
-  const tomorrow2PM = new Date(now);
-  tomorrow2PM.setDate(tomorrow2PM.getDate() + 1);
+  // 2. WAITLIST COMPETITION:
+  // Carol has an APPROVED booking on the Laser Cutter for tomorrow 10am-2pm.
+  // Alice has a WAITLISTED booking on the same slot (waitlistPosition: 1, priorityScore: 85).
+  const tomorrow10AM = new Date(now);
+  tomorrow10AM.setDate(tomorrow10AM.getDate() + 1);
+  tomorrow10AM.setHours(10, 0, 0, 0);
+  const tomorrow2PM = new Date(tomorrow10AM);
   tomorrow2PM.setHours(14, 0, 0, 0);
-  const tomorrow4PM = new Date(tomorrow2PM);
-  tomorrow4PM.setHours(16, 0, 0, 0);
 
-  // Booking C: Carol Zhang has APPROVED slot (High priority: 135)
   const bookingApprovedCarol = await prisma.booking.create({
     data: {
       id: "booking-demo-carol-approved",
       userId: carol.id,
       resourceId: "res-laser-cutter",
-      start: tomorrow2PM,
-      end: tomorrow4PM,
+      start: tomorrow10AM,
+      end: tomorrow2PM,
       purpose: "RESEARCH",
       purposeDetails: "Microfluidic chip PMMA substrate etching for NSF grant assay",
       status: "APPROVED",
@@ -667,104 +650,120 @@ async function main() {
     },
   });
 
-  // Booking D: Alice is WAITLISTED for the same slot (priority: 110, position #1)
   const bookingWaitlistedAlice = await prisma.booking.create({
     data: {
       id: "booking-demo-alice-waitlist",
       userId: alice.id,
       resourceId: "res-laser-cutter",
-      start: tomorrow2PM,
-      end: tomorrow4PM,
+      start: tomorrow10AM,
+      end: tomorrow2PM,
       purpose: "COURSEWORK",
       purposeDetails: "Aerospace wing rib section cutting for drone chassis",
       status: "WAITLISTED",
       waitlistPosition: 1,
-      priorityScore: 110.0,
+      priorityScore: 85.0,
       depositHeld: 20,
     },
   });
 
-  // Booking E: Pending review for Manager/Owner review queue
-  const dayAfterTomorrow = addDays(now, 2);
-  dayAfterTomorrow.setHours(10, 0, 0, 0);
-  const dayAfterEnd = new Date(dayAfterTomorrow);
-  dayAfterEnd.setHours(12, 0, 0, 0);
+  // 3. DAMAGE INCIDENT:
+  // Alice has a RETURNED booking on the 3D Printer from 3 days ago.
+  // CHECK_IN report (rating: 5), CHECK_OUT report (rating: 2).
+  // A DAMAGE incident exists (status: OPEN, aiSummary pre-filled).
+  const threeDaysAgoStart = subHours(now, 76);
+  const threeDaysAgoEnd = subHours(now, 72);
 
-  await prisma.booking.create({
+  const bookingReturnedAlice = await prisma.booking.create({
     data: {
-      id: "booking-demo-pending-review",
+      id: "booking-demo-alice-damage-return",
       userId: alice.id,
-      resourceId: "res-podcast-studio",
-      start: dayAfterTomorrow,
-      end: dayAfterEnd,
-      purpose: "CLUB",
-      purposeDetails: "Campus engineering podcast episode 12 recording",
-      status: "PENDING",
-      priorityScore: 105.0,
+      resourceId: "res-ultimaker-3d",
+      start: threeDaysAgoStart,
+      end: threeDaysAgoEnd,
+      purpose: "COURSEWORK",
+      purposeDetails: "Senior robotics arm gear housing prototype print",
+      status: "RETURNED",
+      priorityScore: 110.0,
       depositHeld: 10,
     },
   });
 
-  // Booking F: Completed return with DAMAGE incident draft
-  const yesterdayStart = subHours(now, 26);
-  const yesterdayEnd = subHours(now, 22);
-
-  const returnedBooking = await prisma.booking.create({
-    data: {
-      id: "booking-demo-damaged-return",
-      userId: bob.id,
-      resourceId: "res-sony-fx6",
-      start: yesterdayStart,
-      end: yesterdayEnd,
-      purpose: "COURSEWORK",
-      purposeDetails: "Campus documentary short film shoot",
-      status: "RETURNED",
-      priorityScore: 85.0,
-      depositHeld: 35,
-    },
-  });
-
   await prisma.conditionReport.create({
     data: {
-      bookingId: returnedBooking.id,
+      bookingId: bookingReturnedAlice.id,
       phase: "CHECK_IN",
       rating: 5,
-      checklist: JSON.stringify(["Camera powers on", "Lens front glass clean", "CFexpress cards formatted"]),
-      notes: "All equipment received in mint condition from cage.",
-      recordedById: bob.id,
-      createdAt: yesterdayStart,
+      checklist: JSON.stringify(["Build plate clean and leveled", "Filament loaded smoothly", "No nozzle residue"]),
+      notes: "Machine is in pristine condition. Extruder temperature stable at 210C.",
+      recordedById: alice.id,
+      createdAt: threeDaysAgoStart,
     },
   });
 
   await prisma.conditionReport.create({
     data: {
-      bookingId: returnedBooking.id,
+      bookingId: bookingReturnedAlice.id,
       phase: "CHECK_OUT",
-      rating: 3,
-      checklist: JSON.stringify(["Camera powers on", "CFexpress cards returned"]),
-      notes: "Front UV filter has a visible scratch and lens hood mount is loose.",
-      recordedById: bob.id,
-      createdAt: yesterdayEnd,
+      rating: 2,
+      checklist: JSON.stringify(["Nozzle clogged with residue", "Glass build plate chipped", "Extruder gear jammed"]),
+      notes: "Secondary core clogged with high-temp material; glass print plate has 20mm chip on edge.",
+      recordedById: alice.id,
+      createdAt: threeDaysAgoEnd,
     },
   });
 
   const damageIncident = await prisma.incident.create({
     data: {
       id: "incident-demo-damage",
-      bookingId: returnedBooking.id,
-      resourceId: "res-sony-fx6",
-      reporterId: eve.id,
+      bookingId: bookingReturnedAlice.id,
+      resourceId: "res-ultimaker-3d",
+      reporterId: dave.id,
       type: "DAMAGE",
       severity: "MEDIUM",
-      description: "Condition rating dropped from 5/5 at check-in to 3/5 at return. Scratch observed on 24-70mm lens UV protection filter.",
-      aiSummary: "Damage reported on Sony FX6 Kit. Front filter scratched during student shoot. Hardware functional but replacement filter ($65) recommended. Manager review required.",
-      status: "UNDER_REVIEW",
+      description: "Condition rating dropped from 5/5 at check-in to 2/5 at return. Secondary print core jammed and glass plate chipped.",
+      aiSummary: "Damage reported on UltiMaker S5 3D Printer. Extruder clogged and glass plate damaged during student print. Core replacement ($115) and calibration required before next reservation.",
+      status: "OPEN",
     },
   });
 
-  // Seed sample Notifications
+  // 4. PENDING REVIEW:
+  // A new PENDING booking by Bob on the GPU Workstation for next week (eligible after cert was added).
+  const nextWeekStart = addDays(now, 7);
+  nextWeekStart.setHours(9, 0, 0, 0);
+  const nextWeekEnd = new Date(nextWeekStart);
+  nextWeekEnd.setHours(13, 0, 0, 0);
+
+  const bookingPendingBob = await prisma.booking.create({
+    data: {
+      id: "booking-demo-bob-gpu",
+      userId: bob.id,
+      resourceId: "res-dgx-compute",
+      start: nextWeekStart,
+      end: nextWeekEnd,
+      purpose: "RESEARCH",
+      purposeDetails: "Fine-tuning Llama-3-8B model on campus conversational corpus for thesis",
+      status: "PENDING",
+      priorityScore: 105.0,
+      depositHeld: 30,
+    },
+  });
+
+  // 5. NOTIFICATIONS:
+  // Pre-seeded notifications for alice, bob, carol, dave, eve
   await prisma.notification.createMany({
     data: [
+      {
+        userId: alice.id,
+        type: "WAITLIST_PLACED",
+        message: "You are #1 on the waitlist for 'Epilog Fusion Pro 48 Laser Cutter' for tomorrow 10:00 - 14:00.",
+        link: `/bookings/${bookingWaitlistedAlice.id}`,
+      },
+      {
+        userId: alice.id,
+        type: "INCIDENT_ALERT",
+        message: "A condition report incident was flagged on your UltiMaker 3D Printer reservation.",
+        link: `/incidents/${damageIncident.id}`,
+      },
       {
         userId: bob.id,
         type: "OVERDUE",
@@ -772,35 +771,75 @@ async function main() {
         link: `/bookings/${bookingOverdue.id}`,
       },
       {
-        userId: alice.id,
-        type: "WAITLIST_PLACED",
-        message: "You are #1 on the waitlist for 'Epilog Fusion Pro 48 Laser Cutter' for tomorrow 14:00 - 16:00.",
-        link: `/bookings/${bookingWaitlistedAlice.id}`,
+        userId: bob.id,
+        type: "BOOKING_SUBMITTED",
+        message: "Your booking request for NVIDIA DGX A100 AI Compute Node has been submitted for review.",
+        link: `/bookings/${bookingPendingBob.id}`,
+      },
+      {
+        userId: carol.id,
+        type: "BOOKING_APPROVED",
+        message: "Your booking for 'Epilog Fusion Pro 48 Laser Cutter' for tomorrow 10:00 - 14:00 has been APPROVED.",
+        link: `/bookings/${bookingApprovedCarol.id}`,
       },
       {
         userId: dave.id,
         type: "BOOKING_REVIEW_REQUIRED",
-        message: "New booking request from Alice Johnson for Podcast Studio awaits your review.",
+        message: "New booking request from Bob Martinez for NVIDIA DGX A100 AI Compute Node awaits your review.",
         link: "/manage",
       },
       {
         userId: eve.id,
         type: "INCIDENT_ALERT",
-        message: "Damage incident on Sony FX6 Camera Kit requires your manager review and penalty assessment.",
+        message: "Damage incident on UltiMaker 3D Printer requires manager review and penalty assessment.",
         link: `/incidents/${damageIncident.id}`,
       },
     ],
   });
 
-  // Seed sample Audit Logs
+  // 6. AUDIT LOGS:
+  // For each booking state change above, create an AuditLog entry
   await prisma.auditLog.createMany({
     data: [
       {
-        actorId: frank.id,
-        action: "CERTIFICATION_VERIFIED",
-        entityType: "UserCertification",
-        entityId: "cert-alice-laser",
-        reason: "Completed hands-on safety session with lab tech.",
+        actorId: bob.id,
+        action: "BOOKING_CREATED",
+        entityType: "Booking",
+        entityId: bookingOverdue.id,
+        reason: "User requested reservation for senior capstone ripple measurement.",
+        createdAt: overdueStart,
+      },
+      {
+        actorId: dave.id,
+        action: "BOOKING_APPROVED",
+        entityType: "Booking",
+        entityId: bookingOverdue.id,
+        reason: "Lab owner approved oscilloscope checkout.",
+        createdAt: overdueStart,
+      },
+      {
+        actorId: bob.id,
+        action: "BOOKING_CHECKED_IN",
+        entityType: "Booking",
+        entityId: bookingOverdue.id,
+        reason: "User recorded check-in condition report (Rating: 4/5).",
+        createdAt: overdueStart,
+      },
+      {
+        actorId: dave.id,
+        action: "INCIDENT_REPORTED",
+        entityType: "Incident",
+        entityId: delayIncident.id,
+        reason: "Delay incident opened: equipment overdue by 2 hours.",
+        createdAt: overdueEnd,
+      },
+      {
+        actorId: carol.id,
+        action: "BOOKING_CREATED",
+        entityType: "Booking",
+        entityId: bookingApprovedCarol.id,
+        reason: "NSF biology grant microfluidic substrate etching reservation requested.",
+        createdAt: now,
       },
       {
         actorId: dave.id,
@@ -808,20 +847,71 @@ async function main() {
         entityType: "Booking",
         entityId: bookingApprovedCarol.id,
         reason: "Approved: high-impact biology research priority.",
+        createdAt: now,
+      },
+      {
+        actorId: alice.id,
+        action: "BOOKING_WAITLISTED",
+        entityType: "Booking",
+        entityId: bookingWaitlistedAlice.id,
+        reason: "Resource slot contested. Placed on waitlist at position #1 (Priority score: 85.0).",
+        createdAt: now,
+      },
+      {
+        actorId: alice.id,
+        action: "BOOKING_CREATED",
+        entityType: "Booking",
+        entityId: bookingReturnedAlice.id,
+        reason: "Reservation requested for 3D printer.",
+        createdAt: threeDaysAgoStart,
+      },
+      {
+        actorId: dave.id,
+        action: "BOOKING_APPROVED",
+        entityType: "Booking",
+        entityId: bookingReturnedAlice.id,
+        reason: "Approved by lab technician.",
+        createdAt: threeDaysAgoStart,
       },
       {
         actorId: alice.id,
         action: "BOOKING_CHECKED_IN",
         entityType: "Booking",
-        entityId: bookingActive.id,
+        entityId: bookingReturnedAlice.id,
         reason: "User recorded check-in condition report (Rating: 5/5).",
+        createdAt: threeDaysAgoStart,
       },
       {
-        actorId: null,
-        action: "BOOKING_MARKED_OVERDUE",
+        actorId: alice.id,
+        action: "BOOKING_RETURNED",
         entityType: "Booking",
-        entityId: bookingOverdue.id,
-        reason: "Automated sweep: scheduled return time elapsed.",
+        entityId: bookingReturnedAlice.id,
+        reason: "User checked out equipment. Condition dropped to 2/5.",
+        createdAt: threeDaysAgoEnd,
+      },
+      {
+        actorId: dave.id,
+        action: "INCIDENT_REPORTED",
+        entityType: "Incident",
+        entityId: damageIncident.id,
+        reason: "Damage incident opened: clogged extruder and chipped build plate.",
+        createdAt: threeDaysAgoEnd,
+      },
+      {
+        actorId: bob.id,
+        action: "BOOKING_CREATED",
+        entityType: "Booking",
+        entityId: bookingPendingBob.id,
+        reason: "Submitted DGX compute request after completing HPC certification.",
+        createdAt: now,
+      },
+      {
+        actorId: frank.id,
+        action: "CERTIFICATION_VERIFIED",
+        entityType: "UserCertification",
+        entityId: "cert-bob-hpc",
+        reason: "Completed HPC Slurm workload & multi-GPU training workshop.",
+        createdAt: now,
       },
     ],
   });
