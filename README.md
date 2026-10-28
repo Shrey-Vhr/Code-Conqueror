@@ -12,7 +12,7 @@
 
 ## 📌 Executive Summary & Hackathon Scope
 
-University campuses invest millions in specialized scientific instruments, fabrication facilities, high-performance computing clusters, and multimedia suites. Yet, up to **60% of specialized equipment sits idle outside peak lab hours**, while researchers and student project teams face multi-week backlogs due to departmental silos, opaque scheduling, lack of safety verification, and zero accountability for damage or delays.
+University campuses invest hundreds of millions in specialized scientific instruments, fabrication facilities, high-performance computing clusters, and multimedia suites. Yet, up to **60% of specialized equipment sits idle outside peak lab hours**, while researchers and student project teams face multi-week backlogs due to departmental silos, opaque scheduling, lack of safety verification, and zero accountability for damage or delays.
 
 **CampusShare** solves this systemic problem for Northfield University by delivering an end-to-end platform for cross-departmental equipment and facility sharing featuring:
 
@@ -20,17 +20,54 @@ University campuses invest millions in specialized scientific instruments, fabri
 2. **Anti-Hoarding Fairness Engine**: Priority scoring algorithms (`base 100 - recent usage + waitlist seniority + academic purpose bonus - conduct strikes`) to eliminate equipment hoarding and ensure equitable access.
 3. **Double-Checked Condition Lifecycle**: Mandatory, side-by-side condition inspection reports at check-in and check-out with automatic incident drafting if equipment returns damaged or degraded.
 4. **Automated Incident Adjudication & Overdue Sweeps**: Background sweep engine detecting overdue sessions, auto-drafting delay incidents, and empowering managers to assess strikes, fines, or suspensions.
-5. **Auto-Promoting Priority Waitlist**: Automatic detection of overlapping requests with instant priority-sorted promotion when reservations are cancelled.
+5. **Auto-Promoting Priority Waitlist**: Automatic detection of overlapping requests with instant priority-sorted promotion when reservations are cancelled or rejected.
 6. **Immutable, Tamper-Evident Audit Ledger**: Append-only audit logs recording every state transition, review note, condition inspection, and manager penalty.
 7. **AI-Assisted Operations with Human-in-the-Loop**: Smart natural language resource matching, automated incident root-cause summaries, safety certificate document analysis, and suspicious usage anomaly detection (all with complete heuristic fallbacks).
 
 ---
 
-## 🛠️ Tech Stack & System Architecture
+## 🏛️ System Architecture & Workflow
+
+### Entity-Relationship Architecture
+
+```mermaid
+erDiagram
+    User ||--o{ Booking : "reserves"
+    User ||--o{ UserTraining : "certifies"
+    User ||--o{ Notification : "receives"
+    User ||--o{ AuditLog : "acts_in"
+    Resource ||--o{ Booking : "allocated_in"
+    Resource ||--o{ ResourceRequirement : "mandates"
+    Resource ||--o{ Incident : "suffers"
+    Booking ||--o{ ConditionReport : "documents"
+    Booking ||--o{ Incident : "triggers"
+    UserTraining }o--|| TrainingModule : "completes"
+```
+
+### Complete Booking Lifecycle State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING : Submit Request (Within Quota)
+    [*] --> WAITLISTED : Slot Conflict Detected
+    WAITLISTED --> APPROVED : Auto-Promoted on Cancellation
+    PENDING --> APPROVED : Staff Approval (Deposit Escrowed)
+    PENDING --> REJECTED : Insufficient Justification / Conflict
+    APPROVED --> CHECKED_IN : Check-In Condition Inspection (Rating 1-5)
+    APPROVED --> CANCELLED : Cancel (Deposit Refunded)
+    CHECKED_IN --> RETURNED : Return Condition Checkout
+    CHECKED_IN --> OVERDUE : Automated Cron Sweep
+    OVERDUE --> RETURNED : Late Return & Strike Review
+    RETURNED --> [*] : Deposit Settled
+```
+
+---
+
+## 🛠️ Tech Stack & Key Libraries
 
 - **Framework**: [Next.js 15.3.3](https://nextjs.org/) (App Router, React Server Components, Server Actions, `revalidatePath`)
 - **UI Library**: [React 19.0.0](https://react.dev/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) (`@tailwindcss/postcss`) with responsive, accessible design
+- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) (`@tailwindcss/postcss`) with responsive, accessible layout
 - **Database & ORM**: [Prisma 6.9.0](https://www.prisma.io/) with SQLite (`prisma/dev.db`)
 - **Authentication & RBAC**: Stateless signed JWT cookies (`jose`) with 7-day expiration, `httpOnly`, `sameSite`, and granular RBAC (`STUDENT`, `RESEARCHER`, `STAFF`, `OWNER`, `MANAGER`, `ADMIN`)
 - **Password Security**: [bcryptjs](https://github.com/dcodeIO/bcrypt.js) salted hash encryption
@@ -43,14 +80,14 @@ University campuses invest millions in specialized scientific instruments, fabri
 
 For rapid judging, a **one-click role switcher** is integrated directly into the top navigation bar. You can also sign in manually using any of the seeded credentials:
 
-| Name | Role | Email | Password | Department | Credits | Strikes | Pre-Configured Profile & Persona |
-| :--- | :--- | :--- | :--- | :--- | :---: | :---: | :--- |
-| **Alice Chen** | `STUDENT` | `alice@northfield.edu` | `Alice2024!` | Bioengineering | 100 | 0 | Ideal student: has all safety certifications (Laser, Biosafety Level 2, Micro-Soldering, GPU Cluster). |
-| **Bob Patel** | `STUDENT` | `bob@northfield.edu` | `Bob2024!` | Mechanical Eng | 45 | 1 | Edge case student: missing biosafety cert (gated from confocal microscope), has an overdue booking and open damage incident. |
-| **Dr. Carol Danvers** | `RESEARCHER` | `carol@northfield.edu` | `Carol2024!` | Physics / Quantum | 250 | 0 | High-priority academic researcher: receives research multiplier (+25 priority bonus) in waitlists. |
-| **Dave Miller** | `OWNER` / `STAFF` | `dave@northfield.edu` | `Dave2024!` | Engineering Ops | 150 | 0 | Equipment custodian & lab owner: manages maker spaces and electron microscopes; reviews and approves pending reservations. |
-| **Eve Torres** | `MANAGER` | `eve@northfield.edu` | `Eve2024!` | Campus Space Admin | 200 | 0 | Department manager: resolves incident disputes, reviews AI summaries, and assesses penalties/strikes. |
-| **Frank Wright** | `ADMIN` | `frank@northfield.edu` | `Frank2024!` | Provost Office | 500 | 0 | Campus administrator: verifies pending safety credentials, inspects suspicious usage anomalies, and monitors global audit logs. |
+| Role | Email | Password | Department | Credits | Strikes | Pre-Configured Profile & Persona |
+| :--- | :--- | :--- | :--- | :---: | :---: | :--- |
+| **STUDENT** | `alice@northfield.edu` | `Alice2024!` | Bioengineering | 100 | 0 | Ideal student: has all safety certifications (Laser, Biosafety Level 2, Micro-Soldering, GPU Cluster), active 3D printer session. |
+| **STUDENT** | `bob@northfield.edu` | `Bob2024!` | Mechanical Eng | 45 | 1 | Edge case student: missing biosafety cert (gated from confocal microscope), has an overdue booking and open damage incident. |
+| **RESEARCHER** | `carol@northfield.edu` | `Carol2024!` | Physics / Quantum | 250 | 0 | High-priority academic researcher: receives research multiplier (+25 priority bonus) in waitlists. |
+| **OWNER / STAFF** | `dave@northfield.edu` | `Dave2024!` | Engineering Ops | 150 | 0 | Equipment custodian & lab owner: manages maker spaces and electron microscopes; reviews and approves pending reservations. |
+| **MANAGER** | `eve@northfield.edu` | `Eve2024!` | Campus Space Admin | 200 | 0 | Department manager: resolves incident disputes, reviews AI summaries, and assesses penalties/strikes. |
+| **ADMIN** | `frank@northfield.edu` | `Frank2024!` | Provost Office | 500 | 0 | Campus administrator: verifies pending safety credentials, inspects suspicious usage anomalies, and monitors global audit logs. |
 
 ---
 
@@ -63,7 +100,8 @@ For rapid judging, a **one-click role switcher** is integrated directly into the
 ### 2. Installation
 ```bash
 # Clone and enter the repository
-cd F:/Code-Conqueror
+git clone https://github.com/Shrey-Vhr/Code-Conqueror.git
+cd Code-Conqueror
 
 # Install dependencies
 npm install
@@ -71,12 +109,10 @@ npm install
 
 ### 3. Database Initialization & Seeding
 ```bash
-# Push schema to SQLite database
-npm run db:push
-
-# Seed with 12 Northfield University resources, 6 demo accounts, trainings, and active bookings
-npm run db:seed
+# Push schema and seed realistic lifecycle demo data in one step
+npm run db:reset
 ```
+*Seeds 12 campus resources, 6 personas, 4 certifications, 6 active/overdue/waitlisted bookings, condition reports, incidents, and audit events.*
 
 ### 4. Run Test Suite
 ```bash
@@ -98,15 +134,15 @@ npm start
 
 ---
 
-## 🏆 Judge Walkthrough Script: The Complete Verification Journey
+## 🏆 Judge Walkthrough Script: The 12-Step Verification Journey
 
 Follow this 12-step path to experience the complete CampusShare lifecycle:
 
-### Step 1: Login & Navigation
+### Step 1: Login & Role Switching
 1. Navigate to `http://localhost:3000/login`.
 2. Notice the **One-Click Quick Login** cards for all 6 university personas.
 3. Click **Alice Chen (Student)** to instantly authenticate.
-4. Observe the persistent **Judge Switcher** in the top navigation bar, allowing instant switching between personas at any moment.
+4. Observe the persistent **Judge Switcher** in the top navigation bar, allowing instant switching between personas at any moment without re-entering passwords.
 
 ### Step 2: Resource Discovery & Eligibility Filtering
 1. Go to **Equipment & Spaces** (`/resources`).
@@ -157,67 +193,95 @@ Follow this 12-step path to experience the complete CampusShare lifecycle:
 5. Rate initial condition as **5 / 5 (Pristine)** and submit.
 6. The booking status immediately updates to **`CHECKED_IN`**, recording the timestamp and audit entry.
 
-### Step 7: Session Return & Automatic Damage Incident Drafting
+### Step 7: Session Extension & ACID Conflict Validation
+1. While still on Alice's checked-in booking (`/bookings/[id]`), click **Extend Session +**.
+2. Select **+1 Hour** or **+2 Hours**.
+3. Click **Confirm Extension**. The system checks schedule conflicts and the 20-hour weekly cap in an ACID transaction, pushing the reservation end time and logging the change in the audit ledger.
+
+### Step 8: Session Return & Automatic Damage Incident Drafting
 1. Under **Session Controls**, click **Complete Return & Check-Out**.
 2. Simulate finding degraded equipment:
    - Uncheck *"Operating surface clean and sanitized"*.
    - Rate return condition as **3 / 5 (Minor Wear / Issues)**.
    - Add return note: *"Resin vat had dried residue; calibration lever feels stiff."*
-3. Click **Submit Return Report**.
+3. Click **Complete Return & Release Deposit**.
 4. The system detects a condition drop (`5/5 -> 3/5`) and **automatically drafts a `DAMAGE` incident** with an AI root-cause analysis!
 5. The session moves to **`COMPLETED`** and links to the newly generated incident.
 
-### Step 8: Manager Adjudication & Conduct Penalties
+### Step 9: Manager Adjudication & Conduct Penalties
 1. Switch to **Eve Torres (Manager)** in the navbar.
 2. In the top navigation, click **Manage Queue** (`/manage`) and scroll to **Active Incident Reports**.
 3. Click **Review & Adjudicate** on the auto-drafted damage incident (`/incidents/[id]`).
-4. Read the **AI Incident Summary** analyzing severity, damage cause, and recommended response.
+4. Read the **AI Incident Summary** analyzing severity, damage cause, and recommended response with the required `⚠️ AI suggestion — requires human review` disclaimer.
 5. In the **Manager Adjudication** form:
    - Resolution Details: *"User notified regarding vat cleaning protocols. Maintenance replaced calibration pin."*
    - Penalty Action: Select **"Issue Conduct Strike (+1 Strike)"** or **"Fine / Deduct Account Credits (20 Credits)"**.
 6. Submit decision. The incident status updates to **`RESOLVED`**, the user's profile is penalized, and an immutable audit log is generated.
 
-### Step 9: Overdue Session Sweep & Automatic Delay Incidents
+### Step 10: Overdue Session Sweep & Automatic Delay Incidents
 1. Remain as **Eve Torres** on `/manage`.
 2. Observe the banner: **"Overdue Booking Sweep"**.
 3. Click **Run Overdue Sweep Now** (or trigger `/api/cron` via curl).
 4. The system scans all checked-in bookings whose end time has passed (such as Bob Patel's seeded booking), transitions them to **`OVERDUE`**, and automatically drafts a **`DELAY` incident** notifying both user and lab manager.
 
-### Step 10: Reservation Cancellation & Automatic Top Waitlist Promotion
-1. Switch to **Alice Chen** and go to her bookings.
+### Step 11: Reservation Cancellation & Automatic Top Waitlist Promotion
+1. Switch to **Alice Chen** and go to her bookings (`/bookings`).
 2. Locate a pending or approved booking that has waitlisted competitors.
 3. Click **Cancel Reservation**.
 4. Enter cancellation reason: *"Lab schedule moved to next week."*
 5. Submit cancellation.
 6. The system refunds Alice's deposit in full, marks the booking **`CANCELLED`**, and **automatically queries the waitlist, selects the highest priority candidate (Carol Danvers), and auto-promotes her reservation to `APPROVED`!**
 
-### Step 11: Admin Safety Credential Verification & Anomaly Detection
-1. Switch to **Frank Wright (Admin)** in the navbar.
-2. Click **Admin Console** (`/admin`).
-3. Under **Certification Verification**:
-   - Review pending safety submissions (e.g., student workshop transcripts).
-   - Inspect the **AI Compliance Verdict** checking document notes against university safety regulations.
-   - Click **Approve Credential**.
-4. Click the **Suspicious Usage Anomaly Scanner** tab:
-   - Review users flagged with high cancellation rates or strike accumulation.
-   - Inspect the AI explanation of potential equipment hoarding or scheduling abuse.
-5. Click the **Global Audit Ledger** tab to view the tamper-evident record of all system events.
+### Step 12: User Profile, Weekly 20h Quota & Notification Center
+1. Switch to **Alice Chen** or **Bob Patel**.
+2. Open **User Profile** (`/profile`):
+   - Review credits balance and escrow breakdown.
+   - View conduct strikes indicator (Bob has 1 strike; 3 strikes triggers suspension).
+   - Review the **Weekly Hours Quota Bar** (20-hour anti-hoarding limit).
+   - Review active safety certifications and recent booking history.
+3. Click the **Notification Bell** in the top navigation bar, and select **Open Notifications Center** (`/notifications`).
+4. Filter notifications by tab: *All*, *Unread*, *Bookings*, *Alerts & Incidents*, *Waitlist*.
+5. Test single **"Mark as read"** or bulk **"Mark all as read"**.
 
 ---
 
-## 🔬 Core Algorithms & Business Logic
+## 🔒 Role-Based Access Control (RBAC) Matrix
+
+| Capability / Action | Student | Researcher | Owner / Staff | Dept Manager | Facilities Admin |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| Browse Catalog & Check Weekly Availability Grid | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Request Equipment Reservation | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Perform Check-In / Return Condition Inspection | Booker | Booker | Booker + Owned | Booker + Dept | Global |
+| Extend Active Session Duration | Booker | Booker | Booker + Owned | Booker + Dept | Global |
+| Report Physical Incident / Broken Equipment | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Cancel Own Reservation (Refund Deposit) | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Review & Approve / Reject Booking Requests | ❌ | ❌ | ✅ Owned Assets | ✅ Dept Assets | Global |
+| Manually Promote Waitlisted Candidate | ❌ | ❌ | ✅ Owned Assets | ✅ Dept Assets | Global |
+| Adjudicate Incidents (Issue Strikes / Fines) | ❌ | ❌ | ❌ | ✅ Dept Assets | Global |
+| Run Automated Overdue Sweeps (`/api/cron`) | ❌ | ❌ | ❌ | ✅ Dept Staff | Global |
+| Verify & Approve Safety Certifications | ❌ | ❌ | ❌ | ❌ | Global Admin |
+| Run AI Fair-Use Anomaly Scanner | ❌ | ❌ | ❌ | ❌ | Global Admin |
+| Inspect Global Immutable Audit Ledger | ❌ | ❌ | ❌ | ❌ | Global Admin |
+
+---
+
+## 🔬 Core Algorithms & Mathematical Formulations
 
 ### 1. Fairness Priority Score Formula
 Located in `lib/fairness.ts`:
+
 $$\text{Priority Score} = \text{Base (100)} - (\text{Hours Used Last 30d} \times 2.5) + \text{Waitlist Seniority} + \text{Purpose Bonus} - (\text{Strikes} \times 25) + \text{Role Bonus}$$
+
 - **Purpose Bonuses**:
-  - `RESEARCH` (Dissertation / Grant): **+25 points**
-  - `COURSEWORK` (Graded Class Project): **+20 points**
-  - `CLUB` (Recognized Student Organization): **+5 points**
+  - `RESEARCH` (Dissertation / Grant / Publications): **+25 points**
+  - `COURSEWORK` (Graded Capstone / Class Project): **+20 points**
+  - `CLUB` (Recognized Student Engineering Organization): **+5 points**
   - `PERSONAL`: **0 points**
 - **Conduct Penalties**:
   - Each active conduct strike deducts **25 points**.
   - 3 active strikes trigger automated account suspension.
+- **Anti-Hoarding Cap**:
+  - No user may hold more than 20 hours of approved bookings across any rolling 7-day period.
 
 ### 2. Multi-Tier Eligibility Gate
 Located in `lib/eligibility.ts`:
@@ -239,9 +303,34 @@ When any booking is cancelled or rejected, the system executes an atomic transac
 
 ---
 
-## 🧪 Automated Test Suite (Vitest)
+## 🤖 AI Human-in-the-Loop Contract
 
-All core state machines, eligibility rules, fairness scores, and conflict algorithms are covered by 18 automated unit and integration tests:
+All AI features in CampusShare follow strict **Human-in-the-Loop (HITL)** safety protocols:
+- **Exact Contract Disclaimer**: Every AI-generated output is accompanied by the centralized constant:
+  ```ts
+  export const AI_DISCLAIMER = "⚠️ AI suggestion — requires human review";
+  ```
+- **Advisory Only**: AI suggestions never unilaterally debit user deposits, assign strikes, or lock accounts.
+- **Zero-Dependency Heuristic Fallback**: If OpenAI API keys are not supplied in `.env`, CampusShare transparently falls back to deterministic heuristic algorithms (keyword matching, structural damage heuristics, and regex certificate parsers) ensuring zero setup friction.
+
+---
+
+## 💻 NPM Scripts Reference
+
+| Command | Description |
+| :--- | :--- |
+| `npm run dev` | Starts Next.js development server on `http://localhost:3000` with hot-module reload |
+| `npm test` | Runs the full Vitest automated test suite (18 unit, state, and fairness tests) |
+| `npm run build` | Compiles production Next.js application, verifying strict TypeScript types (14 routes) |
+| `npm start` | Launches the built production server |
+| `npm run db:push` | Synchronizes the Prisma schema directly to `prisma/dev.db` |
+| `npm run db:seed` | Seeds realistic campus scenarios, demo accounts, and lifecycle bookings |
+| `npm run db:reset` | Resets SQLite database schema and repopulates seed records (`db:push && db:seed`) |
+| `npm run cron` | Manually triggers the overdue sweeps and auto-promotion endpoint (`/api/cron`) |
+
+---
+
+## 🧪 Automated Test Suite (Vitest)
 
 ```bash
 npm test
@@ -273,13 +362,11 @@ npm test
 
 ---
 
-## 🔒 Security, Audit & Safety Standards
+## 🔮 Known Limitations & Production Roadmap
 
-- **Stateless JWT Sessions**: Signed using HMAC-SHA256 via `jose`, stored in `httpOnly`, `sameSite=lax`, `secure` cookies.
-- **Role-Based Access Control (RBAC)**: Strict permission boundaries verified on all server actions and API routes (`requireAuth`, `requireRole`, `canManageResource`).
-- **Append-Only Audit Ledger**: Every booking creation, approval, rejection, check-in, return, cancellation, and incident resolution writes an immutable record with before/after state diffs and actor attribution.
-- **Deposit Escrow**: Deposits are held at booking creation and returned only upon successful, undamaged return.
-- **AI Safety & Human Oversight**: AI tools are advisory; all suggestions feature clear visual indicators (`⚠️ AI suggestion — requires human review`) and require explicit administrator or manager approval.
+1. **Database Concurrency**: The hackathon prototype uses SQLite with ACID transactions for zero-configuration local evaluation. In a multi-campus deployment, this would migrate to PostgreSQL with row-level locks and read-replicas.
+2. **Physical RFID / NFC Access Control**: Check-in currently records digital checklist inspections and photo evidence URLs. Hardware IoT badges could unlock laboratory doors via Webhooks.
+3. **Multi-Channel Notification Dispatch**: Notifications are delivered in real-time through the in-app Notifications Center. Production would integrate SendGrid email and Twilio SMS for 15-minute overdue return reminders.
 
 ---
 
