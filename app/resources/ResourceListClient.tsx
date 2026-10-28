@@ -5,6 +5,7 @@ import Link from "next/link";
 import { aiSearchResources } from "./actions";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Badge } from "@/components/Badge";
+import { AI_DISCLAIMER } from "@/lib/ai";
 
 interface ResourceItem {
   id: string;
@@ -132,7 +133,7 @@ export function ResourceListClient({
             </span>
           </div>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-900 border border-amber-300">
-            ⚠️ AI suggestion — requires human review
+            {AI_DISCLAIMER}
           </span>
         </div>
 
@@ -322,7 +323,19 @@ export function ResourceListClient({
                       {res.department}
                     </span>
                   </div>
-                  <div className="absolute top-3 right-3">
+                  <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                    {userRole && (
+                      <span
+                        className={`text-[11px] font-bold px-2 py-0.5 rounded-md shadow-2xs backdrop-blur-xs flex items-center gap-1 ${
+                          res.isEligible
+                            ? "bg-emerald-600/90 text-white"
+                            : "bg-rose-600/90 text-white"
+                        }`}
+                        title={res.isEligible ? "You are eligible to book" : res.missingCerts[0] || "Prerequisites needed"}
+                      >
+                        {res.isEligible ? "Eligible ✅" : "Ineligible ❌"}
+                      </span>
+                    )}
                     <StatusBadge status={res.status} />
                   </div>
                 </div>
