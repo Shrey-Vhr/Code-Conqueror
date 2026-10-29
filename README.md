@@ -13,6 +13,22 @@ Built for the *Unlock Underused Equipment and Spaces* challenge. The prototype s
 
 ---
 
+## Screenshots
+
+**Discover** — search, filters and plain-language AI matching, clearly labelled as a suggestion.
+
+![Resource registry with search, filters and the AI matcher](docs/screenshots/01-resource-registry.webp)
+
+**Check eligibility before requesting** — what you meet, and exactly what is still missing.
+
+![Resource page showing the eligibility checklist and the booking form](docs/screenshots/02-eligibility-and-booking.webp)
+
+**See the cost, the schedule and your fairness score up front** — weekly availability, credits and deposit, and the priority score that ranks competing requests.
+
+![Weekly availability calendar, cost summary and fairness priority score](docs/screenshots/03-availability-cost-fairness.webp)
+
+---
+
 ## Run it in two minutes
 
 You need Node.js 18.18+ (20+ recommended) and npm.
