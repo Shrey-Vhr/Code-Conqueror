@@ -249,14 +249,14 @@ export default async function AdminPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold uppercase tracking-wider text-rose-800 bg-rose-100 px-2.5 py-0.5 rounded border border-rose-200">
+          <span className="text-xs font-bold uppercase tracking-wider text-rose-800 bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
             Dean of Facilities & Campus Administration
           </span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1.5">
           Campus Governance & Resource Intelligence
         </h1>
-        <p className="text-sm text-slate-500 mt-1">
+        <p className="text-xs sm:text-sm text-slate-500 mt-1">
           Cross-departmental oversight, training credential verification, automated fair-use monitoring, policy settings, and global audit verification.
         </p>
       </div>

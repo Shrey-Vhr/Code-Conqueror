@@ -52,7 +52,7 @@ export function ReviewItemClient({ bookingId }: ReviewItemClientProps) {
             setShowInput("APPROVE");
             setReason("Approved for academic and departmental schedule priority.");
           }}
-          className="px-3.5 py-1.5 bg-secondary hover:bg-secondary-hover text-addon rounded-lg text-xs font-bold shadow-2xs transition-colors cursor-pointer border border-secondary"
+          className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-full text-xs font-bold shadow-md shadow-emerald-500/20 transition-all cursor-pointer hover:-translate-y-0.5"
         >
           Approve Request
         </button>
@@ -61,7 +61,7 @@ export function ReviewItemClient({ bookingId }: ReviewItemClientProps) {
             setShowInput("REJECT");
             setReason("Slot reserved for departmental research cohort or maintenance.");
           }}
-          className="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+          className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 rounded-full text-xs font-bold transition-all cursor-pointer hover:-translate-y-0.5"
         >
           Reject
         </button>
@@ -70,7 +70,7 @@ export function ReviewItemClient({ bookingId }: ReviewItemClientProps) {
   }
 
   return (
-    <div className="w-full mt-3 p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+    <div className="w-full mt-3 p-4 bg-slate-50/90 rounded-2xl border border-slate-200 space-y-3 shadow-2xs">
       <div className="flex items-center justify-between">
         <span className="text-xs font-bold text-slate-800">
           Mandatory Review Note ({showInput === "APPROVE" ? "Approval" : "Rejection"}):
@@ -80,7 +80,7 @@ export function ReviewItemClient({ bookingId }: ReviewItemClientProps) {
             setShowInput(null);
             setError(null);
           }}
-          className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
+          className="text-xs text-slate-400 hover:text-slate-600 font-semibold cursor-pointer"
         >
           Cancel
         </button>
@@ -93,15 +93,17 @@ export function ReviewItemClient({ bookingId }: ReviewItemClientProps) {
         value={reason}
         onChange={(e) => setReason(e.target.value)}
         placeholder="Reason will be saved to audit ledger and notified to user..."
-        className="w-full px-3 py-2 text-xs bg-white rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full px-4 py-2 text-xs bg-white rounded-full border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-400 font-medium"
       />
 
       <div className="flex justify-end gap-2">
         <button
           onClick={() => handleAction(showInput)}
           disabled={isLoading}
-          className={`px-4 py-1.5 rounded-lg text-xs font-bold shadow-2xs cursor-pointer disabled:opacity-50 ${
-            showInput === "APPROVE" ? "bg-secondary hover:bg-secondary-hover text-addon border border-secondary" : "bg-rose-700 hover:bg-rose-800 text-white"
+          className={`px-5 py-2 rounded-full text-xs font-bold shadow-md transition-all cursor-pointer disabled:opacity-50 hover:-translate-y-0.5 ${
+            showInput === "APPROVE"
+              ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/20"
+              : "bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-rose-500/20"
           }`}
         >
           {isLoading ? "Submitting..." : `Confirm ${showInput === "APPROVE" ? "Approval" : "Rejection"}`}
