@@ -94,7 +94,7 @@ export function PriorityBreakdown({
 
         {parsed.purposeBonus > 0 && (
           <div className="flex justify-between text-slate-600">
-            <span>Purpose Bonus ({parsed.purpose})</span>
+            <span>Purpose Bonus{parsed.purpose ? ` (${parsed.purpose})` : ""}</span>
             <span className="font-mono font-bold text-emerald-600">
               +{parsed.purposeBonus}
             </span>
@@ -103,7 +103,7 @@ export function PriorityBreakdown({
 
         {parsed.roleBonus > 0 && (
           <div className="flex justify-between text-slate-600">
-            <span>Role Weighting ({parsed.role})</span>
+            <span>Role Weighting{parsed.role ? ` (${parsed.role})` : ""}</span>
             <span className="font-mono font-bold text-emerald-600">
               +{parsed.roleBonus}
             </span>
@@ -121,7 +121,7 @@ export function PriorityBreakdown({
 
         {parsed.strikesPenalty > 0 && (
           <div className="flex justify-between text-slate-600">
-            <span>Strikes Penalty ({parsed.strikes} strike{parsed.strikes > 1 ? "s" : ""})</span>
+            <span>Strikes Penalty{parsed.strikes ? ` (${parsed.strikes} strike${parsed.strikes > 1 ? "s" : ""})` : ""}</span>
             <span className="font-mono font-bold text-rose-600">
               -{parsed.strikesPenalty}
             </span>

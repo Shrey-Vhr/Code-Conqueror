@@ -264,7 +264,7 @@ export default async function AdminPage() {
       bookedHours30d += (b.end.getTime() - b.start.getTime()) / (1000 * 60 * 60);
     }
   }
-  const utilizationRate = openHours30d > 0 ? Math.min(100, Math.round((bookedHours30d / openHours30d) * 100)) : 0;
+  const utilizationRate = openHours30d > 0 ? Math.min(100, Math.round((bookedHours30d / openHours30d) * 1000) / 10) : 0;
 
   const topResources = Object.entries(topResourceBookings)
     .sort((a, b) => b[1] - a[1])

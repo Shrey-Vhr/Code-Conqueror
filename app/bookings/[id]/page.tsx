@@ -341,12 +341,12 @@ export default async function BookingDetailPage({
       {/* Priority Score Breakdown in Soft Pastel */}
       <PriorityBreakdown breakdown={booking.priorityBreakdown} score={booking.priorityScore} />
 
-      {/* Immutable Audit Log Timeline */}
+      {/* Audit Log Timeline */}
       <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div>
             <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
-              Immutable Audit Ledger & Lifecycle History
+              Audit Ledger & Lifecycle History
             </h2>
             <p className="text-xs text-slate-500">
               Append-only state log recorded inside transactional database commits.

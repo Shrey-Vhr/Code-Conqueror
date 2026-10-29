@@ -73,7 +73,7 @@ export default async function HomePage() {
             <div className="text-center p-3 border-l border-slate-100">
               <span className="text-3xl sm:text-4xl font-semibold text-emerald-600 block">100%</span>
               <span className="text-xs font-medium text-slate-500 uppercase tracking-wide mt-1 block">Audit Traceability</span>
-              <span className="text-[11px] text-slate-400">Immutable lifecycle records</span>
+              <span className="text-[11px] text-slate-400">Append-only lifecycle records</span>
             </div>
           </div>
         </div>

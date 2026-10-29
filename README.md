@@ -27,6 +27,30 @@ Built for the *Unlock Underused Equipment and Spaces* challenge. The prototype s
 
 ![Weekly availability calendar, cost summary and fairness priority score](docs/screenshots/03-availability-cost-fairness.webp)
 
+**Owner stays in control** — the review queue shows eligibility, conflicts and the priority score. Approving or rejecting needs a written reason.
+
+![Owner review queue with eligibility snapshot, conflict analysis and priority score](docs/screenshots/04-owner-review-queue.jpg)
+
+**Condition record at check-in** — who, what state, and the inspection checklist, with the return inspection pending.
+
+![Booking page with the check-in condition report and pending return inspection](docs/screenshots/05-booking-condition-report.jpg)
+
+**Every score and decision is explained and logged** — the full priority breakdown, then an append-only history of who did what and why.
+
+![Fairness score breakdown and the audit ledger](docs/screenshots/06-fairness-breakdown-and-audit.jpg)
+
+**Incidents** — a damage report with an AI summary that is labelled as a suggestion only.
+
+![Damage incident with AI summary requiring human review](docs/screenshots/07-incident-with-ai-summary.jpg)
+
+**A manager decides** — resolution notes, a penalty choice, and whether the held deposit is refunded or forfeited.
+
+![Manager adjudication form with penalty and deposit settlement](docs/screenshots/08-manager-resolution.jpg)
+
+**Verification with AI as an advisor, not the decider** — the AI pre-screens a safety certificate and here even recommends rejecting it; an administrator makes the final call.
+
+![Admin credential review with an AI recommendation and Verify or Reject buttons](docs/screenshots/09-admin-credential-review.jpg)
+
 ---
 
 ## Run it in two minutes
@@ -82,7 +106,7 @@ This follows the ten steps in the challenge. Pick the account from the **Switch 
 | :-: | :--- | :--- |
 | 1 | Owner lists a resource | As **Dave**: *Resources → List New Resource*. Fill in the details, opening hours, deposit, limits and any required training, then save. |
 | 2 | User discovers it and checks eligibility | As **Bob**: *Resources*, try the AI match box ("laser cut acrylic"), open **Epilog Fusion Pro 48 Laser Cutter**. The eligibility checklist shows his certification is still pending. |
-| 3 | Verification | As **Frank**: *Admin → Credentials Review*. Read the AI pre-screen (advisory only) and press **Verify & Grant** on Bob's certificate. |
+| 3 | Verification | As **Frank**: *Admin → Credentials Review*. Read the AI pre-screen (advisory only; with an OpenAI key it may even suggest rejecting) and decide: **Verify & Grant** or **Reject** on Bob's certificate. |
 | 4 | User requests a booking | As **Bob**: reopen the laser cutter. It now says "Fully Eligible". Choose a weekday slot of 2 hours or less and press **Request Booking**. The cost, deposit and fairness score breakdown are shown first. |
 | 5 | Owner reviews | As **Dave**: *Manage → Booking Approval Queue*. Compare eligibility, conflicts and priority score, then approve (a decision note is required). Rejecting also needs a reason. |
 | 6 | Approved, rejected or waitlisted | Request the same slot as **Carol's** existing booking to see the waitlist, with a position and an explained score. |
