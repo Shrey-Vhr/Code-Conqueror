@@ -6,13 +6,17 @@
 
 Built for the *Unlock Underused Equipment and Spaces* challenge.
 
+### 🌐 Live demo: [campusshare-rpjx.onrender.com](https://campusshare-rpjx.onrender.com)
+
+<sub>Sign in with any [demo account](#demo-accounts). The free host sleeps when idle, so the first load can take up to a minute; the demo data resets after a restart.</sub>
+
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Prisma](https://img.shields.io/badge/Prisma-6-2D3748?logo=prisma)](https://www.prisma.io/)
 [![Tests](https://img.shields.io/badge/tests-26%20passing-4c8f6a)](#tests)
 
-[Quick start](#quick-start) · [5-minute tour](#take-the-tour) · [Screenshots](#screenshots) · [How it works](#how-it-works) · [Brief → code](#how-it-meets-the-brief)
+[Live demo](https://campusshare-rpjx.onrender.com) · [Quick start](#quick-start) · [5-minute tour](#take-the-tour) · [Screenshots](#screenshots) · [How it works](#how-it-works) · [Brief → code](#how-it-meets-the-brief)
 
 </div>
 
@@ -41,7 +45,9 @@ One campus ("Northfield University") shares its resources end to end, with a per
 
 ## Quick start
 
-Needs **Node.js 18.18+** and npm. No API key, database server or other setup.
+**Fastest:** open the [live demo](https://campusshare-rpjx.onrender.com) and pick a demo account.
+
+**Or run it locally.** Needs **Node.js 18.18+** and npm. No API key, database server or other setup.
 
 ```bash
 git clone https://github.com/Shrey-Vhr/Code-Conqueror.git
