@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CampusShare — Product Document</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm 15mm; }
+  :root {
+    --ink: #26302b; --muted: #5d6e64; --line: #d6e0d9; --soft: #eef4f0; --soft2: #f6f9f7;
+    --brand: #3a5f55; --brand2: #467568; --accent: #6d5c84; --warn: #997433; --rose: #a2564b;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: "Segoe UI", Inter, Arial, sans-serif; color: var(--ink); font-size: 10.6pt; line-height: 1.5; margin: 0; }
+  h1, h2, h3, h4 { color: var(--brand); line-height: 1.25; margin: 0; }
+  h2 { font-size: 17pt; margin: 0 0 3mm; padding-bottom: 2mm; border-bottom: 2px solid var(--line); }
+  h3 { font-size: 12.5pt; margin: 5mm 0 2mm; }
+  h4 { font-size: 10.8pt; margin: 3mm 0 1mm; color: var(--ink); }
+  p { margin: 0 0 2.6mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 5.5mm; }
+  li { margin-bottom: 1mm; }
+  section { break-before: page; }
+  section.flow { break-before: auto; margin-top: 8mm; }
+  .cover { break-before: auto; height: 255mm; display: flex; flex-direction: column; justify-content: center; }
+  .cover .tag { color: var(--accent); font-weight: 600; letter-spacing: .08em; text-transform: uppercase; font-size: 9.5pt; }
+  .cover h1 { font-size: 40pt; margin: 4mm 0 3mm; color: var(--brand); }
+  .cover .lead { font-size: 15pt; color: var(--ink); max-width: 150mm; margin-bottom: 10mm; }
+  .cover .meta { border-left: 4px solid var(--brand2); padding-left: 5mm; color: var(--muted); }
+  .cover .meta b { color: var(--ink); }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 9.6pt; }
+  th, td { border: 1px solid var(--line); padding: 2mm 2.6mm; text-align: left; vertical-align: top; }
+  th { background: var(--soft); color: var(--brand); font-weight: 600; }
+  tr { break-inside: avoid; }
+  .card { background: var(--soft2); border: 1px solid var(--line); border-radius: 3mm; padding: 3.5mm 4.5mm; margin: 2mm 0 4mm; break-inside: avoid; }
+  .card.brand { background: var(--soft); border-color: #bcd3cb; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3.5mm; }
+  .pill { display: inline-block; background: var(--soft); color: var(--brand); border: 1px solid #bcd3cb; border-radius: 10mm; padding: .4mm 2.6mm; font-size: 8.8pt; margin: 0 1mm 1mm 0; }
+  .uc { border: 1px solid var(--line); border-radius: 3mm; margin: 0 0 3.5mm; break-inside: avoid; overflow: hidden; }
+  .uc .head { background: var(--soft); padding: 2mm 4mm; display: flex; justify-content: space-between; gap: 4mm; }
+  .uc .head b { color: var(--brand); }
+  .uc .head span { color: var(--muted); font-size: 9.2pt; }
+  .uc .body { padding: 2.6mm 4mm 1.6mm; font-size: 9.8pt; }
+  .uc .body p { margin-bottom: 1.4mm; }
+  .uc .body b { color: var(--ink); }
+  .flowrow { display: flex; flex-wrap: wrap; gap: 2mm; align-items: center; margin: 3mm 0 4mm; }
+  .step { background: var(--soft); border: 1px solid #bcd3cb; border-radius: 2.5mm; padding: 1.6mm 3mm; font-size: 9.2pt; color: var(--brand); font-weight: 600; }
+  .arrow { color: var(--muted); }
+  .formula { font-family: Consolas, "Courier New", monospace; background: #f1f5f2; border: 1px solid var(--line); border-radius: 3mm; padding: 3.5mm 5mm; font-size: 9.6pt; line-height: 1.7; margin: 2mm 0 4mm; break-inside: avoid; }
+  figure { margin: 0 0 4.5mm; break-inside: avoid; }
+  figure img { width: 100%; border: 1px solid var(--line); border-radius: 2.5mm; display: block; }
+  figcaption { font-size: 9pt; color: var(--muted); margin-top: 1.2mm; }
+  figcaption b { color: var(--ink); }
+  .small { font-size: 9.2pt; color: var(--muted); }
+  .footer-note { margin-top: 6mm; color: var(--muted); font-size: 9pt; }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 9.2pt; background: #eef2ef; padding: 0 1mm; border-radius: 1mm; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<section class="cover">
+  <div class="tag">Hackathon submission · Unlock Underused Equipment and Spaces</div>
+  <h1>CampusShare</h1>
+  <p class="lead">A trusted platform that lets a campus share its idle labs, equipment and spaces — safely, fairly, and with a full audit trail.</p>
+  <div class="meta">
+    <p><b>Product document</b> — problem, users, solution, use cases, design, AI workflow, security and testing</p>
+    <p><b>Team:</b> shreyvohraa — Shrey Vohra, Pragti Aggarwal</p>
+    <p><b>Code:</b> github.com/Shrey-Vhr/Code-Conqueror</p>
+    <p><b>Status:</b> working prototype for one campus (“Northfield University”), 26 automated tests passing</p>
+  </div>
+</section>
+
+<!-- ============ 1. SUMMARY ============ -->
+<section>
+  <h2>1. Executive summary</h2>
+  <p>Colleges, laboratories, makerspaces and community organisations own valuable equipment and spaces that sit unused for long periods. At the same time, nearby students, researchers, creators and early-stage teams cannot afford to buy or privately rent the same resources. An ordinary booking calendar does not fix this, because sharing institutional property is a <b>trust problem</b>: who is allowed to use what, who approves it, what condition it was in, and what happens when something breaks or comes back late.</p>
+  <p><b>CampusShare</b> is a working web platform that handles the whole sharing lifecycle with a person in charge of every important decision:</p>
+  <div class="grid2">
+    <div class="card brand">
+      <h4>What it does</h4>
+      <ul>
+        <li>Owners list resources with hours, rules, deposits and required training</li>
+        <li>Users discover resources and see eligibility before they request</li>
+        <li>Requests are ranked by a transparent fairness score</li>
+        <li>Owners approve, reject or waitlist, always with a reason</li>
+        <li>Check-in and return with condition reports and photos</li>
+        <li>Damage, delay and conflict handling with deposit settlement</li>
+        <li>An append-only audit log both sides can read</li>
+      </ul>
+    </div>
+    <div class="card brand">
+      <h4>Why it matters</h4>
+      <ul>
+        <li>Idle equipment becomes accessible without owners losing control</li>
+        <li>Access is fair and explainable, not first-come or favour-based</li>
+        <li>Safety and training are checked before use, not after an accident</li>
+        <li>Damage and delays are recorded and handled, not argued about</li>
+        <li>AI helps, but never decides access, safety or penalties</li>
+      </ul>
+    </div>
+  </div>
+  <h3>The ten-step journey it demonstrates</h3>
+  <div class="flowrow">
+    <span class="step">1 List</span><span class="arrow">→</span>
+    <span class="step">2 Discover &amp; check eligibility</span><span class="arrow">→</span>
+    <span class="step">3 Request</span><span class="arrow">→</span>
+    <span class="step">4 Verify</span><span class="arrow">→</span>
+    <span class="step">5 Review</span><span class="arrow">→</span>
+    <span class="step">6 Approve / reject / waitlist</span><span class="arrow">→</span>
+    <span class="step">7 Check in</span><span class="arrow">→</span>
+    <span class="step">8 Return</span><span class="arrow">→</span>
+    <span class="step">9 Handle damage / delay</span><span class="arrow">→</span>
+    <span class="step">10 Full history</span>
+  </div>
+  <p>A reviewer can complete this whole journey in the running app in about five minutes, switching between roles with one click.</p>
+</section>
+
+<!-- ============ 2. PROBLEM ============ -->
+<section>
+  <h2>2. The problem</h2>
+  <h3>Who has it</h3>
+  <div class="grid2">
+    <div class="card">
+      <h4>Resource owners</h4>
+      <p>Colleges, university departments, labs, makerspaces and small organisations that hold costly equipment and spaces: laser cutters, 3D printers, cameras, GPU machines, studios, classrooms and workshops.</p>
+    </div>
+    <div class="card">
+      <h4>Would-be users</h4>
+      <p>Students, researchers, creators and early-stage teams nearby who need the same resources but cannot afford to buy them or rent them privately.</p>
+    </div>
+  </div>
+  <h3>How often</h3>
+  <p>Constantly. Specialised equipment is typically in active use only during class or lab hours, so it sits idle in the evenings, at weekends and between projects. Anyone who needs it meets the same obstacles every time: finding out who owns it, whether they are allowed to use it, and who to ask.</p>
+  <h3>What it costs today</h3>
+  <table>
+    <tr><th style="width:24%">Who</th><th>Cost</th></tr>
+    <tr><td>Owners</td><td>Equipment idles and loses value. Informal sharing is risky: with no record of who used it, why, and in what condition, owners face misuse, unreported damage, scheduling clashes and unfair allocation. Many simply refuse to share.</td></tr>
+    <tr><td>Users</td><td>Projects stall or never start, because the only options are buying equipment, paying commercial rates, or waiting weeks for access.</td></tr>
+    <tr><td>Institutions</td><td>A plain booking calendar shows availability but does nothing about training requirements, approvals, deposits, damage, late returns or fairness, so these decisions stay manual, unexplained and unrecorded.</td></tr>
+  </table>
+  <h3>Why ordinary booking tools fall short</h3>
+  <table>
+    <tr><th style="width:36%">Need when sharing institutional property</th><th>Typical booking calendar</th></tr>
+    <tr><td>Check training, qualification and standing first</td><td>Anyone can book</td></tr>
+    <tr><td>Owner approval with a recorded reason</td><td>Instant, unexplained booking</td></tr>
+    <tr><td>Fair access when demand exceeds supply</td><td>First come, first served; easy to hoard</td></tr>
+    <tr><td>Condition before and after use</td><td>No record</td></tr>
+    <tr><td>Damage, delay and conflict handling</td><td>Handled by email, if at all</td></tr>
+    <tr><td>A history both sides can trust</td><td>None</td></tr>
+  </table>
+</section>
+
+<!-- ============ 3. USERS ============ -->
+<section class="flow">
+  <h2>3. Target users and roles</h2>
+  <p>We start with a university campus, where users already share an institution, a verification path and clear safety training. The same approach extends to makerspaces and community organisations.</p>
+  <table>
+    <tr><th style="width:20%">Role</th><th style="width:38%">Who</th><th>Can do in CampusShare</th></tr>
+    <tr><td>Student / Researcher</td><td>People who need access to equipment and spaces</td><td>Browse, check eligibility, request, check in and return, cancel or extend, report incidents, submit training evidence</td></tr>
+    <tr><td>Owner</td><td>Lab supervisors and faculty who own resources</td><td>List resources, set conditions, review and decide on requests for their own resources</td></tr>
+    <tr><td>Manager</td><td>Department managers</td><td>Review requests and resolve incidents for their department, settle deposits and penalties</td></tr>
+    <tr><td>Administrator</td><td>Campus facilities and administration</td><td>Verify accounts and certificates, set fairness policy, view analytics and the global audit log</td></tr>
+  </table>
+  <p class="small">All permissions are enforced on the server, not only hidden in the interface. The signed-in user is re-read from the database on every request, so a suspension or role change applies immediately.</p>
+</section>
+
+<!-- ============ 4. SOLUTION ============ -->
+<section class="flow">
+  <h2>4. The solution</h2>
+  <p>CampusShare turns sharing into one connected workflow. Each stage below maps to a challenge requirement.</p>
+  <table>
+    <tr><th style="width:22%">Stage</th><th>What CampusShare does</th></tr>
+    <tr><td>List</td><td>Owners publish equipment and spaces with location, weekly opening hours, rules, deposit, hourly credit cost, maximum hours per booking, weekly limit and required training.</td></tr>
+    <tr><td>Discover</td><td>Search, filters by type and department, an “I am eligible” toggle, and plain-language AI matching (for example “laser-cut acrylic”).</td></tr>
+    <tr><td>Qualify</td><td>Before requesting, users see a checklist: verified account, good standing, enough credits, department and role rules, and unexpired safety training. Missing items are named.</td></tr>
+    <tr><td>Request</td><td>The form shows duration, cost, refundable deposit and the user's fairness score before they submit. Overlapping times enter a waitlist automatically.</td></tr>
+    <tr><td>Decide</td><td>Owners and managers approve, reject or waitlist, with a mandatory written reason. They see eligibility, conflicts and the score breakdown side by side.</td></tr>
+    <tr><td>Use</td><td>Check-in and return use a checklist, a 1–5 rating, notes and a photo. A worse rating at return drafts a damage incident automatically.</td></tr>
+    <tr><td>Resolve</td><td>Managers settle incidents: no penalty, strike, credit fine or suspension, and refund or forfeit of the held deposit.</td></tr>
+    <tr><td>Trace</td><td>Every approval, rejection, cancellation, extension, check-in, return and incident is written to an append-only audit log.</td></tr>
+  </table>
+
+  <h3>Booking lifecycle</h3>
+  <div class="card">
+    <div class="flowrow">
+      <span class="step">PENDING</span><span class="arrow">or</span><span class="step">WAITLISTED</span>
+    </div>
+    <ul>
+      <li><b>Request</b> → <code>PENDING</code> (within limits) or <code>WAITLISTED</code> (slot already taken)</li>
+      <li><code>WAITLISTED</code> → <code>PENDING</code> when a slot frees up, by priority score</li>
+      <li><code>PENDING</code> → <code>APPROVED</code> (owner or manager) or <code>REJECTED</code> (with a reason)</li>
+      <li><code>APPROVED</code> → <code>CHECKED_IN</code> (condition report) or <code>CANCELLED</code> (cancel, or no-show with a strike and forfeited deposit)</li>
+      <li><code>CHECKED_IN</code> → <code>COMPLETED</code> (clean return) or <code>RETURNED</code> (damage: incident opened, deposit held) or <code>OVERDUE</code> (past end time: delay incident)</li>
+      <li><code>RETURNED</code> → <code>COMPLETED</code> once the incident is resolved</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============ 5. USE CASES ============ -->
+<section>
+  <h2>5. Use cases</h2>
+  <p class="small">Each use case names the actor, the goal, the main flow and the outcome. All are available in the working prototype.</p>
+
+  <div class="uc"><div class="head"><b>UC1 · List a resource</b><span>Actor: Owner</span></div><div class="body">
+    <p><b>Goal:</b> Make an idle resource available on the owner's terms.</p>
+    <p><b>Flow:</b> Open <i>List New Resource</i>; enter name, type, category, location, description and safety rules; set weekly opening hours, deposit, hourly credit cost, maximum hours and weekly limit; add requirements (training, role, department, minimum credits); save.</p>
+    <p><b>Outcome:</b> The resource appears in the registry with its conditions; the listing is recorded in the audit log.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC2 · Discover a suitable resource</b><span>Actor: Student / Researcher</span></div><div class="body">
+    <p><b>Goal:</b> Find equipment that fits a need.</p>
+    <p><b>Flow:</b> Search and filter, or describe the need in plain language (“high frame rate video capture”) and receive ranked matches with reasons.</p>
+    <p><b>Outcome:</b> A short list of fitting resources, with AI matches labelled as a suggestion.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC3 · Check eligibility and submit training evidence</b><span>Actor: Student / Researcher</span></div><div class="body">
+    <p><b>Goal:</b> Know exactly what is needed before asking, and supply what is missing.</p>
+    <p><b>Flow:</b> Open a resource; read the checklist of met and missing requirements; from the profile, submit a safety credential with an evidence note.</p>
+    <p><b>Outcome:</b> The certificate shows as pending until an administrator decides.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC4 · Verify an account or certificate</b><span>Actor: Administrator</span></div><div class="body">
+    <p><b>Goal:</b> Grant access only to qualified people.</p>
+    <p><b>Flow:</b> Review pending certificates with an AI pre-screen (advisory); press <i>Verify</i> or <i>Reject</i>; verify or revoke accounts.</p>
+    <p><b>Outcome:</b> The user is notified; verified certificates carry an expiry date and unlock the resource.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC5 · Request a booking</b><span>Actor: Student / Researcher</span></div><div class="body">
+    <p><b>Goal:</b> Reserve a slot within fair-use limits.</p>
+    <p><b>Flow:</b> Choose date, time and purpose; see duration, cost, deposit and fairness score; submit. The system re-checks eligibility, weekly caps, credits and conflicts.</p>
+    <p><b>Outcome:</b> The request becomes <code>PENDING</code> for review, or <code>WAITLISTED</code> with a position and an explained score.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC6 · Review a request</b><span>Actor: Owner / Manager</span></div><div class="body">
+    <p><b>Goal:</b> Decide with full information and keep control.</p>
+    <p><b>Flow:</b> Open the approval queue; compare eligibility snapshot, conflict analysis and priority score; approve or reject with a written reason.</p>
+    <p><b>Outcome:</b> The user is told the decision and the reason. Approving a slot moves competing pending requests for the same time to the waitlist, which prevents double booking.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC7 · Fair waitlist and promotion</b><span>Actors: System, Owner</span></div><div class="body">
+    <p><b>Goal:</b> Give the next most deserving person the slot when it frees up.</p>
+    <p><b>Flow:</b> When an approved booking is cancelled, waitlist scores are recalculated with waiting time; the top eligible candidate with no conflict moves to the owner's review queue.</p>
+    <p><b>Outcome:</b> The candidate and the owner are notified; the owner still approves.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC8 · Check in and record initial condition</b><span>Actor: Student / Researcher</span></div><div class="body">
+    <p><b>Goal:</b> Document the state of the equipment before use.</p>
+    <p><b>Flow:</b> Open the approved booking; complete the checklist, rate the condition 1–5, add notes and a photo; confirm. (Check-in opens 15 minutes before the start; demo mode lifts this so reviewers can test any time.)</p>
+    <p><b>Outcome:</b> The booking is <code>CHECKED_IN</code>; the baseline condition report is stored.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC9 · Return and record final condition</b><span>Actor: Student / Researcher</span></div><div class="body">
+    <p><b>Goal:</b> Close the booking and expose any damage.</p>
+    <p><b>Flow:</b> Complete the return checklist, rating, notes and photo; confirm. Usage credits are charged.</p>
+    <p><b>Outcome:</b> A clean return completes the booking and refunds the deposit. A rating lower than at check-in drafts a <b>damage incident</b> with an AI summary and holds the deposit.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC10 · Resolve an incident</b><span>Actor: Manager</span></div><div class="body">
+    <p><b>Goal:</b> Handle damage, delay or misuse fairly and on the record.</p>
+    <p><b>Flow:</b> Open the incident queue; read the report and the AI summary (suggestion only); write the findings; choose no penalty, a strike, a credit fine, or a suspension; refund or forfeit the deposit.</p>
+    <p><b>Outcome:</b> The incident is resolved, the borrower is notified, and the booking completes once every incident on it is resolved.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC11 · Handle overdue returns and no-shows</b><span>Actor: System</span></div><div class="body">
+    <p><b>Goal:</b> Keep resources moving without manual chasing.</p>
+    <p><b>Flow:</b> An automated sweep marks past-due sessions <code>OVERDUE</code> and opens a delay incident; cancels no-shows more than 30 minutes late with a strike and forfeited deposit; sends one-hour reminders.</p>
+    <p><b>Outcome:</b> The borrower and owner are notified and every step is audited.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC12 · Extend or cancel a booking</b><span>Actors: Student / Researcher, Owner</span></div><div class="body">
+    <p><b>Goal:</b> Adapt to changing needs without breaking fairness.</p>
+    <p><b>Flow:</b> Request an extension (checked against conflicts, per-booking maximum and weekly caps) or cancel (deposit refunded, waitlist promoted).</p>
+    <p><b>Outcome:</b> The affected people are notified and the change is logged.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC13 · Govern the system</b><span>Actor: Administrator</span></div><div class="body">
+    <p><b>Goal:</b> Keep rules fair and see how the system is used.</p>
+    <p><b>Flow:</b> Edit fairness policy (weekly cap, score weights, monthly credit grant); review usage statistics and fair-use flags; read the global audit ledger.</p>
+    <p><b>Outcome:</b> Every policy change is itself logged with who changed it and why.</p>
+  </div></div>
+
+  <div class="uc"><div class="head"><b>UC14 · See the full history</b><span>Actors: Student, Owner, Manager, Administrator</span></div><div class="body">
+    <p><b>Goal:</b> Trust the record.</p>
+    <p><b>Flow:</b> Open any booking or incident to see the timeline of decisions, reasons, condition reports and incidents, with who did each step and when.</p>
+    <p><b>Outcome:</b> Both parties share one complete, append-only history of the transaction.</p>
+  </div></div>
+</section>
+
+<!-- ============ 6. FAIRNESS ============ -->
+<section>
+  <h2>6. Fair allocation</h2>
+  <p>When demand exceeds availability, requests are ranked by a score that is shown to both the user and the reviewer. The score <b>ranks</b> requests; a person still approves or rejects.</p>
+  <div class="formula">
+    Priority = 100<br>
+    &nbsp;&nbsp;− 2.5 × hours used in the last 30 days<br>
+    &nbsp;&nbsp;+ waitlist time bonus (up to +30)<br>
+    &nbsp;&nbsp;+ purpose bonus (Research +25 · Coursework +20 · Club +5)<br>
+    &nbsp;&nbsp;+ role bonus (Researcher +15 · Student +10)<br>
+    &nbsp;&nbsp;− 25 × conduct strikes
+  </div>
+  <table>
+    <tr><th style="width:30%">Measure</th><th>How it prevents hoarding or unfairness</th></tr>
+    <tr><td>Heavy-use penalty</td><td>People who have used a lot recently rank lower than people who have not</td></tr>
+    <tr><td>Waitlist time bonus</td><td>Waiting counts, so nobody is starved</td></tr>
+    <tr><td>Weekly hour cap</td><td>Campus-wide limit per person (default 20 hours) plus per-resource weekly limits</td></tr>
+    <tr><td>Credits and deposits</td><td>Monthly credit grant, hourly credit costs, refundable deposit held until a clean return</td></tr>
+    <tr><td>Strikes</td><td>No-shows and conduct penalties lower priority; three strikes block booking</td></tr>
+    <tr><td>Explainability</td><td>The full score breakdown is visible to the user and the reviewer, and saved with the booking</td></tr>
+    <tr><td>Admin control</td><td>Weights and caps are editable by an administrator; every change is logged</td></tr>
+  </table>
+</section>
+
+<!-- ============ 7. AI ============ -->
+<section class="flow">
+  <h2>7. AI, with a person in charge</h2>
+  <p>AI is used where it saves time and never decides access, safety or penalties.</p>
+  <div class="grid2">
+    <div class="card brand"><h4>Used for</h4>
+      <ul><li>Matching a plain-language need to resources</li><li>Pre-screening certificate evidence</li><li>Summarising incidents and suggesting a severity</li><li>Explaining unusual usage patterns to an administrator</li></ul></div>
+    <div class="card"><h4>Never used for</h4>
+      <ul><li>Approving or rejecting a booking</li><li>Charging credits or deposits</li><li>Assigning strikes or penalties</li><li>Suspending anyone</li></ul></div>
+  </div>
+  <h3>Prompt architecture and data flow</h3>
+  <ol>
+    <li>A user or staff member acts in the interface; a server action first checks their login and role.</li>
+    <li>The server reads the needed records and builds a prompt with a fixed role and task, the case data, and the exact output format (JSON for matching, certificate review and incident summaries). Usage prompts carry no names, only department and counts.</li>
+    <li>One call is made to the OpenAI API (model <code>gpt-4o-mini</code>, low temperature, 4-second timeout).</li>
+    <li>The output is validated in code: resource ids must exist, severity must be an allowed value, malformed output is discarded.</li>
+    <li>If there is no key, the call fails or times out, or validation fails, a rule-based fallback returns a result (keyword scoring, templated summaries), so the app never breaks.</li>
+    <li>Results are stored so they are not requested twice, and shown with the label <b>“AI suggestion — requires human review”</b>.</li>
+    <li>A person makes the decision, and that decision is written to the audit log.</li>
+  </ol>
+  <p>There are no agents or multi-step chains in the product: each feature is a single prompt and call. AI output never changes a booking status, balance, strike or account. For example, the official severity of an auto-drafted damage incident comes from a fixed rule; the AI's suggested severity is stored separately for the manager to consider.</p>
+</section>
+
+<!-- ============ 8. SECURITY ============ -->
+<section class="flow">
+  <h2>8. Security, privacy and accountability</h2>
+  <table>
+    <tr><th style="width:26%">Area</th><th>Controls</th></tr>
+    <tr><td>Access control</td><td>Server-side role and ownership checks on every action; the user is re-read from the database on each request</td></tr>
+    <tr><td>Credentials</td><td>bcrypt-hashed passwords; signed, HTTP-only session cookies; secrets required in production</td></tr>
+    <tr><td>Input safety</td><td>All inputs validated with Zod; allowed values enforced for types, statuses and severities</td></tr>
+    <tr><td>Least information</td><td>Users see their own bookings; owners and managers see only what they need to review; certificate documents are visible to administrators; no personal names are sent to the AI for usage analysis</td></tr>
+    <tr><td>Guarded endpoints</td><td>The overdue-sweep endpoint needs a secret; demo logins can be switched off with a setting</td></tr>
+    <tr><td>Audit log</td><td>Append-only; written in the same database transaction as each change; no update or delete path in the application</td></tr>
+    <tr><td>Human oversight</td><td>Access, safety and penalty decisions are always made by an authorised person, with a recorded reason</td></tr>
+  </table>
+</section>
+
+<!-- ============ 9. ARCHITECTURE ============ -->
+<section class="flow">
+  <h2>9. Architecture and technology</h2>
+  <div class="grid2">
+    <div class="card"><h4>Stack</h4>
+      <p>Next.js 15 (App Router, Server Actions) · React 19 · TypeScript · Tailwind CSS 4 · Prisma 6 with SQLite · Zod 4 · jose · bcryptjs · OpenAI SDK (optional) · Vitest</p></div>
+    <div class="card"><h4>Core data</h4>
+      <p>Users, Resources and requirements, Trainings and certifications, Bookings, Condition reports, Incidents, Notifications, Audit log, Fairness settings</p></div>
+  </div>
+  <table>
+    <tr><th style="width:26%">Module</th><th>Responsibility</th></tr>
+    <tr><td>eligibility</td><td>Checks account, standing, credits, role, department and unexpired training; returns what is met and what is missing</td></tr>
+    <tr><td>conflicts</td><td>Detects overlaps, opening-hours violations, maintenance and maximum-duration breaches</td></tr>
+    <tr><td>fairness</td><td>Computes the priority score; enforces weekly caps; grants monthly credits; reads the admin policy</td></tr>
+    <tr><td>bookingService</td><td>The booking state machine: request, approve, reject, cancel, check in, return, extend, waitlist promotion</td></tr>
+    <tr><td>incidentService</td><td>Resolves incidents, applies penalties, settles deposits, completes bookings</td></tr>
+    <tr><td>overdue</td><td>Marks overdue sessions, cancels no-shows, sends reminders, refreshes waitlist scores</td></tr>
+    <tr><td>notifications / audit</td><td>In-app alerts and the append-only audit trail</td></tr>
+    <tr><td>ai</td><td>Prompt building, validation and rule-based fallbacks for the four AI features</td></tr>
+  </table>
+  <h3>Quality assurance</h3>
+  <p>26 automated tests (unit and integration) run against a temporary copy of the database. They cover eligibility, fairness scoring, conflict detection, booking state, and integration tests on a real database for the full lifecycle, double-booking prevention, waitlist promotion, overdue and no-show sweeps, incident resolution with deposit settlement, and role boundaries. The project also builds and type-checks cleanly.</p>
+</section>
+
+<!-- ============ 10. SCREENSHOTS ============ -->
+<section>
+  <h2>10. The product</h2>
+  <p class="small">Screens from the running prototype, in lifecycle order.</p>
+  <div class="grid2">
+    <figure><img src="../screenshots/01-resource-registry.webp"><figcaption><b>Discover.</b> Search, filters and plain-language AI matching, labelled as a suggestion.</figcaption></figure>
+    <figure><img src="../screenshots/02-eligibility-and-booking.webp"><figcaption><b>Qualify.</b> What the user meets and what is still missing, next to the booking form.</figcaption></figure>
+    <figure><img src="../screenshots/03-availability-cost-fairness.webp"><figcaption><b>Plan.</b> Weekly availability, cost and deposit, and the fairness score.</figcaption></figure>
+    <figure><img src="../screenshots/04-owner-review-queue.jpg"><figcaption><b>Decide.</b> The owner's queue with eligibility, conflicts and score.</figcaption></figure>
+    <figure><img src="../screenshots/05-booking-condition-report.jpg"><figcaption><b>Record.</b> Check-in condition report with the return inspection pending.</figcaption></figure>
+    <figure><img src="../screenshots/06-fairness-breakdown-and-audit.jpg"><figcaption><b>Explain.</b> Score breakdown and the append-only audit ledger.</figcaption></figure>
+    <figure><img src="../screenshots/07-incident-with-ai-summary.jpg"><figcaption><b>Report.</b> Damage incident with an AI summary that is only a suggestion.</figcaption></figure>
+    <figure><img src="../screenshots/08-manager-resolution.jpg"><figcaption><b>Resolve.</b> Penalty options and deposit refund or forfeit.</figcaption></figure>
+    <figure><img src="../screenshots/09-admin-credential-review.jpg"><figcaption><b>Verify.</b> AI advises on a certificate; the administrator decides.</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ 11. COVERAGE ============ -->
+<section class="flow">
+  <h2>11. How it meets the challenge brief</h2>
+  <table>
+    <tr><th style="width:42%">Expected outcome</th><th>In CampusShare</th></tr>
+    <tr><td>Listings with availability, location, access conditions, rules</td><td>Owner listing form; resource page with weekly availability calendar</td></tr>
+    <tr><td>Search, filtering or intelligent matching</td><td>Filters, eligibility toggle, AI matching</td></tr>
+    <tr><td>Profiles and verification</td><td>Profile page; administrator verification of accounts and certificates</td></tr>
+    <tr><td>Eligibility checks</td><td>Pre-request checklist covering training, standing, credits, role, department</td></tr>
+    <tr><td>Approval, rejection and waitlist</td><td>Reviewer decisions with mandatory reasons; automatic waitlist</td></tr>
+    <tr><td>Transparent handling of competing requests</td><td>Conflict detection; explained priority score; double-booking prevention</td></tr>
+    <tr><td>Check-in and check-out; before/after condition</td><td>Checklist, rating, notes and photo at both points</td></tr>
+    <tr><td>Damage, delay and incident reporting</td><td>Incident queue; automatic damage drafts; overdue delay incidents</td></tr>
+    <tr><td>Notifications</td><td>Approvals, rejections, waitlist moves, reminders, cancellations, overdue</td></tr>
+    <tr><td>Fair-usage measures</td><td>Caps, credits, deposits, priority score, no-show strikes</td></tr>
+    <tr><td>Role-based access</td><td>Student, Researcher, Owner, Manager, Administrator</td></tr>
+    <tr><td>Auditable history</td><td>Append-only audit log, visible in booking, incident and admin views</td></tr>
+    <tr><td>Privacy and security</td><td>See section 8</td></tr>
+    <tr><td>AI where valuable, humans decide</td><td>Section 7; every AI result is reviewable and labelled</td></tr>
+  </table>
+</section>
+
+<!-- ============ 12. DISTINCTIVE / LIMITS ============ -->
+<section class="flow">
+  <h2>12. What makes it distinctive</h2>
+  <ul>
+    <li><b>Trust first.</b> Eligibility is checked before a request, and users see exactly what is missing, so they are not rejected afterwards without explanation.</li>
+    <li><b>Explainable fairness.</b> A transparent score, caps, credits and deposits; every user can see why they were approved, rejected or waitlisted.</li>
+    <li><b>One connected lifecycle.</b> Request, approval, condition records, return, incident and deposit settlement live in one flow. A worse condition at return drafts an incident automatically, so accountability does not depend on someone remembering to report it.</li>
+    <li><b>A shared record.</b> An append-only history both owner and user can read.</li>
+    <li><b>AI as advisor.</b> Useful, labelled and optional; the product works fully without it.</li>
+  </ul>
+
+  <h2 style="margin-top:8mm">13. Limitations and future work</h2>
+  <p>This is a prototype for a single campus.</p>
+  <ul>
+    <li>Notifications are in-app only; email and SMS are future work.</li>
+    <li>Certificate evidence is a text note; document upload and verification are future work. Condition photos are stored in the database; a real deployment would use a file store.</li>
+    <li>Sign-in is simulated with demo accounts; a real deployment would use campus single sign-on.</li>
+    <li>One institution and one campus time zone; multi-institution sharing is a natural extension.</li>
+    <li>SQLite suits a demo; production would use a hosted database.</li>
+  </ul>
+
+  <h2 style="margin-top:8mm">14. Try it</h2>
+  <div class="card brand">
+    <p><b>Repository:</b> github.com/Shrey-Vhr/Code-Conqueror (the README has a two-minute setup and a five-minute guided tour).</p>
+    <p><b>Run:</b> <code>npm install</code>, <code>npm run db:reset</code>, <code>npm run dev</code>, then open <code>localhost:3000</code> and pick a demo account.</p>
+  </div>
+  <table>
+    <tr><th>Role</th><th>Email</th><th>Password</th></tr>
+    <tr><td>Student</td><td>alice@northfield.edu</td><td>Alice2024!</td></tr>
+    <tr><td>Student</td><td>bob@northfield.edu</td><td>Bob2024!</td></tr>
+    <tr><td>Researcher</td><td>carol@northfield.edu</td><td>Carol2024!</td></tr>
+    <tr><td>Owner</td><td>dave@northfield.edu</td><td>Dave2024!</td></tr>
+    <tr><td>Manager</td><td>eve@northfield.edu</td><td>Eve2024!</td></tr>
+    <tr><td>Administrator</td><td>frank@northfield.edu</td><td>Frank2024!</td></tr>
+  </table>
+  <p class="small">Demo credentials for the seeded sample campus only.</p>
+
+  <h2 style="margin-top:8mm">15. Team and development approach</h2>
+  <p><b>Team shreyvohraa</b></p>
+  <ul>
+    <li><b>Shrey Vohra</b> — research, product design, UI/UX, AI workflows and systems, deployment</li>
+    <li><b>Pragti Aggarwal</b> — backend and frontend development with AI agents, documentation, deployment</li>
+  </ul>
+  <p>The product was researched and specified, then built with AI coding assistance (Claude and Antigravity), followed by several rounds of independent review and testing to catch security and logic problems before submission.</p>
+</section>
+
+</body>
+</html>

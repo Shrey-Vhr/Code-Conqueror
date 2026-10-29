@@ -1,0 +1,26 @@
+# Render Blueprint: https://render.com/docs/blueprint-spec
+# Deploys CampusShare as a single Node web service with a local SQLite file.
+# On the free plan the disk is ephemeral, so the demo campus is re-seeded after a restart.
+services:
+  - type: web
+    name: campusshare
+    runtime: node
+    plan: free
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /login
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: DATABASE_URL
+        value: file:./dev.db
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true
+      - key: DEMO_MODE
+        value: "true"
+      - key: CAMPUS_TIMEZONE
+        value: America/New_York
+      - key: OPENAI_API_KEY
+        sync: false
