@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import { loginAction, quickLoginAction } from "@/lib/auth";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -75,16 +73,15 @@ export default function LoginPage() {
     try {
       const res = await quickLoginAction(accEmail);
       if (res.success) {
-        router.push("/resources");
-        router.refresh();
-      } else {
-        setError(("error" in res && typeof res.error === "string") ? res.error : "Login failed");
+        // Full navigation: the session cookie was just set, so load /resources fresh
+        window.location.assign("/resources");
+        return; // keep the "Switching..." state while the browser navigates away
       }
+      setError(("error" in res && typeof res.error === "string") ? res.error : "Login failed");
     } catch {
       setError("An unexpected error occurred during quick sign in.");
-    } finally {
-      setActiveQuickEmail(null);
     }
+    setActiveQuickEmail(null);
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -99,8 +96,8 @@ export default function LoginPage() {
     try {
       const res = await loginAction(formData);
       if (res.success) {
-        router.push("/resources");
-        router.refresh();
+        // Full navigation: the session cookie was just set, so load /resources fresh
+        window.location.assign("/resources");
       } else {
         setError(("error" in res && typeof res.error === "string") ? res.error : "Invalid email or password");
       }

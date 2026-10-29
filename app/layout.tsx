@@ -14,7 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning style={{ backgroundColor: "#eaf0eb" }}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+      style={{ backgroundColor: "#eaf0eb" }}
+    >
       <body
         suppressHydrationWarning
         className="min-h-screen flex flex-col text-slate-800 antialiased"
