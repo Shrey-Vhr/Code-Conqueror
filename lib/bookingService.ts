@@ -456,6 +456,28 @@ export async function cancelBooking(params: {
       reason: reason || "Booking cancelled",
     });
 
+    // Notify the affected parties of the cancellation
+    if (actorId !== "system") {
+      if (actorId !== booking.userId) {
+        await createNotification(tx, {
+          userId: booking.userId,
+          type: "BOOKING_CANCELLED",
+          message: `Your reservation for "${booking.resource.name}" was cancelled by staff. Reason: "${reason || "No reason given"}"`,
+          link: `/bookings/${bookingId}`,
+        });
+      } else if (
+        booking.status === "APPROVED" &&
+        booking.resource.ownerId !== booking.userId
+      ) {
+        await createNotification(tx, {
+          userId: booking.resource.ownerId,
+          type: "BOOKING_CANCELLED",
+          message: `${booking.user.name} cancelled an approved reservation for "${booking.resource.name}". The slot is free again.`,
+          link: `/manage`,
+        });
+      }
+    }
+
     // 3. AUTO-PROMOTE TOP WAITLISTED BOOKING
     // ONLY triggered if the cancelled booking was actually APPROVED or CHECKED_IN (held the slot)
     let promotedBookingId: string | null = null;
@@ -621,10 +643,12 @@ export async function checkInBooking(params: {
     };
   }
 
-  // 15-minute check-in window constraint
+  // 15-minute check-in window constraint. Demo mode lifts it so a reviewer can
+  // walk request -> approve -> check-in -> return in one sitting without waiting
+  // for a future slot to begin.
   const now = new Date();
   const earliestCheckIn = new Date(booking.start.getTime() - 15 * 60 * 1000);
-  if (now.getTime() < earliestCheckIn.getTime()) {
+  if (process.env.DEMO_MODE !== "true" && now.getTime() < earliestCheckIn.getTime()) {
     return {
       success: false,
       error: `Too early to check in. Check-in opens 15 minutes before your scheduled start time (${booking.start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}).`,
