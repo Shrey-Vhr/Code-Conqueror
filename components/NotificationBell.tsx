@@ -99,7 +99,7 @@ export function NotificationBell({
     <div className="relative inline-block text-left" ref={dropdownRef}>
       <button
         onClick={handleToggle}
-        className="relative p-2 text-slate-600 hover:text-secondary rounded-full hover:bg-primary/50 transition-colors focus:outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
+        className="relative p-2 text-slate-500 hover:text-indigo-600 rounded-full hover:bg-indigo-50/80 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
         aria-label="Notifications"
       >
         <svg
@@ -118,19 +118,19 @@ export function NotificationBell({
         </svg>
 
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 text-[10px] font-bold text-white ring-2 ring-white animate-pulse">
+          <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[10px] font-bold text-white ring-2 ring-white shadow-xs">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl bg-white shadow-xl ring-1 ring-slate-900/10 z-50 overflow-hidden divide-y divide-slate-100">
-          <div className="p-3.5 bg-slate-50 flex items-center justify-between">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-3xl bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-slate-200/80 z-50 overflow-hidden divide-y divide-slate-100 border border-slate-100">
+          <div className="p-4 bg-gradient-to-r from-indigo-50/70 to-purple-50/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-sm text-slate-800">Notifications</span>
+              <span className="font-bold text-sm text-slate-900">Notifications</span>
               {unreadCount > 0 && (
-                <span className="bg-rose-100 text-rose-800 text-xs px-2 py-0.5 rounded-full font-medium">
+                <span className="bg-rose-100 text-rose-700 text-xs px-2.5 py-0.5 rounded-full font-bold">
                   {unreadCount} new
                 </span>
               )}
@@ -139,7 +139,7 @@ export function NotificationBell({
               <button
                 onClick={handleMarkAllRead}
                 disabled={loading}
-                className="text-xs text-secondary hover:text-[#254212] font-bold cursor-pointer"
+                className="text-xs text-indigo-600 hover:text-indigo-800 font-bold cursor-pointer transition-colors"
               >
                 Mark all read
               </button>
@@ -161,25 +161,25 @@ export function NotificationBell({
                   <div
                     key={notif.id}
                     onClick={() => handleItemClick(notif)}
-                    className={`p-3.5 hover:bg-slate-50 transition-colors cursor-pointer text-sm ${
-                      !notif.read ? "bg-primary/30" : ""
+                    className={`p-4 hover:bg-slate-50 transition-colors cursor-pointer text-sm ${
+                      !notif.read ? "bg-indigo-50/40" : ""
                     }`}
                   >
                     {notif.link ? (
                       <Link href={notif.link} className="block">
                         <div className="flex items-start gap-2.5">
                           <span
-                            className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${
-                              !notif.read ? "bg-secondary" : "bg-transparent"
+                            className={`mt-1 w-2 h-2 rounded-full shrink-0 ${
+                              !notif.read ? "bg-indigo-600" : "bg-transparent"
                             }`}
                           />
                           <div className="flex-1">
                             <p className="text-slate-800 font-medium leading-snug">
                               {notif.message}
                             </p>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center gap-2 mt-1.5">
                               <span
-                                className={`text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded ${
+                                className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
                                   isOverdue
                                     ? "bg-rose-100 text-rose-700"
                                     : isApproved
@@ -203,16 +203,26 @@ export function NotificationBell({
                     ) : (
                       <div className="flex items-start gap-2.5">
                         <span
-                          className={`mt-0.5 w-2 h-2 rounded-full shrink-0 ${
-                            !notif.read ? "bg-blue-600" : "bg-transparent"
+                          className={`mt-1 w-2 h-2 rounded-full shrink-0 ${
+                            !notif.read ? "bg-indigo-600" : "bg-transparent"
                           }`}
                         />
                         <div className="flex-1">
                           <p className="text-slate-800 font-medium leading-snug">
                             {notif.message}
                           </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <span
+                              className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                                isOverdue
+                                  ? "bg-rose-100 text-rose-700"
+                                  : isApproved
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : isWaitlist
+                                  ? "bg-purple-100 text-purple-700"
+                                  : "bg-slate-100 text-slate-600"
+                              }`}
+                            >
                               {notif.type.replace(/_/g, " ")}
                             </span>
                             <span className="text-xs text-slate-400">
@@ -230,14 +240,13 @@ export function NotificationBell({
             )}
           </div>
 
-          <div className="p-2.5 bg-slate-50 border-t border-slate-100 text-center">
+          <div className="p-3 bg-slate-50/80 text-center">
             <Link
               href="/notifications"
               onClick={() => setIsOpen(false)}
-              className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-1"
+              className="text-xs font-bold text-indigo-600 hover:text-indigo-800"
             >
-              <span>Open Notifications Center</span>
-              <span aria-hidden="true">&rarr;</span>
+              See all notifications →
             </Link>
           </div>
         </div>

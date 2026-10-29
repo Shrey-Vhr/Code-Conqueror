@@ -16,7 +16,7 @@ export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
     case "VERIFIED":
       return (
         <Badge variant="success" className={className}>
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 shadow-xs"></span>
           {status}
         </Badge>
       );
@@ -31,8 +31,8 @@ export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
       );
     case "CHECKED_IN":
       return (
-        <Badge variant="addon" className={className}>
-          <span className="w-1.5 h-1.5 rounded-full bg-secondary mr-1.5 animate-pulse"></span>
+        <Badge variant="cyan" className={className}>
+          <span className="w-1.5 h-1.5 rounded-full bg-sky-500 mr-1.5 animate-pulse"></span>
           CHECKED IN
         </Badge>
       );
@@ -55,6 +55,7 @@ export function StatusBadge({ status, className = "" }: StatusBadgeProps) {
     case "HIGH":
       return (
         <Badge variant="destructive" className={className}>
+          <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5"></span>
           {status}
         </Badge>
       );

@@ -17,11 +17,11 @@ export async function Navbar() {
   }
 
   const rolePillStyles: Record<string, string> = {
-    STUDENT: "bg-primary text-secondary border-[#DDD0A9]",
-    RESEARCHER: "bg-[#254212] text-white border-secondary",
-    OWNER: "bg-amber-100 text-amber-900 border-amber-300",
-    MANAGER: "bg-purple-100 text-purple-900 border-purple-200",
-    ADMIN: "bg-rose-100 text-rose-900 border-rose-200",
+    STUDENT: "bg-indigo-50 text-indigo-700 border-indigo-200/80",
+    RESEARCHER: "bg-purple-50 text-purple-700 border-purple-200/80",
+    OWNER: "bg-amber-50 text-amber-800 border-amber-200/80",
+    MANAGER: "bg-sky-50 text-sky-700 border-sky-200/80",
+    ADMIN: "bg-rose-50 text-rose-700 border-rose-200/80",
   };
 
   const isStaff =
@@ -32,47 +32,47 @@ export async function Navbar() {
   const isAdmin = session?.role === "ADMIN";
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-xs border-b border-slate-200 shadow-2xs">
+    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/70 shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo */}
           <div className="flex items-center gap-6">
             <Link href="/resources" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#172A0B] to-[#2B4E15] flex items-center justify-center text-[#D5E84A] font-extrabold text-lg shadow-sm group-hover:scale-105 transition-transform border border-[#172A0B]">
+              <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 flex items-center justify-center text-white font-black text-sm shadow-md shadow-indigo-300/40 group-hover:scale-105 group-hover:rotate-3 transition-transform">
                 CS
               </div>
               <div>
-                <span className="font-bold text-slate-900 text-lg tracking-tight">
+                <span className="font-extrabold text-slate-900 text-lg tracking-tight bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 bg-clip-text">
                   CampusShare
                 </span>
-                <span className="hidden sm:inline-block ml-2 text-[11px] font-bold tracking-wider uppercase text-secondary bg-primary px-2 py-0.5 rounded-md border border-[#DDD0A9]">
+                <span className="hidden sm:inline-block ml-2 text-[10px] font-bold tracking-wider uppercase text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200/70">
                   Northfield Univ
                 </span>
               </div>
             </Link>
 
-            {/* Navigation links */}
+            {/* Navigation links with pill buttons */}
             {session && (
               <nav className="hidden md:flex items-center gap-1">
                 <Link
                   href="/resources"
-                  className="px-3 py-1.5 text-sm font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/70 rounded-full transition-all"
                 >
                   Resources
                 </Link>
                 <Link
                   href="/bookings"
-                  className="px-3 py-1.5 text-sm font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/70 rounded-full transition-all"
                 >
                   Bookings
                 </Link>
                 {isStaff && (
                   <Link
                     href="/manage"
-                    className="px-3 py-1.5 text-sm font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/70 rounded-full transition-all flex items-center gap-1.5"
                   >
                     <span>Manage</span>
-                    <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                    <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.2 rounded-full">
                       Staff
                     </span>
                   </Link>
@@ -80,17 +80,17 @@ export async function Navbar() {
                 {isAdmin && (
                   <Link
                     href="/admin"
-                    className="px-3 py-1.5 text-sm font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-1.5"
+                    className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/70 rounded-full transition-all flex items-center gap-1.5"
                   >
                     <span>Admin</span>
-                    <span className="bg-rose-100 text-rose-800 text-[10px] font-bold px-1.5 py-0.5 rounded">
+                    <span className="bg-rose-100 text-rose-800 text-[10px] font-bold px-2 py-0.2 rounded-full">
                       Console
                     </span>
                   </Link>
                 )}
                 <Link
                   href="/profile"
-                  className="px-3 py-1.5 text-sm font-medium text-slate-700 hover:text-blue-600 hover:bg-slate-50 rounded-lg transition-colors"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-indigo-600 hover:bg-indigo-50/70 rounded-full transition-all"
                 >
                   My Profile
                 </Link>
@@ -108,17 +108,17 @@ export async function Navbar() {
                   initialUnreadCount={unreadCount}
                 />
 
-                {/* Judge Quick Switcher Dropdown */}
-                <div className="hidden lg:flex items-center">
-                  <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
-                    <span className="px-2 text-slate-500 font-medium">Switch:</span>
+                {/* Judge Quick Switcher Pill Bar */}
+                <div className="hidden xl:flex items-center">
+                  <div className="flex items-center gap-1 bg-slate-100/80 p-1 rounded-full border border-slate-200/60 shadow-inner text-xs">
+                    <span className="px-2.5 text-slate-400 font-semibold text-[11px]">Switch:</span>
                     <form action={switchRoleAction.bind(null, "alice@northfield.edu")}>
                       <button
                         type="submit"
-                        className={`px-2 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all ${
                           session.email === "alice@northfield.edu"
-                            ? "bg-secondary text-[#D5E84A] shadow-2xs font-bold"
-                            : "text-slate-600 hover:text-slate-900"
+                            ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-xs font-bold scale-[1.02]"
+                            : "text-slate-600 hover:text-indigo-600 hover:bg-white"
                         }`}
                         title="Student (Active, all certs)"
                       >
@@ -128,10 +128,10 @@ export async function Navbar() {
                     <form action={switchRoleAction.bind(null, "bob@northfield.edu")}>
                       <button
                         type="submit"
-                        className={`px-2 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all ${
                           session.email === "bob@northfield.edu"
-                            ? "bg-secondary text-[#D5E84A] shadow-2xs font-bold"
-                            : "text-slate-600 hover:text-slate-900"
+                            ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-xs font-bold scale-[1.02]"
+                            : "text-slate-600 hover:text-indigo-600 hover:bg-white"
                         }`}
                         title="Student (Missing cert, overdue demo)"
                       >
@@ -141,10 +141,10 @@ export async function Navbar() {
                     <form action={switchRoleAction.bind(null, "carol@northfield.edu")}>
                       <button
                         type="submit"
-                        className={`px-2 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all ${
                           session.email === "carol@northfield.edu"
-                            ? "bg-secondary text-[#D5E84A] shadow-2xs font-bold"
-                            : "text-slate-600 hover:text-slate-900"
+                            ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-xs font-bold scale-[1.02]"
+                            : "text-slate-600 hover:text-indigo-600 hover:bg-white"
                         }`}
                         title="Researcher (High priority)"
                       >
@@ -154,10 +154,10 @@ export async function Navbar() {
                     <form action={switchRoleAction.bind(null, "dave@northfield.edu")}>
                       <button
                         type="submit"
-                        className={`px-2 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all ${
                           session.email === "dave@northfield.edu"
-                            ? "bg-secondary text-[#D5E84A] shadow-2xs font-bold"
-                            : "text-slate-600 hover:text-slate-900"
+                            ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-xs font-bold scale-[1.02]"
+                            : "text-slate-600 hover:text-indigo-600 hover:bg-white"
                         }`}
                         title="Owner (Engineering)"
                       >
@@ -167,10 +167,10 @@ export async function Navbar() {
                     <form action={switchRoleAction.bind(null, "eve@northfield.edu")}>
                       <button
                         type="submit"
-                        className={`px-2 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all ${
                           session.email === "eve@northfield.edu"
-                            ? "bg-secondary text-[#D5E84A] shadow-2xs font-bold"
-                            : "text-slate-600 hover:text-slate-900"
+                            ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-xs font-bold scale-[1.02]"
+                            : "text-slate-600 hover:text-indigo-600 hover:bg-white"
                         }`}
                         title="Manager (Incident resolution)"
                       >
@@ -180,10 +180,10 @@ export async function Navbar() {
                     <form action={switchRoleAction.bind(null, "frank@northfield.edu")}>
                       <button
                         type="submit"
-                        className={`px-2 py-1 rounded-lg font-medium cursor-pointer transition-colors ${
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-all ${
                           session.email === "frank@northfield.edu"
-                            ? "bg-secondary text-[#D5E84A] shadow-2xs font-bold"
-                            : "text-slate-600 hover:text-slate-900"
+                            ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-xs font-bold scale-[1.02]"
+                            : "text-slate-600 hover:text-indigo-600 hover:bg-white"
                         }`}
                         title="Admin (Global audits & approvals)"
                       >
@@ -194,14 +194,14 @@ export async function Navbar() {
                 </div>
 
                 {/* User Role Pill */}
-                <div className="flex items-center gap-2 pl-2 border-l border-slate-200">
+                <div className="flex items-center gap-2 pl-2 border-l border-slate-200/80">
                   <div className="text-right hidden sm:block">
-                    <p className="text-xs font-semibold text-slate-900 leading-tight">
+                    <p className="text-xs font-bold text-slate-800 leading-tight">
                       {session.name}
                     </p>
                     <span
-                      className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                        rolePillStyles[session.role] || "bg-slate-100 text-slate-800"
+                      className={`inline-block text-[10px] font-semibold px-2.5 py-0.5 rounded-full border mt-0.5 ${
+                        rolePillStyles[session.role] || "bg-slate-100 text-slate-800 border-slate-200"
                       }`}
                     >
                       {session.role}
@@ -213,7 +213,7 @@ export async function Navbar() {
                     <button
                       type="submit"
                       title="Log Out"
-                      className="p-2 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
+                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-full transition-all cursor-pointer"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -236,10 +236,10 @@ export async function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="px-4 py-2 bg-secondary hover:bg-secondary-hover text-[#F3EBD2] rounded-lg text-sm font-bold shadow-sm transition-colors border border-secondary flex items-center gap-1.5"
+                className="px-5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all hover:-translate-y-0.5 flex items-center gap-1.5"
               >
                 <span>Sign In</span>
-                <span className="text-addon font-black">→</span>
+                <span>→</span>
               </Link>
             )}
           </div>

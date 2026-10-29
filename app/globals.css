@@ -1,67 +1,98 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #F3EBD2;
-  --color-primary-hover: #E7DDBC;
-  --color-primary-light: #FAF7EF;
-  --color-primary-dark: #DDD0A9;
+  --color-primary: #6366F1;
+  --color-primary-hover: #4F46E5;
+  --color-primary-light: #EEF2FF;
+  --color-primary-dark: #4338CA;
 
-  --color-secondary: #172A0B;
-  --color-secondary-hover: #223F10;
-  --color-secondary-light: #2D5216;
-  --color-secondary-dark: #0D1806;
+  --color-secondary: #0F172A;
+  --color-secondary-hover: #1E293B;
+  --color-secondary-light: #334155;
+  --color-secondary-dark: #020617;
 
-  --color-addon: #D5E84A;
-  --color-addon-hover: #C5DC37;
-  --color-addon-light: #EEF7A6;
-  --color-addon-dark: #98A820;
+  --color-addon: #F43F5E;
+  --color-addon-hover: #E11D48;
+  --color-addon-light: #FFE4E6;
+  --color-addon-dark: #BE123C;
 
-  --color-blue-50: #FAF6EC;
-  --color-blue-100: #F3EBD2;
-  --color-blue-200: #E5DBBA;
-  --color-blue-300: #D5E84A;
-  --color-blue-400: #B8CD33;
-  --color-blue-500: #2C4E15;
-  --color-blue-600: #172A0B;
-  --color-blue-700: #0F1D07;
-  --color-blue-800: #0A1405;
-  --color-blue-900: #050A02;
-
-  --color-slate-50: #FAF7F0;
-  --color-slate-100: #F3EBD2;
-  --color-slate-200: #E5DBBD;
-  --color-slate-300: #D2C4A0;
-  --color-slate-400: #9A8F74;
-  --color-slate-500: #6B634E;
-  --color-slate-600: #464234;
-  --color-slate-700: #2B3322;
-  --color-slate-800: #1E2816;
-  --color-slate-900: #172A0B;
-  --color-slate-950: #0D1806;
+  --color-pastel-lavender: #EEF2FF;
+  --color-pastel-lavender-border: #C7D2FE;
+  --color-pastel-mint: #ECFDF5;
+  --color-pastel-mint-border: #A7F3D0;
+  --color-pastel-peach: #FFFBEB;
+  --color-pastel-peach-border: #FDE68A;
+  --color-pastel-rose: #FFF1F2;
+  --color-pastel-rose-border: #FECDD3;
+  --color-pastel-sky: #F0F9FF;
+  --color-pastel-sky-border: #BAE6FD;
+  --color-pastel-purple: #FAF5FF;
+  --color-pastel-purple-border: #E9D5FF;
 }
 
 @layer base {
   :root {
-    --background: #FAF7F0;
-    --foreground: #172A0B;
+    --background: #F8FAFC;
+    --foreground: #0F172A;
     --card: #FFFFFF;
-    --card-foreground: #172A0B;
-    --primary: #F3EBD2;
-    --primary-foreground: #172A0B;
-    --secondary: #172A0B;
+    --card-foreground: #0F172A;
+    --primary: #6366F1;
+    --primary-foreground: #FFFFFF;
+    --secondary: #0F172A;
     --secondary-foreground: #FFFFFF;
-    --accent: #D5E84A;
-    --accent-foreground: #172A0B;
-    --muted: #F3EBD2;
-    --muted-foreground: #6B634E;
-    --border: #E5DBBD;
+    --accent: #F43F5E;
+    --accent-foreground: #FFFFFF;
+    --muted: #F1F5F9;
+    --muted-foreground: #64748B;
+    --border: #E2E8F0;
   }
 
   body {
     background-color: var(--background);
+    background-image: 
+      radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.04) 0px, transparent 50%),
+      radial-gradient(at 90% 15%, rgba(244, 63, 94, 0.03) 0px, transparent 50%),
+      radial-gradient(at 50% 90%, rgba(16, 185, 129, 0.03) 0px, transparent 50%);
     color: var(--foreground);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", Oxygen, Ubuntu, Cantarell, sans-serif;
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
   }
+}
+
+/* Custom Soft Pastel Glass Cards and Transitions */
+.card-pastel-lavender {
+  background: linear-gradient(135deg, rgba(238, 242, 255, 0.85) 0%, rgba(245, 243, 255, 0.55) 100%);
+  border-color: rgba(199, 210, 254, 0.75);
+}
+
+.card-pastel-mint {
+  background: linear-gradient(135deg, rgba(236, 253, 245, 0.85) 0%, rgba(240, 253, 250, 0.55) 100%);
+  border-color: rgba(167, 243, 208, 0.75);
+}
+
+.card-pastel-peach {
+  background: linear-gradient(135deg, rgba(255, 251, 235, 0.85) 0%, rgba(255, 247, 237, 0.55) 100%);
+  border-color: rgba(253, 230, 138, 0.75);
+}
+
+.card-pastel-rose {
+  background: linear-gradient(135deg, rgba(255, 241, 242, 0.85) 0%, rgba(253, 242, 248, 0.55) 100%);
+  border-color: rgba(254, 205, 211, 0.75);
+}
+
+.card-pastel-sky {
+  background: linear-gradient(135deg, rgba(240, 249, 255, 0.85) 0%, rgba(238, 242, 255, 0.55) 100%);
+  border-color: rgba(186, 230, 253, 0.75);
+}
+
+.card-pastel-purple {
+  background: linear-gradient(135deg, rgba(250, 245, 255, 0.85) 0%, rgba(243, 232, 255, 0.55) 100%);
+  border-color: rgba(233, 213, 255, 0.75);
+}
+
+.card-pastel-white {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border-color: rgba(226, 232, 240, 0.8);
 }

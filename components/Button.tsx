@@ -23,29 +23,29 @@ export function Button({
   ...props
 }: ButtonProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium transition-colors rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer";
+    "inline-flex items-center justify-center font-semibold transition-all duration-200 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none cursor-pointer active:scale-[0.98]";
 
   const sizeStyles = {
-    sm: "px-2.5 py-1.5 text-xs",
-    md: "px-4 py-2 text-sm",
-    lg: "px-5 py-2.5 text-base",
+    sm: "px-3.5 py-1.5 text-xs",
+    md: "px-5 py-2.5 text-sm",
+    lg: "px-6 py-3 text-base",
   };
 
   const variantStyles = {
     default:
-      "bg-secondary text-white hover:bg-secondary-hover focus:ring-addon shadow-sm font-semibold",
+      "bg-gradient-to-r from-indigo-600 via-indigo-500 to-indigo-600 hover:from-indigo-700 hover:to-indigo-600 text-white shadow-md shadow-indigo-500/20 focus:ring-indigo-500 hover:-translate-y-0.5",
     secondary:
-      "bg-primary text-secondary hover:bg-primary-hover focus:ring-secondary border border-slate-300 font-semibold",
+      "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200/80 focus:ring-indigo-400 hover:-translate-y-0.5 shadow-2xs",
     destructive:
-      "bg-rose-700 text-white hover:bg-rose-800 focus:ring-rose-500 shadow-sm font-semibold",
+      "bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white shadow-md shadow-rose-500/20 focus:ring-rose-500 hover:-translate-y-0.5",
     outline:
-      "bg-white text-secondary border border-slate-300 hover:bg-primary-light focus:ring-secondary shadow-2xs font-semibold",
+      "bg-white/90 text-slate-700 border border-slate-200/90 hover:bg-slate-50 hover:border-slate-300 focus:ring-indigo-400 shadow-2xs hover:-translate-y-0.5",
     ghost:
-      "bg-transparent text-secondary hover:bg-primary focus:ring-secondary font-medium",
+      "bg-transparent text-slate-700 hover:bg-indigo-50/80 hover:text-indigo-600 focus:ring-indigo-400",
     success:
-      "bg-[#1C360E] text-[#D5E84A] hover:bg-secondary focus:ring-addon shadow-sm font-bold",
+      "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white shadow-md shadow-emerald-500/20 focus:ring-emerald-500 hover:-translate-y-0.5",
     addon:
-      "bg-addon text-secondary hover:bg-addon-hover focus:ring-secondary font-bold shadow-sm",
+      "bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white shadow-md shadow-pink-500/20 focus:ring-rose-400 hover:-translate-y-0.5",
   };
 
   return (
