@@ -7,6 +7,7 @@ import { checkEligibility } from "@/lib/eligibility";
 import { getUserRecentHours } from "@/lib/fairness";
 import { canManageResource } from "@/lib/rbac";
 import { StatusBadge } from "@/components/StatusBadge";
+import { ResourceThumb } from "@/components/ResourceThumb";
 import { EligibilityChecklist } from "@/components/EligibilityChecklist";
 import { BookingFormClient } from "./BookingFormClient";
 import { WeeklyAvailabilityGrid } from "./WeeklyAvailabilityGrid";
@@ -109,16 +110,6 @@ export default async function ResourceDetailPage({
     },
   });
 
-  const daysOfWeek = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ];
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Breadcrumb & Navigation */}
@@ -151,25 +142,20 @@ export default async function ResourceDetailPage({
         {/* Left Column: Resource Details & Rules (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           {/* Hero Banner with Soft Rounded Corners */}
-          <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] overflow-hidden">
-            <div className="h-72 sm:h-88 relative bg-slate-100 overflow-hidden">
-              <img
-                src={resource.image || "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80"}
-                alt={resource.name}
-                className="w-full h-full object-cover"
-              />
+          <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <ResourceThumb type={resource.type} className="h-40 sm:h-48" iconClassName="w-16 h-16">
               <div className="absolute top-4 left-4 flex gap-2 flex-wrap">
-                <span className="bg-white/95 backdrop-blur-xs text-slate-900 font-bold text-xs px-3 py-1 rounded-full shadow-xs">
+                <span className="bg-white/80 backdrop-blur-sm text-slate-600 font-medium text-xs px-3 py-1 rounded-full">
                   {resource.type}
                 </span>
-                <span className="bg-indigo-600/90 backdrop-blur-xs text-white font-semibold text-xs px-3 py-1 rounded-full shadow-xs">
+                <span className="bg-white/80 backdrop-blur-sm text-indigo-700 font-medium text-xs px-3 py-1 rounded-full">
                   {resource.department}
                 </span>
               </div>
               <div className="absolute top-4 right-4">
                 <StatusBadge status={resource.status} />
               </div>
-            </div>
+            </ResourceThumb>
 
             <div className="p-7">
               <div className="flex items-center gap-2 text-xs text-slate-400 mb-2">
@@ -184,7 +170,7 @@ export default async function ResourceDetailPage({
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+              <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight leading-tight">
                 {resource.name}
               </h1>
 
@@ -196,21 +182,21 @@ export default async function ResourceDetailPage({
               <div className="mt-6 pt-6 border-t border-slate-100 grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
                 <div className="p-3.5 bg-gradient-to-br from-indigo-50/60 to-purple-50/30 border border-indigo-100/70 rounded-2xl">
                   <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-wider block">Rate</span>
-                  <span className="text-base font-black text-slate-900">
+                  <span className="text-base font-semibold text-slate-900">
                     {resource.creditCostPerHour === 0 ? "Free" : `${resource.creditCostPerHour} cr/h`}
                   </span>
                 </div>
                 <div className="p-3.5 bg-gradient-to-br from-amber-50/60 to-orange-50/30 border border-amber-100/70 rounded-2xl">
                   <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">Deposit</span>
-                  <span className="text-base font-black text-slate-900">{resource.depositCredits} cr</span>
+                  <span className="text-base font-semibold text-slate-900">{resource.depositCredits} cr</span>
                 </div>
                 <div className="p-3.5 bg-gradient-to-br from-emerald-50/60 to-teal-50/30 border border-emerald-100/70 rounded-2xl">
                   <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider block">Max Duration</span>
-                  <span className="text-base font-black text-slate-900">{resource.maxHoursPerBooking}h/slot</span>
+                  <span className="text-base font-semibold text-slate-900">{resource.maxHoursPerBooking}h/slot</span>
                 </div>
                 <div className="p-3.5 bg-gradient-to-br from-sky-50/60 to-blue-50/30 border border-sky-100/70 rounded-2xl">
                   <span className="text-[10px] font-bold text-sky-700 uppercase tracking-wider block">Weekly Limit</span>
-                  <span className="text-base font-black text-slate-900">{resource.maxBookingsPerWeek} slots</span>
+                  <span className="text-base font-semibold text-slate-900">{resource.maxBookingsPerWeek} slots</span>
                 </div>
               </div>
             </div>
@@ -231,31 +217,14 @@ export default async function ResourceDetailPage({
             </div>
           )}
 
-          {/* Operating Availability Windows */}
-          <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-3">
-            <h3 className="font-bold text-slate-900 text-sm">
-              Standard Operating Hours
-            </h3>
-            {availabilityWindows.length === 0 ? (
-              <p className="text-xs text-slate-500">24/7 Access for authorized department keyholders.</p>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                {availabilityWindows.map((win, idx) => (
-                  <div key={idx} className="p-3 rounded-2xl bg-slate-50/80 border border-slate-100 text-xs">
-                    <span className="font-bold text-slate-700 block">
-                      {daysOfWeek[win.dayOfWeek]}
-                    </span>
-                    <span className="text-slate-500 font-mono mt-0.5 block text-[11px]">
-                      {win.start} - {win.end}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          {/* Weekly availability (also summarises operating hours) */}
+          <WeeklyAvailabilityGrid
+            availabilityWindows={availabilityWindows}
+            bookings={gridBookings}
+          />
 
           {/* Upcoming Schedule / Occupied Slots */}
-          <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-3">
+          <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-3">
             <h3 className="font-bold text-slate-900 text-sm">
               Active & Upcoming Bookings
             </h3>
@@ -306,7 +275,7 @@ export default async function ResourceDetailPage({
               isEligible={eligibility.eligible}
             />
           ) : (
-            <div className="p-8 text-center bg-white/95 rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-4">
+            <div className="p-8 text-center bg-white/80 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
               <h3 className="font-bold text-slate-900 text-base">
                 Sign in to Reserve
               </h3>
@@ -315,18 +284,12 @@ export default async function ResourceDetailPage({
               </p>
               <Link
                 href="/login"
-                className="inline-block px-6 py-3 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-bold text-xs rounded-full shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all hover:-translate-y-0.5"
+                className="inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-full shadow-sm transition-all hover:-translate-y-0.5"
               >
                 Sign In to CampusShare
               </Link>
             </div>
           )}
-
-          {/* Weekly Availability Calendar Grid */}
-          <WeeklyAvailabilityGrid
-            availabilityWindows={availabilityWindows}
-            bookings={gridBookings}
-          />
         </div>
       </div>
     </div>

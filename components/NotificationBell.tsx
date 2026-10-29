@@ -125,7 +125,7 @@ export function NotificationBell({
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-3xl bg-white/95 backdrop-blur-md shadow-xl ring-1 ring-slate-200/80 z-50 overflow-hidden divide-y divide-slate-100 border border-slate-100">
+        <div className="reveal-pop absolute right-0 mt-2 w-80 sm:w-96 rounded-3xl bg-white shadow-lg ring-1 ring-slate-200/70 z-50 overflow-hidden divide-y divide-slate-200/60">
           <div className="p-4 bg-gradient-to-r from-indigo-50/70 to-purple-50/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="font-bold text-sm text-slate-900">Notifications</span>

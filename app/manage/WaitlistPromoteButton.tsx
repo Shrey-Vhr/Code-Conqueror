@@ -41,7 +41,7 @@ export function WaitlistPromoteButton({
     <button
       onClick={handlePromote}
       disabled={isPending}
-      className="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full text-xs font-bold shadow-md shadow-purple-500/20 transition-all cursor-pointer disabled:opacity-50 shrink-0 hover:-translate-y-0.5"
+      className="px-4 py-2 bg-purple-500 hover:bg-purple-400 text-white rounded-full text-xs font-bold shadow-sm transition-all cursor-pointer disabled:opacity-50 shrink-0 hover:-translate-y-0.5"
     >
       {isPending ? "Promoting..." : "Promote to Pending ↑"}
     </button>

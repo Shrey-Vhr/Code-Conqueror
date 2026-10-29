@@ -4,7 +4,7 @@ import { z } from "zod";
 const apiKey = process.env.OPENAI_API_KEY;
 const openai = apiKey ? new OpenAI({ apiKey, timeout: 4000 }) : null;
 
-export const AI_DISCLAIMER = "⚠️ AI suggestion — requires human review";
+export const AI_DISCLAIMER = "AI suggestion — requires human review";
 
 export interface ResourceMatchResult {
   resourceId: string;

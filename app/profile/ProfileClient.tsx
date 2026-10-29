@@ -66,7 +66,7 @@ export function ProfileClient({
 
         <button
           onClick={() => setShowSubmitModal(!showSubmitModal)}
-          className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-100 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer inline-flex items-center gap-1.5 self-start sm:self-auto"
+          className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-100 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer inline-flex items-center gap-1.5 self-start sm:self-auto"
         >
           <span>+</span>
           <span>Submit Safety Credential</span>
@@ -99,7 +99,7 @@ export function ProfileClient({
               required
               value={selectedTrainingId}
               onChange={(e) => setSelectedTrainingId(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 text-xs bg-white/95 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
+              className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 text-xs bg-white/80 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
             >
               <option value="">-- Choose Training --</option>
               {trainings.map((t) => (
@@ -120,7 +120,7 @@ export function ProfileClient({
               value={documentNote}
               onChange={(e) => setDocumentNote(e.target.value)}
               placeholder="e.g. Attended safety workshop with Lab Tech Jenkins on Oct 14. Certificate ID: #NF-SAF-8821. Passed fire safety exam."
-              className="w-full px-4 py-3 rounded-2xl border border-slate-200/90 text-xs bg-white/95 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
+              className="w-full px-4 py-3 rounded-2xl border border-slate-200/90 text-xs bg-white/80 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
             />
           </div>
 
@@ -135,7 +135,7 @@ export function ProfileClient({
             <button
               type="submit"
               disabled={isPending}
-              className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-100 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+              className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-100 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
             >
               {isPending ? "Submitting..." : "Submit for Verification"}
             </button>
@@ -145,7 +145,7 @@ export function ProfileClient({
 
       {/* Certifications Table */}
       {userCertifications.length === 0 ? (
-        <div className="p-10 text-center bg-white/85 rounded-3xl border border-slate-200/80 text-xs text-slate-400 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+        <div className="p-10 text-center bg-white/85 rounded-3xl border border-slate-200/80 text-xs text-slate-400 shadow-sm">
           No training certifications on record yet. Click &quot;Submit Safety Credential&quot; to request verification.
         </div>
       ) : (
@@ -161,11 +161,11 @@ export function ProfileClient({
             return (
               <div
                 key={cert.id}
-                className={`${cardThemeClass} rounded-3xl p-5 shadow-[0_4px_20px_rgb(0,0,0,0.02)] space-y-3`}
+                className={`${cardThemeClass} rounded-3xl p-5 shadow-xs space-y-3`}
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <span className="text-[10px] font-bold font-mono px-2.5 py-0.5 rounded-full bg-white/90 text-slate-700 border border-slate-200/60 shadow-2xs">
+                    <span className="text-[10px] font-bold font-mono px-2.5 py-0.5 rounded-full bg-white/80 text-slate-700 border border-slate-200/60 shadow-2xs">
                       {cert.trainingCode}
                     </span>
                     <h4 className="font-bold text-slate-900 text-sm mt-1.5 leading-snug">

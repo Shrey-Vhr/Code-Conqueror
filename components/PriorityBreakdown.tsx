@@ -72,7 +72,7 @@ export function PriorityBreakdown({
           </p>
         </div>
         <div className="text-right">
-          <span className="text-2xl font-black text-indigo-600 font-mono block">
+          <span className="text-2xl font-semibold text-indigo-600 font-mono block">
             {parsed.finalScore.toFixed(1)}
           </span>
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">points</span>

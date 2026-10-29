@@ -52,7 +52,7 @@ export function ReviewItemClient({ bookingId }: ReviewItemClientProps) {
             setShowInput("APPROVE");
             setReason("Approved for academic and departmental schedule priority.");
           }}
-          className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-full text-xs font-bold shadow-md shadow-emerald-500/20 transition-all cursor-pointer hover:-translate-y-0.5"
+          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-xs font-bold shadow-sm transition-all cursor-pointer hover:-translate-y-0.5"
         >
           Approve Request
         </button>
@@ -102,8 +102,8 @@ export function ReviewItemClient({ bookingId }: ReviewItemClientProps) {
           disabled={isLoading}
           className={`px-5 py-2 rounded-full text-xs font-bold shadow-md transition-all cursor-pointer disabled:opacity-50 hover:-translate-y-0.5 ${
             showInput === "APPROVE"
-              ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-emerald-500/20"
-              : "bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-rose-500/20"
+              ? "bg-emerald-600 hover:bg-emerald-500 text-white"
+              : "bg-rose-500 hover:bg-rose-400 text-white"
           }`}
         >
           {isLoading ? "Submitting..." : `Confirm ${showInput === "APPROVE" ? "Approval" : "Rejection"}`}

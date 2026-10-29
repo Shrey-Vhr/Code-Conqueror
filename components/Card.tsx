@@ -7,7 +7,7 @@ export function Card({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`bg-white/90 backdrop-blur-sm rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_12px_36px_rgb(99,102,241,0.06)] transition-all duration-300 overflow-hidden ${className}`}
+      className={`bg-white/80 backdrop-blur-sm rounded-3xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow duration-300 overflow-hidden ${className}`}
       {...props}
     >
       {children}
@@ -22,7 +22,7 @@ export function CardHeader({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`p-6 sm:p-7 border-b border-slate-100 bg-gradient-to-b from-slate-50/60 to-transparent ${className}`}
+      className={`p-6 sm:p-7 border-b border-slate-200/50 ${className}`}
       {...props}
     >
       {children}
@@ -37,7 +37,7 @@ export function CardTitle({
 }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
     <h3
-      className={`text-lg sm:text-xl font-bold text-slate-900 tracking-tight ${className}`}
+      className={`text-lg font-semibold text-slate-800 tracking-tight ${className}`}
       {...props}
     >
       {children}
@@ -76,7 +76,7 @@ export function CardFooter({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={`p-5 sm:p-6 bg-slate-50/60 border-t border-slate-100 flex items-center justify-between ${className}`}
+      className={`p-5 sm:p-6 bg-slate-100/40 border-t border-slate-200/50 flex items-center justify-between ${className}`}
       {...props}
     >
       {children}

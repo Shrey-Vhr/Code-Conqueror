@@ -95,7 +95,7 @@ export default async function BookingDetailPage({
       </div>
 
       {/* Main Reservation Card in Soft Pastel Style */}
-      <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] overflow-hidden">
+      <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div className="p-7 sm:p-8 flex flex-col md:flex-row items-start justify-between gap-6">
           <div className="flex-1 space-y-3">
             <div className="flex items-center gap-2 text-xs text-slate-400">
@@ -106,7 +106,7 @@ export default async function BookingDetailPage({
               <span>{booking.resource.location}</span>
             </div>
 
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight leading-tight">
               {booking.resource.name}
             </h1>
 
@@ -152,7 +152,7 @@ export default async function BookingDetailPage({
             </div>
             <div className="pt-2 border-t border-indigo-100/70 flex justify-between">
               <span className="text-slate-500 font-medium">Priority Score</span>
-              <span className="font-black text-indigo-600 font-mono">{booking.priorityScore} pts</span>
+              <span className="font-semibold text-indigo-600 font-mono">{booking.priorityScore} pts</span>
             </div>
           </div>
         </div>
@@ -173,7 +173,7 @@ export default async function BookingDetailPage({
       {/* Side-by-Side Condition Reports (Check-In vs Check-Out) */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black text-slate-900 tracking-tight">
+          <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
             Physical Inspection & Condition Reports
           </h2>
           <span className="text-xs text-slate-500 font-medium">
@@ -183,7 +183,7 @@ export default async function BookingDetailPage({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Check-In Report Card */}
-          <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-4">
+          <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-xs" />
@@ -207,7 +207,7 @@ export default async function BookingDetailPage({
                   <ul className="space-y-1.5 text-slate-700">
                     {JSON.parse(checkInReport.checklist || "[]").map((item: string, idx: number) => (
                       <li key={idx} className="flex items-center gap-2">
-                        <span className="text-emerald-600 font-black">✓</span>
+                        <span className="text-emerald-600 font-semibold">✓</span>
                         <span>{item}</span>
                       </li>
                     ))}
@@ -233,7 +233,7 @@ export default async function BookingDetailPage({
           </div>
 
           {/* Check-Out Report Card */}
-          <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-4">
+          <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-sm space-y-4">
             <div className="flex items-center justify-between pb-3.5 border-b border-slate-100">
               <div className="flex items-center gap-2.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-sky-500 shadow-xs" />
@@ -257,7 +257,7 @@ export default async function BookingDetailPage({
                   <ul className="space-y-1.5 text-slate-700">
                     {JSON.parse(checkOutReport.checklist || "[]").map((item: string, idx: number) => (
                       <li key={idx} className="flex items-center gap-2">
-                        <span className="text-sky-600 font-black">✓</span>
+                        <span className="text-sky-600 font-semibold">✓</span>
                         <span>{item}</span>
                       </li>
                     ))}
@@ -273,7 +273,7 @@ export default async function BookingDetailPage({
                 {/* Rating delta warning */}
                 {checkInReport && checkOutReport.rating < checkInReport.rating && (
                   <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-[11px] font-medium flex items-center gap-1.5">
-                    <span>⚠️ Condition degraded from check-in ({checkInReport.rating}★ → {checkOutReport.rating}★). Damage incident automatically drafted.</span>
+                    <span>Condition degraded from check-in ({checkInReport.rating}★ → {checkOutReport.rating}★). Damage incident automatically drafted.</span>
                   </div>
                 )}
 
@@ -294,14 +294,14 @@ export default async function BookingDetailPage({
       {/* Linked Incidents */}
       {booking.incidents.length > 0 && (
         <div className="space-y-3">
-          <h2 className="text-lg font-black text-slate-900 tracking-tight">
+          <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
             Associated Incident Reports
           </h2>
           <div className="grid grid-cols-1 gap-3">
             {booking.incidents.map((inc) => (
               <div
                 key={inc.id}
-                className="p-5 bg-gradient-to-br from-rose-50/70 via-white to-pink-50/30 rounded-3xl border border-rose-200/80 shadow-[0_4px_20px_rgb(0,0,0,0.02)] flex items-start justify-between gap-4"
+                className="p-5 bg-gradient-to-br from-rose-50/70 via-white to-pink-50/30 rounded-3xl border border-rose-200/80 shadow-xs flex items-start justify-between gap-4"
               >
                 <div>
                   <div className="flex items-center gap-2 flex-wrap">
@@ -319,7 +319,7 @@ export default async function BookingDetailPage({
                   {inc.aiSummary && (
                     <div className="mt-2.5 text-xs text-amber-900 bg-amber-50/90 p-3 rounded-2xl border border-amber-200/80">
                       <span className="text-[10px] font-bold uppercase text-amber-800 block mb-0.5">
-                        ⚠️ AI suggestion — requires human review
+                        AI suggestion — requires human review
                       </span>
                       {inc.aiSummary}
                     </div>
@@ -328,7 +328,7 @@ export default async function BookingDetailPage({
 
                 <Link
                   href={`/incidents/${inc.id}`}
-                  className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full text-xs font-bold shrink-0 transition-all shadow-xs hover:-translate-y-0.5"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-xs font-bold shrink-0 transition-all shadow-xs hover:-translate-y-0.5"
                 >
                   View Incident →
                 </Link>
@@ -342,10 +342,10 @@ export default async function BookingDetailPage({
       <PriorityBreakdown breakdown={booking.priorityBreakdown} score={booking.priorityScore} />
 
       {/* Immutable Audit Log Timeline */}
-      <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-4">
+      <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-4">
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div>
-            <h2 className="text-lg font-black text-slate-900 tracking-tight">
+            <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
               Immutable Audit Ledger & Lifecycle History
             </h2>
             <p className="text-xs text-slate-500">

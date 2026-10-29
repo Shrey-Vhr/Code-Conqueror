@@ -235,6 +235,37 @@ export default async function AdminPage() {
     }
   }
 
+  // Real utilisation: booked hours in a 60-day window (30 days back, 30 ahead) / hours resources are open
+  const windowStart = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const windowEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  const activeResources = await prisma.resource.findMany({
+    where: { status: { not: "RETIRED" } },
+    select: { availabilityWindows: true },
+  });
+  let openHours30d = 0;
+  for (const r of activeResources) {
+    let weekly = 0;
+    try {
+      const wins = JSON.parse(r.availabilityWindows || "[]") as { start: string; end: string }[];
+      if (wins.length === 0) weekly = 6 * 12;
+      for (const w of wins) {
+        const [sh, sm] = w.start.split(":").map(Number);
+        const [eh, em] = w.end.split(":").map(Number);
+        weekly += Math.max(0, eh * 60 + (em || 0) - (sh * 60 + (sm || 0))) / 60;
+      }
+    } catch {
+      weekly = 6 * 12;
+    }
+    openHours30d += weekly * (60 / 7);
+  }
+  let bookedHours30d = 0;
+  for (const b of allBookingsWithResource) {
+    if (["COMPLETED", "CHECKED_IN", "APPROVED", "RETURNED", "OVERDUE"].includes(b.status) && b.start >= windowStart && b.start <= windowEnd) {
+      bookedHours30d += (b.end.getTime() - b.start.getTime()) / (1000 * 60 * 60);
+    }
+  }
+  const utilizationRate = openHours30d > 0 ? Math.min(100, Math.round((bookedHours30d / openHours30d) * 100)) : 0;
+
   const topResources = Object.entries(topResourceBookings)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
@@ -253,7 +284,7 @@ export default async function AdminPage() {
             Dean of Facilities & Campus Administration
           </span>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1.5">
+        <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight mt-1.5">
           Campus Governance & Resource Intelligence
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -272,7 +303,7 @@ export default async function AdminPage() {
           totalUsers,
           totalResources,
           totalBookings,
-          utilizationRate: 78,
+          utilizationRate,
           totalHours: Math.round(totalHours),
           statusStats,
           purposeStats,

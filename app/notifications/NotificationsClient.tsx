@@ -155,10 +155,10 @@ export function NotificationsClient({
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6">
       {/* Page Header */}
-      <div className="card-pastel-lavender rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)]">
+      <div className="card-pastel-lavender rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-sm">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
               Notification Center
             </h1>
             {unreadCount > 0 ? (
@@ -180,7 +180,7 @@ export function NotificationsClient({
           <button
             onClick={handleMarkAllRead}
             disabled={actionLoading}
-            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold text-slate-700 bg-white/90 hover:bg-white border border-slate-200/90 rounded-full transition-all shadow-xs hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold text-slate-700 bg-white/80 hover:bg-white border border-slate-200/90 rounded-full transition-all shadow-xs hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
           >
             <svg className="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
@@ -223,7 +223,7 @@ export function NotificationsClient({
             onClick={() => setFilter(tab.key as any)}
             className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
               filter === tab.key
-                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-100"
+                ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-100"
                 : "bg-white/85 text-slate-600 hover:bg-white border border-slate-200/70 shadow-2xs hover:text-slate-900"
             }`}
           >
@@ -242,7 +242,7 @@ export function NotificationsClient({
       {/* Notifications List */}
       <div className="space-y-3">
         {filteredNotifications.length === 0 ? (
-          <div className="text-center py-16 card-pastel-lavender rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+          <div className="text-center py-16 card-pastel-lavender rounded-3xl shadow-sm">
             <div className="w-14 h-14 mx-auto rounded-full bg-white shadow-2xs border border-indigo-100/80 flex items-center justify-center text-indigo-400 mb-3">
               <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -300,7 +300,7 @@ export function NotificationsClient({
                           onClick={() => {
                             if (!n.read) handleMarkAsRead(n.id);
                           }}
-                          className="text-xs font-bold text-indigo-700 bg-white/90 hover:bg-indigo-50 border border-indigo-200/70 px-3.5 py-1.5 rounded-full transition-all shadow-2xs hover:shadow-xs inline-flex items-center gap-1.5 hover:-translate-y-0.5"
+                          className="text-xs font-bold text-indigo-700 bg-white/80 hover:bg-indigo-50 border border-indigo-200/70 px-3.5 py-1.5 rounded-full transition-all shadow-2xs hover:shadow-xs inline-flex items-center gap-1.5 hover:-translate-y-0.5"
                         >
                           <span>View resource or booking</span>
                           <span aria-hidden="true">&rarr;</span>

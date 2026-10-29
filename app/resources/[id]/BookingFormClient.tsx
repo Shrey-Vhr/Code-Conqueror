@@ -108,9 +108,9 @@ export function BookingFormClient({
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-6 sm:p-7 space-y-6">
+    <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-sm p-6 sm:p-7 space-y-6">
       <div>
-        <h3 className="text-lg font-black text-slate-900 tracking-tight">
+        <h3 className="text-lg font-semibold text-slate-900 tracking-tight">
           Reserve Time Slot
         </h3>
         <p className="text-xs text-slate-500 mt-0.5">
@@ -225,7 +225,7 @@ export function BookingFormClient({
           </div>
           <div className="pt-2 border-t border-amber-200/60 flex justify-between font-bold text-slate-900 text-sm">
             <span>Total Credits Required</span>
-            <span className="text-indigo-600 font-black">{totalCreditsNeeded} credits</span>
+            <span className="text-indigo-600 font-semibold">{totalCreditsNeeded} credits</span>
           </div>
           <div className="flex justify-between text-[11px] text-slate-500">
             <span>Your Available Balance</span>
@@ -241,14 +241,14 @@ export function BookingFormClient({
         <button
           type="submit"
           disabled={isSubmitting || !isEligible}
-          className="w-full py-3.5 px-6 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full font-bold text-xs sm:text-sm shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all cursor-pointer disabled:opacity-50 disabled:pointer-events-none hover:-translate-y-0.5 active:translate-y-0"
+          className="w-full py-3.5 px-6 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-bold text-xs sm:text-sm shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:pointer-events-none hover:-translate-y-0.5 active:translate-y-0"
         >
           {isSubmitting ? "Submitting Request..." : "Request Booking"}
         </button>
 
         {!isEligible && (
           <p className="text-center text-xs text-rose-600 font-medium">
-            ⚠️ You must complete missing prerequisites before booking this resource.
+            You must complete missing prerequisites before booking this resource.
           </p>
         )}
       </form>

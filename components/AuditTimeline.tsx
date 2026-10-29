@@ -96,7 +96,7 @@ export function AuditTimeline({ logs, className = "" }: AuditTimelineProps) {
                     </div>
 
                     {log.reason && (
-                      <p className="mt-2 text-xs text-slate-600 bg-white/90 p-3 rounded-2xl border border-slate-200/80 italic shadow-2xs">
+                      <p className="mt-2 text-xs text-slate-600 bg-white/80 p-3 rounded-2xl border border-slate-200/80 italic shadow-2xs">
                         &quot;{log.reason}&quot;
                       </p>
                     )}
@@ -106,7 +106,7 @@ export function AuditTimeline({ logs, className = "" }: AuditTimelineProps) {
                         <summary className="cursor-pointer hover:text-indigo-600 font-semibold transition-colors">
                           View state snapshot
                         </summary>
-                        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 bg-white/90 rounded-2xl border border-slate-200 font-mono text-[11px] shadow-2xs">
+                        <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 bg-white/80 rounded-2xl border border-slate-200 font-mono text-[11px] shadow-2xs">
                           {log.before && (
                             <div>
                               <span className="text-slate-400 font-sans font-bold uppercase text-[10px] block mb-1">

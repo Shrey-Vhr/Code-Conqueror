@@ -126,30 +126,30 @@ export function AdminConsoleClient({
     <div className="space-y-8">
       {/* KPI Stats Grid in Soft Pastel Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="p-6 bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/40 rounded-3xl border border-emerald-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+        <div className="p-6 bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/40 rounded-3xl border border-emerald-100 shadow-xs">
           <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider block">Total Campus Users</span>
-          <span className="text-2xl sm:text-3xl font-black text-emerald-950 mt-1 block">{stats.totalUsers}</span>
+          <span className="text-2xl sm:text-3xl font-semibold text-emerald-950 mt-1 block">{stats.totalUsers}</span>
           <span className="text-[11px] text-emerald-700 font-semibold mt-1 block">
             {allUsers.filter((u) => u.verified).length} verified profiles
           </span>
         </div>
 
-        <div className="p-6 bg-gradient-to-br from-sky-50/70 via-white to-blue-50/40 rounded-3xl border border-sky-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+        <div className="p-6 bg-gradient-to-br from-sky-50/70 via-white to-blue-50/40 rounded-3xl border border-sky-100 shadow-xs">
           <span className="text-xs font-bold text-sky-800 uppercase tracking-wider block">Shared Resources</span>
-          <span className="text-2xl sm:text-3xl font-black text-sky-950 mt-1 block">{stats.totalResources}</span>
+          <span className="text-2xl sm:text-3xl font-semibold text-sky-950 mt-1 block">{stats.totalResources}</span>
           <span className="text-[11px] text-sky-700 font-semibold mt-1 block">Active across colleges</span>
         </div>
 
-        <div className="p-6 bg-gradient-to-br from-purple-50/70 via-white to-indigo-50/40 rounded-3xl border border-purple-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+        <div className="p-6 bg-gradient-to-br from-purple-50/70 via-white to-indigo-50/40 rounded-3xl border border-purple-100 shadow-xs">
           <span className="text-xs font-bold text-purple-800 uppercase tracking-wider block">Total Usage Recorded</span>
-          <span className="text-2xl sm:text-3xl font-black text-purple-950 mt-1 block">{stats.totalHours} hrs</span>
+          <span className="text-2xl sm:text-3xl font-semibold text-purple-950 mt-1 block">{stats.totalHours} hrs</span>
           <span className="text-[11px] text-purple-700 font-semibold mt-1 block">{stats.totalBookings} total bookings</span>
         </div>
 
-        <div className="p-6 bg-gradient-to-br from-amber-50/70 via-white to-orange-50/40 rounded-3xl border border-amber-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
-          <span className="text-xs font-bold text-amber-800 uppercase tracking-wider block">Equipment Utilization</span>
-          <span className="text-2xl sm:text-3xl font-black text-amber-950 mt-1 block">{stats.utilizationRate}%</span>
-          <span className="text-[11px] text-amber-700 font-semibold mt-1 block">+34% vs baseline</span>
+        <div className="p-6 bg-gradient-to-br from-amber-50/70 via-white to-orange-50/40 rounded-3xl border border-amber-100 shadow-xs">
+          <span className="text-xs font-bold text-amber-800 uppercase tracking-wider block">Utilization · 60 days</span>
+          <span className="text-2xl sm:text-3xl font-semibold text-amber-950 mt-1 block">{stats.utilizationRate}%</span>
+          <span className="text-[11px] text-amber-700 font-medium mt-1 block">of open hours booked</span>
         </div>
       </div>
 
@@ -159,13 +159,13 @@ export function AdminConsoleClient({
           onClick={() => setActiveTab("CERTS")}
           className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             activeTab === "CERTS"
-              ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/20"
+              ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm"
               : "text-slate-600 hover:bg-indigo-50/70 hover:text-indigo-600"
           }`}
         >
           <span>Credentials Review</span>
           {pendingCerts.length > 0 && (
-            <span className="bg-rose-500 text-white text-[10px] font-black px-2 py-0.2 rounded-full shadow-2xs">
+            <span className="bg-rose-500 text-white text-[10px] font-semibold px-2 py-0.2 rounded-full shadow-2xs">
               {pendingCerts.length}
             </span>
           )}
@@ -175,7 +175,7 @@ export function AdminConsoleClient({
           onClick={() => setActiveTab("USERS")}
           className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             activeTab === "USERS"
-              ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/20"
+              ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm"
               : "text-slate-600 hover:bg-indigo-50/70 hover:text-indigo-600"
           }`}
         >
@@ -189,7 +189,7 @@ export function AdminConsoleClient({
           onClick={() => setActiveTab("FAIRNESS")}
           className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === "FAIRNESS"
-              ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/20"
+              ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm"
               : "text-slate-600 hover:bg-indigo-50/70 hover:text-indigo-600"
           }`}
         >
@@ -200,7 +200,7 @@ export function AdminConsoleClient({
           onClick={() => setActiveTab("ANALYTICS")}
           className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === "ANALYTICS"
-              ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/20"
+              ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm"
               : "text-slate-600 hover:bg-indigo-50/70 hover:text-indigo-600"
           }`}
         >
@@ -211,13 +211,13 @@ export function AdminConsoleClient({
           onClick={() => setActiveTab("SUSPICIOUS")}
           className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
             activeTab === "SUSPICIOUS"
-              ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/20"
+              ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm"
               : "text-slate-600 hover:bg-indigo-50/70 hover:text-indigo-600"
           }`}
         >
           <span>Fair-Use Flags</span>
           {suspiciousUsers.length > 0 && (
-            <span className="bg-amber-400 text-slate-900 text-[10px] font-black px-2 py-0.2 rounded-full">
+            <span className="bg-amber-400 text-slate-900 text-[10px] font-semibold px-2 py-0.2 rounded-full">
               {suspiciousUsers.length}
             </span>
           )}
@@ -227,7 +227,7 @@ export function AdminConsoleClient({
           onClick={() => setActiveTab("TRAININGS")}
           className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === "TRAININGS"
-              ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/20"
+              ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm"
               : "text-slate-600 hover:bg-indigo-50/70 hover:text-indigo-600"
           }`}
         >
@@ -238,7 +238,7 @@ export function AdminConsoleClient({
           onClick={() => setActiveTab("AUDIT")}
           className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === "AUDIT"
-              ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/20"
+              ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm"
               : "text-slate-600 hover:bg-indigo-50/70 hover:text-indigo-600"
           }`}
         >
@@ -250,7 +250,7 @@ export function AdminConsoleClient({
       {activeTab === "CERTS" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-black text-slate-900 tracking-tight">
+            <h3 className="text-base font-semibold text-slate-900 tracking-tight">
               Pending Safety Credential Submissions
             </h3>
             <span className="text-xs text-slate-500 font-medium">
@@ -259,8 +259,8 @@ export function AdminConsoleClient({
           </div>
 
           {pendingCerts.length === 0 ? (
-            <div className="p-12 text-center bg-white/95 rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)]">
-              <span className="text-3xl block mb-2">🎉</span>
+            <div className="p-12 text-center bg-white/80 rounded-3xl border border-slate-200/80 shadow-sm">
+              <span className="text-3xl block mb-2"></span>
               <p className="font-bold text-slate-900 text-sm">All certifications cleared</p>
               <p className="text-xs text-slate-500 mt-1">
                 There are no pending safety certificates awaiting administrative verification.
@@ -271,7 +271,7 @@ export function AdminConsoleClient({
               {pendingCerts.map((c) => (
                 <div
                   key={c.id}
-                  className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-4"
+                  className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-4"
                 >
                   <div className="flex flex-col sm:flex-row justify-between gap-3 items-start">
                     <div>
@@ -298,7 +298,7 @@ export function AdminConsoleClient({
                       <button
                         onClick={() => handleVerifyCert(c.id, true)}
                         disabled={isPending}
-                        className="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-full text-xs font-bold shadow-md shadow-emerald-500/20 cursor-pointer transition-all hover:-translate-y-0.5"
+                        className="px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-xs font-bold shadow-sm cursor-pointer transition-all hover:-translate-y-0.5"
                       >
                         Verify & Grant
                       </button>
@@ -314,20 +314,20 @@ export function AdminConsoleClient({
 
                   {/* AI Copilot Badge */}
                   <div className="p-4 rounded-2xl border bg-gradient-to-br from-indigo-50/70 to-purple-50/40 border-indigo-200/80 text-xs flex gap-3 shadow-2xs">
-                    <span className="text-base">🤖</span>
+                    <span className="text-base"></span>
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-bold text-indigo-950 text-xs">
                           AI suggestion — requires human review
                         </span>
                         <span
-                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
+                          className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
                             c.aiVerdict.verdict === "VERIFIED"
                               ? "bg-emerald-100 text-emerald-800 border border-emerald-200"
                               : "bg-amber-100 text-amber-800 border border-amber-200"
                           }`}
                         >
-                          Recommendation: {c.aiVerdict.verdict} ({Math.round(c.aiVerdict.confidence * 100)}% match)
+                          Recommendation: {c.aiVerdict.verdict.replace(/_/g, " ").toLowerCase()} ({Math.round(c.aiVerdict.confidence)}% match)
                         </span>
                       </div>
                       <p className="text-indigo-900 text-[11px] leading-relaxed">
@@ -344,10 +344,10 @@ export function AdminConsoleClient({
 
       {/* TAB 2: USER & OWNER ACCOUNT VERIFICATION */}
       {activeTab === "USERS" && (
-        <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-4">
+        <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-sm space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
-              <h3 className="font-black text-slate-900 text-base">Campus Account Verification</h3>
+              <h3 className="font-semibold text-slate-900 text-base">Campus Account Verification</h3>
               <p className="text-xs text-slate-500">
                 Grant or revoke official campus verification status. Verified users have access to department equipment.
               </p>
@@ -430,10 +430,10 @@ export function AdminConsoleClient({
 
       {/* TAB 3: FAIRNESS POLICY SETTINGS */}
       {activeTab === "FAIRNESS" && (
-        <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
+        <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-sm space-y-6">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100">
             <div>
-              <h3 className="font-black text-slate-900 text-base">Campus Fairness Policy Settings</h3>
+              <h3 className="font-semibold text-slate-900 text-base">Campus Fairness Policy Settings</h3>
               <p className="text-xs text-slate-500">
                 Configure global quotas, monthly credit grants, strikes penalties, and reservation limits.
               </p>
@@ -480,7 +480,7 @@ export function AdminConsoleClient({
                   </div>
                 ) : (
                   <div className="flex items-center justify-between pt-2">
-                    <span className="text-sm font-black text-slate-900 bg-white px-3 py-1 rounded-full border border-slate-200 font-mono shadow-2xs">
+                    <span className="text-sm font-semibold text-slate-900 bg-white px-3 py-1 rounded-full border border-slate-200 font-mono shadow-2xs">
                       {s.value}
                     </span>
                     <button
@@ -504,8 +504,8 @@ export function AdminConsoleClient({
       {activeTab === "ANALYTICS" && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-3">
-              <h4 className="font-black text-slate-900 text-sm">Bookings by Status</h4>
+            <div className="bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+              <h4 className="font-semibold text-slate-900 text-sm">Bookings by Status</h4>
               <div className="space-y-2 text-xs">
                 {Object.entries(stats.statusStats).map(([status, count]) => (
                   <div key={status} className="flex justify-between items-center py-1.5 border-b border-slate-100">
@@ -516,8 +516,8 @@ export function AdminConsoleClient({
               </div>
             </div>
 
-            <div className="bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-3">
-              <h4 className="font-black text-slate-900 text-sm">Reservations by Purpose</h4>
+            <div className="bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+              <h4 className="font-semibold text-slate-900 text-sm">Reservations by Purpose</h4>
               <div className="space-y-2 text-xs">
                 {Object.entries(stats.purposeStats).map(([purpose, count]) => (
                   <div key={purpose} className="flex justify-between items-center py-1.5 border-b border-slate-100">
@@ -528,8 +528,8 @@ export function AdminConsoleClient({
               </div>
             </div>
 
-            <div className="bg-white/95 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-3">
-              <h4 className="font-black text-slate-900 text-sm">Hours by Department</h4>
+            <div className="bg-white/80 backdrop-blur-md p-6 rounded-3xl border border-slate-200/80 shadow-sm space-y-3">
+              <h4 className="font-semibold text-slate-900 text-sm">Hours by Department</h4>
               <div className="space-y-2 text-xs">
                 {stats.deptBreakdown.map((d) => (
                   <div key={d.department} className="flex justify-between items-center py-1.5 border-b border-slate-100">
@@ -541,8 +541,8 @@ export function AdminConsoleClient({
             </div>
           </div>
 
-          <div className="bg-white/95 backdrop-blur-md p-7 rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-4">
-            <h4 className="font-black text-slate-900 text-base">Most Utilized Equipment & Spaces</h4>
+          <div className="bg-white/80 backdrop-blur-md p-7 rounded-3xl border border-slate-200/80 shadow-sm space-y-4">
+            <h4 className="font-semibold text-slate-900 text-base">Most Utilized Equipment & Spaces</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
               {stats.topResources.map((r, i) => (
                 <div key={r.name} className="p-4 rounded-2xl bg-gradient-to-br from-indigo-50/50 to-purple-50/30 border border-indigo-100">
@@ -560,7 +560,7 @@ export function AdminConsoleClient({
       {activeTab === "SUSPICIOUS" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-black text-slate-900 tracking-tight">
+            <h3 className="text-base font-semibold text-slate-900 tracking-tight">
               Suspicious Activity & Fair-Use Monitor
             </h3>
             <span className="text-xs text-slate-500">
@@ -572,7 +572,7 @@ export function AdminConsoleClient({
             {suspiciousUsers.map((u) => (
               <div
                 key={u.id}
-                className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-3.5"
+                className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-3.5"
               >
                 <div className="flex justify-between items-start">
                   <div>
@@ -592,7 +592,7 @@ export function AdminConsoleClient({
                 </div>
 
                 <div className="p-4 rounded-2xl border bg-gradient-to-br from-amber-50/80 to-orange-50/40 border-amber-200/80 text-xs flex gap-3 shadow-2xs">
-                  <span className="text-base">⚠️</span>
+                  <span className="text-base"></span>
                   <div className="space-y-0.5">
                     <span className="font-bold text-amber-900 text-xs block">
                       AI suggestion — requires human review
@@ -613,14 +613,14 @@ export function AdminConsoleClient({
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="font-black text-slate-900 text-base">Campus Safety & Lab Modules</h3>
+              <h3 className="font-semibold text-slate-900 text-base">Campus Safety & Lab Modules</h3>
               <p className="text-xs text-slate-500">
                 Prerequisite certifications required by high-powered machinery, cleanrooms, and bio-hoods.
               </p>
             </div>
             <button
               onClick={() => setShowNewTraining(!showNewTraining)}
-              className="px-5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-500/20 cursor-pointer transition-all hover:-translate-y-0.5"
+              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-xs font-bold shadow-sm cursor-pointer transition-all hover:-translate-y-0.5"
             >
               + Create Safety Module
             </button>
@@ -633,9 +633,9 @@ export function AdminConsoleClient({
                 setShowNewTraining(false);
                 router.refresh();
               }}
-              className="bg-white/95 rounded-3xl border border-indigo-200 p-6 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-4"
+              className="bg-white/80 rounded-3xl border border-indigo-200 p-6 sm:p-7 shadow-sm space-y-4"
             >
-              <h4 className="font-black text-sm text-slate-900">Define New Training Certification</h4>
+              <h4 className="font-semibold text-sm text-slate-900">Define New Training Certification</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
@@ -711,7 +711,7 @@ export function AdminConsoleClient({
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-500/20 cursor-pointer"
+                  className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-xs font-bold shadow-sm cursor-pointer"
                 >
                   Save Training Module
                 </button>
@@ -724,7 +724,7 @@ export function AdminConsoleClient({
             {trainings.map((t) => (
               <div
                 key={t.id}
-                className="bg-white/95 rounded-3xl border border-slate-200/80 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-2.5 hover:-translate-y-0.5 transition-all"
+                className="bg-white/80 rounded-3xl border border-slate-200/80 p-6 shadow-sm space-y-2.5 hover:-translate-y-0.5 transition-all"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold font-mono px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/70">
@@ -745,10 +745,10 @@ export function AdminConsoleClient({
 
       {/* TAB 7: GLOBAL AUDIT LEDGER */}
       {activeTab === "AUDIT" && (
-        <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-4">
+        <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm space-y-4">
           <div className="flex items-center justify-between pb-4 border-b border-slate-100">
             <div>
-              <h3 className="font-black text-slate-900 text-base">
+              <h3 className="font-semibold text-slate-900 text-base">
                 Campus-Wide Append-Only Audit Stream
               </h3>
               <p className="text-xs text-slate-500">

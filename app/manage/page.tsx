@@ -118,7 +118,7 @@ export default async function ManagePage() {
               Department: <strong>{session.department}</strong>
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mt-1.5">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight mt-1.5">
             Department Operations & Review Queue
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -129,7 +129,7 @@ export default async function ManagePage() {
         <form action={manualSweepAction}>
           <button
             type="submit"
-            className="px-5 py-2.5 bg-gradient-to-r from-slate-900 to-indigo-950 hover:from-slate-800 hover:to-indigo-900 text-white rounded-full text-xs font-bold shadow-md transition-all cursor-pointer flex items-center gap-2 shrink-0 hover:-translate-y-0.5"
+            className="px-5 py-2.5 bg-indigo-700 hover:bg-indigo-600 text-white rounded-full text-xs font-bold shadow-md transition-all cursor-pointer flex items-center gap-2 shrink-0 hover:-translate-y-0.5"
           >
             <svg className="w-4 h-4 text-amber-300" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -143,7 +143,7 @@ export default async function ManagePage() {
       {overdueBookings.length > 0 && (
         <div className="p-6 bg-gradient-to-br from-rose-50/80 via-white to-pink-50/50 border border-rose-300 rounded-3xl shadow-sm space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-rose-900 font-black text-sm">
+            <div className="flex items-center gap-2 text-rose-900 font-semibold text-sm">
               <span className="flex h-2.5 w-2.5 rounded-full bg-rose-600 animate-pulse"></span>
               <span>URGENT: {overdueBookings.length} Overdue Campus Assets</span>
             </div>
@@ -164,7 +164,7 @@ export default async function ManagePage() {
                 </div>
                 <Link
                   href={`/bookings/${b.id}`}
-                  className="px-4 py-2 bg-gradient-to-r from-rose-600 to-rose-700 text-white font-bold rounded-full text-xs shadow-md shadow-rose-500/20 hover:-translate-y-0.5 transition-all"
+                  className="px-4 py-2 bg-rose-500 hover:bg-rose-400 text-white font-bold rounded-full text-xs shadow-sm hover:-translate-y-0.5 transition-all"
                 >
                   Inspect Overdue Session →
                 </Link>
@@ -178,7 +178,7 @@ export default async function ManagePage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-xl font-semibold text-slate-900 tracking-tight">
               Booking Approval Queue
             </h2>
             <span className="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-0.5 rounded-full border border-amber-200">
@@ -191,7 +191,7 @@ export default async function ManagePage() {
         </div>
 
         {pendingBookings.length === 0 ? (
-          <div className="p-8 text-center bg-white/90 rounded-3xl border border-slate-200/80 text-xs text-slate-400">
+          <div className="p-8 text-center bg-white/80 rounded-3xl border border-slate-200/80 text-xs text-slate-400">
             No pending booking requests awaiting review for your department resources.
           </div>
         ) : (
@@ -207,7 +207,7 @@ export default async function ManagePage() {
               return (
                 <div
                   key={booking.id}
-                  className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-4"
+                  className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-sm space-y-4"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                     <div>
@@ -216,7 +216,7 @@ export default async function ManagePage() {
                         <span>•</span>
                         <span>{booking.resource.location}</span>
                       </div>
-                      <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                      <h3 className="text-lg font-semibold text-slate-900 tracking-tight">
                         {booking.user.name} ({booking.user.role} — {booking.user.department})
                       </h3>
                       <p className="text-xs text-slate-600 mt-1">
@@ -245,7 +245,7 @@ export default async function ManagePage() {
                       {elig?.eligible ? (
                         <p className="text-emerald-800 font-medium">✓ All mandatory safety & role requirements verified</p>
                       ) : (
-                        <p className="text-amber-800 font-medium">⚠️ Review needed: {elig?.missing?.join(", ") || "Partial"}</p>
+                        <p className="text-amber-800 font-medium">Review needed: {elig?.missing?.join(", ") || "Partial"}</p>
                       )}
                       <p className="text-slate-500 text-[11px]">
                         Account credits: <strong>{booking.user.credits}</strong> • Strikes: <strong>{booking.user.strikes}</strong>
@@ -278,7 +278,7 @@ export default async function ManagePage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-xl font-semibold text-slate-900 tracking-tight">
               Active Sessions in Progress
             </h2>
             <span className="bg-sky-100 text-sky-800 text-xs font-bold px-3 py-0.5 rounded-full border border-sky-200">
@@ -289,7 +289,7 @@ export default async function ManagePage() {
         </div>
 
         {activeSessions.length === 0 ? (
-          <div className="p-8 text-center bg-white/90 rounded-3xl border border-slate-200/80 text-xs text-slate-400">
+          <div className="p-8 text-center bg-white/80 rounded-3xl border border-slate-200/80 text-xs text-slate-400">
             No active hardware or space sessions currently checked in.
           </div>
         ) : (
@@ -300,7 +300,7 @@ export default async function ManagePage() {
               return (
                 <div
                   key={sessionBooking.id}
-                  className="bg-white/95 backdrop-blur-md rounded-3xl border border-sky-200/80 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-3.5"
+                  className="bg-white/80 backdrop-blur-md rounded-3xl border border-sky-200/80 p-6 shadow-sm space-y-3.5"
                 >
                   <div className="flex items-start justify-between">
                     <div>
@@ -335,7 +335,7 @@ export default async function ManagePage() {
                   <div className="flex justify-end gap-2 pt-1">
                     <Link
                       href={`/bookings/${sessionBooking.id}`}
-                      className="px-5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full text-xs font-bold transition-all shadow-md shadow-indigo-500/15 hover:-translate-y-0.5"
+                      className="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-xs font-bold transition-all shadow-sm hover:-translate-y-0.5"
                     >
                       Supervise / Manage Session →
                     </Link>
@@ -351,7 +351,7 @@ export default async function ManagePage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-xl font-semibold text-slate-900 tracking-tight">
               Department Incident Queue
             </h2>
             <span className="bg-rose-100 text-rose-800 text-xs font-bold px-3 py-0.5 rounded-full border border-rose-200">
@@ -362,7 +362,7 @@ export default async function ManagePage() {
         </div>
 
         {openIncidents.length === 0 ? (
-          <div className="p-8 text-center bg-white/90 rounded-3xl border border-slate-200/80 text-xs text-slate-400">
+          <div className="p-8 text-center bg-white/80 rounded-3xl border border-slate-200/80 text-xs text-slate-400">
             No unresolved equipment incidents or damage claims!
           </div>
         ) : (
@@ -370,7 +370,7 @@ export default async function ManagePage() {
             {openIncidents.map((inc) => (
               <div
                 key={inc.id}
-                className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 hover:border-rose-300 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group"
+                className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 hover:border-rose-300 p-6 shadow-sm transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group"
               >
                 <div className="space-y-1.5 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -397,7 +397,7 @@ export default async function ManagePage() {
 
                 <Link
                   href={`/incidents/${inc.id}`}
-                  className="px-5 py-2 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-full text-xs font-bold shadow-md shadow-rose-500/20 transition-all shrink-0 hover:-translate-y-0.5"
+                  className="px-5 py-2 bg-rose-500 hover:bg-rose-400 text-white rounded-full text-xs font-bold shadow-sm transition-all shrink-0 hover:-translate-y-0.5"
                 >
                   Review & Resolve →
                 </Link>
@@ -411,7 +411,7 @@ export default async function ManagePage() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-xl font-semibold text-slate-900 tracking-tight">
               Waitlisted Requests Queue
             </h2>
             <span className="bg-purple-100 text-purple-800 text-xs font-bold px-3 py-0.5 rounded-full border border-purple-200">
@@ -424,7 +424,7 @@ export default async function ManagePage() {
         </div>
 
         {waitlistedBookings.length === 0 ? (
-          <div className="p-8 text-center bg-white/90 rounded-3xl border border-slate-200/80 text-xs text-slate-400">
+          <div className="p-8 text-center bg-white/80 rounded-3xl border border-slate-200/80 text-xs text-slate-400">
             No reservations currently waiting on waitlists for your department resources.
           </div>
         ) : (
@@ -432,7 +432,7 @@ export default async function ManagePage() {
             {waitlistedBookings.map((b) => (
               <div
                 key={b.id}
-                className="bg-white/95 backdrop-blur-md rounded-3xl border border-purple-200/80 hover:border-purple-300 p-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)] transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+                className="bg-white/80 backdrop-blur-md rounded-3xl border border-purple-200/80 hover:border-purple-300 p-6 shadow-sm transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
               >
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">

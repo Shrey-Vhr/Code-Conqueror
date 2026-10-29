@@ -271,10 +271,10 @@ export function BookingActionPanels({
     (isBooker || isOwnerOrManager);
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
+    <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-sm space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="font-black text-slate-900 text-base">
+          <h3 className="font-semibold text-slate-900 text-base">
             Reservation Action Controls
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
@@ -289,7 +289,7 @@ export function BookingActionPanels({
               onClick={() =>
                 setActiveAction(activeAction === "CHECK_IN" ? "IDLE" : "CHECK_IN")
               }
-              className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-full text-xs font-bold shadow-md shadow-emerald-500/20 transition-all cursor-pointer hover:-translate-y-0.5"
+              className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-xs font-bold shadow-sm transition-all cursor-pointer hover:-translate-y-0.5"
             >
               Check-In Inspection →
             </button>
@@ -302,8 +302,8 @@ export function BookingActionPanels({
               }
               className={`px-5 py-2.5 rounded-full text-xs font-bold shadow-md transition-all cursor-pointer hover:-translate-y-0.5 ${
                 status === "OVERDUE"
-                  ? "bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-rose-500/30 animate-pulse"
-                  : "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white shadow-indigo-500/20"
+                  ? "bg-rose-500 hover:bg-rose-400 text-white animate-pulse"
+                  : "bg-indigo-600 hover:bg-indigo-500 text-white"
               }`}
             >
               Return Condition Check-out →
@@ -339,7 +339,7 @@ export function BookingActionPanels({
                   : "border-rose-200 hover:bg-rose-50 text-rose-700"
               }`}
             >
-              Report Incident 🚨
+              Report Incident 
             </button>
           )}
 
@@ -450,7 +450,7 @@ export function BookingActionPanels({
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-500/20 cursor-pointer disabled:opacity-50"
+              className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-xs font-bold shadow-sm cursor-pointer disabled:opacity-50"
             >
               {isLoading ? "Verifying & Extending..." : `Confirm +${extensionHours}h Extension`}
             </button>
@@ -590,7 +590,7 @@ export function BookingActionPanels({
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-full text-xs font-bold shadow-md shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
+              className="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-xs font-bold shadow-sm cursor-pointer disabled:opacity-50"
             >
               {isLoading ? "Saving..." : "Confirm & Check In"}
             </button>
@@ -611,7 +611,7 @@ export function BookingActionPanels({
             <span className="text-xs text-sky-700 font-bold px-3 py-1 bg-sky-100 rounded-full">Phase: CHECK_OUT</span>
           </div>
 
-          <div className="p-3.5 bg-white/90 rounded-2xl border border-sky-100 text-xs text-slate-600">
+          <div className="p-3.5 bg-white/80 rounded-2xl border border-sky-100 text-xs text-slate-600">
             ℹ️ If the return condition rating drops below the check-in rating, a damage incident will be automatically drafted for manager review.
           </div>
 
@@ -734,7 +734,7 @@ export function BookingActionPanels({
             <button
               type="submit"
               disabled={isLoading}
-              className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-500/20 cursor-pointer disabled:opacity-50"
+              className="px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-xs font-bold shadow-sm cursor-pointer disabled:opacity-50"
             >
               {isLoading ? "Processing..." : "Complete Return & Release Deposit"}
             </button>
@@ -766,7 +766,7 @@ export function BookingActionPanels({
             <button
               onClick={handleCancel}
               disabled={isLoading}
-              className="px-6 py-2 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-full text-xs font-bold shadow-md shadow-rose-500/20 cursor-pointer disabled:opacity-50"
+              className="px-6 py-2 bg-rose-500 hover:bg-rose-400 text-white rounded-full text-xs font-bold shadow-sm cursor-pointer disabled:opacity-50"
             >
               {isLoading ? "Cancelling..." : "Confirm Cancellation & Promote Waitlist"}
             </button>
@@ -789,7 +789,7 @@ export function BookingActionPanels({
 
           {/* AI Human Review Contract Disclaimer */}
           <div className="p-3.5 bg-amber-50/90 rounded-2xl border border-amber-200/80 text-xs text-amber-900 flex items-start gap-2.5">
-            <span className="text-sm shrink-0">⚠️</span>
+            <span className="text-sm shrink-0"></span>
             <div className="space-y-1">
               <span className="font-bold block text-amber-800">
                 {AI_DISCLAIMER}
@@ -860,7 +860,7 @@ export function BookingActionPanels({
             <button
               type="submit"
               disabled={isLoading || !incidentDescription.trim()}
-              className="px-6 py-2 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-full text-xs font-bold shadow-md shadow-rose-500/20 cursor-pointer disabled:opacity-50"
+              className="px-6 py-2 bg-rose-500 hover:bg-rose-400 text-white rounded-full text-xs font-bold shadow-sm cursor-pointer disabled:opacity-50"
             >
               {isLoading ? "Submitting..." : "Submit Incident Report"}
             </button>

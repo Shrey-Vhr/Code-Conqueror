@@ -120,12 +120,12 @@ export default function LoginPage() {
     <div className="min-h-[calc(100vh-4rem)] py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center">
       <div className="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Traditional Login Box in Soft Pastel Card */}
-        <div className="lg:col-span-5 bg-white/95 backdrop-blur-md p-8 sm:p-9 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-200/80">
+        <div className="lg:col-span-5 bg-white/80 backdrop-blur-md p-8 sm:p-9 rounded-3xl shadow-sm border border-slate-200/80">
           <div className="mb-6">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white flex items-center justify-center font-black text-sm mb-3.5 shadow-md shadow-indigo-300/40">
+            <div className="w-11 h-11 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center font-semibold text-sm mb-3.5 shadow-sm">
               CS
             </div>
-            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
               Sign in to CampusShare
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -184,7 +184,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-5 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-bold text-sm transition-all shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50 cursor-pointer hover:-translate-y-0.5 active:translate-y-0"
+              className="w-full py-3 px-5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50 cursor-pointer hover:-translate-y-0.5 active:translate-y-0"
             >
               {isLoading ? "Signing in..." : "Sign In with Single Sign-On"}
             </button>
@@ -196,7 +196,7 @@ export default function LoginPage() {
         </div>
 
         {/* Right Column: Hackathon Judge One-Click Role Switcher in Soft Pastel Card */}
-        <div className="lg:col-span-7 bg-white/95 backdrop-blur-md p-8 sm:p-9 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-200/80">
+        <div className="lg:col-span-7 bg-white/80 backdrop-blur-md p-8 sm:p-9 rounded-3xl shadow-sm border border-slate-200/80">
           <div className="flex items-center justify-between mb-4">
             <div>
               <div className="flex items-center gap-2">
@@ -205,7 +205,7 @@ export default function LoginPage() {
                   Judge Sandbox Ready
                 </span>
               </div>
-              <h2 className="text-xl font-black text-slate-900 mt-2 tracking-tight">
+              <h2 className="text-xl font-semibold text-slate-900 mt-2 tracking-tight">
                 One-Click Demo Account Switcher
               </h2>
             </div>
@@ -255,7 +255,7 @@ export default function LoginPage() {
                       type="button"
                       onClick={() => handleQuickLogin(acc.email)}
                       disabled={isLoggingIn}
-                      className="px-4 py-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white text-xs font-bold shadow-xs hover:shadow-indigo-500/25 transition-all cursor-pointer disabled:opacity-50 hover:-translate-y-0.5"
+                      className="px-4 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-xs transition-all cursor-pointer disabled:opacity-50 hover:-translate-y-0.5"
                     >
                       {isLoggingIn ? "Switching..." : "Login →"}
                     </button>

@@ -1,98 +1,252 @@
 @import "tailwindcss";
 
+/*
+ * Soft Sage theme.
+ * The default Tailwind palettes are remapped onto one calm, low-saturation
+ * set of tints so every existing utility (bg-indigo-50, text-slate-500 ...)
+ * picks up the new look without touching each component.
+ */
 @theme {
-  --color-primary: #6366F1;
-  --color-primary-hover: #4F46E5;
-  --color-primary-light: #EEF2FF;
-  --color-primary-dark: #4338CA;
+  /* Surfaces: a barely-green white instead of pure white */
+  --color-white: #fbfcfa;
+  --color-black: #1b2420;
 
-  --color-secondary: #0F172A;
-  --color-secondary-hover: #1E293B;
-  --color-secondary-light: #334155;
-  --color-secondary-dark: #020617;
+  /* Neutrals (slate / gray / zinc / neutral / stone) -> sage-grey */
+  --color-slate-50: #f3f6f3;
+  --color-slate-100: #eaf0ec;
+  --color-slate-200: #dde6e0;
+  --color-slate-300: #c6d2ca;
+  --color-slate-400: #98a89e;
+  --color-slate-500: #6d7e74;
+  --color-slate-600: #526259;
+  --color-slate-700: #3e4d45;
+  --color-slate-800: #2f3b35;
+  --color-slate-900: #26302b;
+  --color-slate-950: #1b2420;
 
-  --color-addon: #F43F5E;
-  --color-addon-hover: #E11D48;
-  --color-addon-light: #FFE4E6;
-  --color-addon-dark: #BE123C;
+  /* Primary (indigo / blue / violet) -> muted teal-sage */
+  --color-indigo-50: #eff6f4;
+  --color-indigo-100: #ddebe7;
+  --color-indigo-200: #c1d9d2;
+  --color-indigo-300: #9bbfb5;
+  --color-indigo-400: #74a398;
+  --color-indigo-500: #568c80;
+  --color-indigo-600: #467568;
+  --color-indigo-700: #3a5f55;
+  --color-indigo-800: #304e46;
+  --color-indigo-900: #283f39;
+  --color-indigo-950: #1c2b27;
 
-  --color-pastel-lavender: #EEF2FF;
-  --color-pastel-lavender-border: #C7D2FE;
-  --color-pastel-mint: #ECFDF5;
-  --color-pastel-mint-border: #A7F3D0;
-  --color-pastel-peach: #FFFBEB;
-  --color-pastel-peach-border: #FDE68A;
-  --color-pastel-rose: #FFF1F2;
-  --color-pastel-rose-border: #FECDD3;
-  --color-pastel-sky: #F0F9FF;
-  --color-pastel-sky-border: #BAE6FD;
-  --color-pastel-purple: #FAF5FF;
-  --color-pastel-purple-border: #E9D5FF;
+  /* Accent (purple / fuchsia / pink) -> dusty lavender */
+  --color-purple-50: #f6f3f8;
+  --color-purple-100: #ece6f1;
+  --color-purple-200: #dbd0e5;
+  --color-purple-300: #c2b3d3;
+  --color-purple-400: #a590bb;
+  --color-purple-500: #8a74a3;
+  --color-purple-600: #725e8a;
+  --color-purple-700: #5d4d70;
+  --color-purple-800: #4a3e59;
+
+  /* Danger (rose / red) -> soft clay */
+  --color-rose-50: #fbf2f0;
+  --color-rose-100: #f5e3df;
+  --color-rose-200: #ecc9c2;
+  --color-rose-300: #deaaa0;
+  --color-rose-400: #cc8579;
+  --color-rose-500: #b96a5d;
+  --color-rose-600: #a2564b;
+  --color-rose-700: #85463e;
+  --color-rose-800: #6c3b35;
+
+  /* Warning (amber / yellow / orange) -> warm sand */
+  --color-amber-50: #fbf6ea;
+  --color-amber-100: #f5ecd3;
+  --color-amber-200: #ebdbb0;
+  --color-amber-300: #dcc486;
+  --color-amber-400: #cba95f;
+  --color-amber-500: #b38d44;
+  --color-amber-600: #997433;
+  --color-amber-700: #7a5c2b;
+  --color-amber-800: #5f4826;
+
+  /* Success (emerald / green / teal) -> leaf green */
+  --color-emerald-50: #eef6ef;
+  --color-emerald-100: #ddece0;
+  --color-emerald-200: #bfdac6;
+  --color-emerald-300: #96bfa1;
+  --color-emerald-400: #6fa27f;
+  --color-emerald-500: #54896a;
+  --color-emerald-600: #427153;
+  --color-emerald-700: #365a44;
+  --color-emerald-800: #2c4938;
+
+  /* Info (sky / cyan) -> dusty blue */
+  --color-sky-50: #eff4f8;
+  --color-sky-100: #dde8f0;
+  --color-sky-200: #c1d4e2;
+  --color-sky-300: #97b6cd;
+  --color-sky-400: #6f97b4;
+  --color-sky-500: #547e9c;
+  --color-sky-600: #436782;
+  --color-sky-700: #38546a;
+  --color-sky-800: #2e4556;
+
+  /* Lighter type weights: nothing shouts */
+  --font-weight-bold: 600;
+  --font-weight-extrabold: 600;
+  --font-weight-black: 650;
+
+  /* Diffuse, sage-tinted shadows instead of hard black ones */
+  --shadow-2xs: 0 1px 1px rgb(38 48 43 / 0.03);
+  --shadow-xs: 0 1px 2px rgb(38 48 43 / 0.04);
+  --shadow-sm: 0 1px 3px rgb(38 48 43 / 0.05), 0 1px 2px rgb(38 48 43 / 0.03);
+  --shadow-md: 0 4px 12px -2px rgb(38 48 43 / 0.06), 0 2px 4px -2px rgb(38 48 43 / 0.03);
+  --shadow-lg: 0 10px 24px -6px rgb(38 48 43 / 0.08), 0 4px 8px -4px rgb(38 48 43 / 0.04);
+  --shadow-xl: 0 18px 36px -10px rgb(38 48 43 / 0.1), 0 6px 12px -6px rgb(38 48 43 / 0.04);
+  --shadow-2xl: 0 28px 50px -14px rgb(38 48 43 / 0.14);
+
+  /* Gentler pulse (used for live status dots) */
+  --animate-pulse: soft-pulse 3.2s ease-in-out infinite;
+
+  @keyframes soft-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
 }
 
 @layer base {
   :root {
-    --background: #F8FAFC;
-    --foreground: #0F172A;
-    --card: #FFFFFF;
-    --card-foreground: #0F172A;
-    --primary: #6366F1;
-    --primary-foreground: #FFFFFF;
-    --secondary: #0F172A;
-    --secondary-foreground: #FFFFFF;
-    --accent: #F43F5E;
-    --accent-foreground: #FFFFFF;
-    --muted: #F1F5F9;
-    --muted-foreground: #64748B;
-    --border: #E2E8F0;
+    --background: #eaf0eb;
+    --foreground: #26302b;
+    --ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 
   body {
     background-color: var(--background);
-    background-image: 
-      radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.04) 0px, transparent 50%),
-      radial-gradient(at 90% 15%, rgba(244, 63, 94, 0.03) 0px, transparent 50%),
-      radial-gradient(at 50% 90%, rgba(16, 185, 129, 0.03) 0px, transparent 50%);
+    background-image:
+      radial-gradient(60rem 36rem at 8% -8%, rgb(160 196 184 / 0.32), transparent 70%),
+      radial-gradient(48rem 32rem at 100% 0%, rgb(196 186 218 / 0.22), transparent 70%),
+      radial-gradient(54rem 34rem at 50% 108%, rgb(214 204 170 / 0.2), transparent 70%);
+    background-attachment: fixed;
     color: var(--foreground);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
   }
+
+  ::selection {
+    background: #b9d4cc;
+    color: #1b2420;
+  }
+
+  /* Form controls: calm focus ring, soft fields */
+  input:not([type="checkbox"]):not([type="radio"]),
+  select,
+  textarea {
+    background-color: rgb(251 252 250 / 0.85);
+    transition: border-color 0.2s var(--ease-soft), box-shadow 0.2s var(--ease-soft), background-color 0.2s;
+  }
+
+  input:focus,
+  select:focus,
+  textarea:focus {
+    background-color: #fbfcfa;
+  }
+
+  ::placeholder {
+    color: #98a89e;
+  }
+
+  /* Slim, quiet scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #c6d2ca transparent;
+  }
 }
 
-/* Custom Soft Pastel Glass Cards and Transitions */
-.card-pastel-lavender {
-  background: linear-gradient(135deg, rgba(238, 242, 255, 0.85) 0%, rgba(245, 243, 255, 0.55) 100%);
-  border-color: rgba(199, 210, 254, 0.75);
+/* ---------- Motion ---------- */
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.card-pastel-mint {
-  background: linear-gradient(135deg, rgba(236, 253, 245, 0.85) 0%, rgba(240, 253, 250, 0.55) 100%);
-  border-color: rgba(167, 243, 208, 0.75);
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.card-pastel-peach {
-  background: linear-gradient(135deg, rgba(255, 251, 235, 0.85) 0%, rgba(255, 247, 237, 0.55) 100%);
-  border-color: rgba(253, 230, 138, 0.75);
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.97) translateY(-4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.card-pastel-rose {
-  background: linear-gradient(135deg, rgba(255, 241, 242, 0.85) 0%, rgba(253, 242, 248, 0.55) 100%);
-  border-color: rgba(254, 205, 211, 0.75);
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -10px, 0); }
 }
 
-.card-pastel-sky {
-  background: linear-gradient(135deg, rgba(240, 249, 255, 0.85) 0%, rgba(238, 242, 255, 0.55) 100%);
-  border-color: rgba(186, 230, 253, 0.75);
+/* Every page eases in as a whole */
+main > div {
+  animation: fade-up 0.55s var(--ease-soft) backwards;
 }
 
-.card-pastel-purple {
-  background: linear-gradient(135deg, rgba(250, 245, 255, 0.85) 0%, rgba(243, 232, 255, 0.55) 100%);
-  border-color: rgba(233, 213, 255, 0.75);
+/* Opt-in utilities */
+.reveal {
+  animation: fade-up 0.6s var(--ease-soft) backwards;
 }
 
-.card-pastel-white {
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(8px);
-  border-color: rgba(226, 232, 240, 0.8);
+.reveal-pop {
+  animation: pop-in 0.25s var(--ease-soft) backwards;
+}
+
+/* Children fade up one after another */
+.stagger > * {
+  animation: fade-up 0.55s var(--ease-soft) backwards;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger > *:nth-child(2) { animation-delay: 0.07s; }
+.stagger > *:nth-child(3) { animation-delay: 0.12s; }
+.stagger > *:nth-child(4) { animation-delay: 0.17s; }
+.stagger > *:nth-child(5) { animation-delay: 0.22s; }
+.stagger > *:nth-child(6) { animation-delay: 0.27s; }
+.stagger > *:nth-child(7) { animation-delay: 0.32s; }
+.stagger > *:nth-child(8) { animation-delay: 0.37s; }
+.stagger > *:nth-child(n + 9) { animation-delay: 0.42s; }
+
+.float-slow {
+  animation: drift 7s ease-in-out infinite;
+}
+
+/* Calm lift for anything clickable that looks like a card */
+.lift {
+  transition: transform 0.3s var(--ease-soft), box-shadow 0.3s var(--ease-soft), border-color 0.3s;
+}
+.lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Soft tinted surfaces kept for existing markup */
+.card-pastel-lavender { background: rgb(240 235 246 / 0.7); border-color: rgb(219 208 229 / 0.8); }
+.card-pastel-mint     { background: rgb(232 243 236 / 0.75); border-color: rgb(191 218 198 / 0.8); }
+.card-pastel-peach    { background: rgb(247 240 222 / 0.75); border-color: rgb(235 219 176 / 0.8); }
+.card-pastel-rose     { background: rgb(246 232 228 / 0.75); border-color: rgb(236 201 194 / 0.8); }
+.card-pastel-sky      { background: rgb(233 241 246 / 0.75); border-color: rgb(193 212 226 / 0.8); }
+.card-pastel-purple   { background: rgb(240 235 246 / 0.7); border-color: rgb(219 208 229 / 0.8); }
+.card-pastel-white    { background: rgb(251 252 250 / 0.8); backdrop-filter: blur(8px); border-color: rgb(221 230 224 / 0.9); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

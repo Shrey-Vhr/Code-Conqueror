@@ -26,9 +26,9 @@ export default async function NewResourcePage() {
         <span className="text-slate-800 font-bold">List New Resource</span>
       </div>
 
-      <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-8 sm:p-10 space-y-6">
+      <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-sm p-8 sm:p-10 space-y-6">
         <div className="border-b border-slate-100 pb-5 mb-2">
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-semibold text-slate-900 tracking-tight">
             List Campus Asset for Sharing
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -145,17 +145,6 @@ export default async function NewResourcePage() {
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Image URL (Unsplash or direct asset)
-              </label>
-              <input
-                type="url"
-                name="image"
-                placeholder="https://images.unsplash.com/photo-..."
-                className="w-full px-4 py-2.5 rounded-full border border-slate-200 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-2xs"
-              />
-            </div>
           </div>
 
           {/* Pricing & Policy Limits */}
@@ -314,7 +303,7 @@ export default async function NewResourcePage() {
             </Link>
             <button
               type="submit"
-              className="px-7 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all cursor-pointer hover:-translate-y-0.5"
+              className="px-7 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-xs font-bold shadow-sm transition-all cursor-pointer hover:-translate-y-0.5"
             >
               Publish Resource to Registry
             </button>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useTransition } from "react";
+import { ResourceThumb } from "@/components/ResourceThumb";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -143,7 +144,7 @@ export function BookingsListClient({ initialBookings }: BookingsListClientProps)
               }}
               className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-2 ${
                 isActive
-                  ? "bg-gradient-to-r from-indigo-600 to-indigo-500 text-white shadow-md shadow-indigo-500/20"
+                  ? "bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm"
                   : "text-slate-600 hover:bg-indigo-50/70 hover:text-indigo-600"
               }`}
             >
@@ -163,7 +164,7 @@ export function BookingsListClient({ initialBookings }: BookingsListClientProps)
       </div>
 
       {/* Filter and Search Bar in Soft Pastel Card */}
-      <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-4 sm:p-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+      <div className="bg-white/80 backdrop-blur-md rounded-3xl border border-slate-200/80 p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         {/* Search Input */}
         <div className="relative flex-1">
           <svg
@@ -218,9 +219,9 @@ export function BookingsListClient({ initialBookings }: BookingsListClientProps)
 
       {/* Bookings List */}
       {filteredBookings.length === 0 ? (
-        <div className="bg-white/95 rounded-3xl border border-slate-200/80 p-12 text-center space-y-4 shadow-[0_8px_30px_rgb(0,0,0,0.03)]">
+        <div className="bg-white/80 rounded-3xl border border-slate-200/80 p-12 text-center space-y-4 shadow-sm">
           <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 mx-auto flex items-center justify-center font-bold text-2xl shadow-xs">
-            📅
+            
           </div>
           <h3 className="text-base font-bold text-slate-900">No Reservations Found</h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
@@ -231,7 +232,7 @@ export function BookingsListClient({ initialBookings }: BookingsListClientProps)
           <div className="pt-2">
             <Link
               href="/resources"
-              className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-500/20 transition-all hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-xs font-bold shadow-sm transition-all hover:-translate-y-0.5"
             >
               Browse Shared Resources →
             </Link>
@@ -250,28 +251,19 @@ export function BookingsListClient({ initialBookings }: BookingsListClientProps)
             return (
               <div
                 key={booking.id}
-                className={`bg-white/95 backdrop-blur-md rounded-3xl border transition-all overflow-hidden p-6 sm:p-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 ${
+                className={`bg-white/80 backdrop-blur-md rounded-3xl border transition-all overflow-hidden p-6 sm:p-7 flex flex-col md:flex-row items-start md:items-center justify-between gap-5 ${
                   isOverdue
                     ? "border-rose-300 bg-rose-50/40 ring-2 ring-rose-200 shadow-sm"
                     : isCheckedIn
-                    ? "border-sky-200 bg-sky-50/20 shadow-[0_8px_30px_rgb(0,0,0,0.03)]"
+                    ? "border-sky-200 bg-sky-50/20 shadow-sm"
                     : isWaitlisted
-                    ? "border-purple-200/80 bg-purple-50/20 shadow-[0_8px_30px_rgb(0,0,0,0.03)]"
-                    : "border-slate-200/80 hover:border-indigo-200 hover:shadow-md shadow-[0_8px_30px_rgb(0,0,0,0.03)]"
+                    ? "border-purple-200/80 bg-purple-50/20 shadow-sm"
+                    : "border-slate-200/80 hover:border-indigo-200 hover:shadow-md shadow-sm"
                 }`}
               >
                 {/* Left: Resource Image & Metadata */}
                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                  <div className="w-18 h-18 rounded-2xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200/80 shadow-2xs">
-                    <img
-                      src={
-                        booking.resource.image ||
-                        "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=400&q=80"
-                      }
-                      alt={booking.resource.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                  <ResourceThumb type={booking.resource.type} className="w-16 h-16 rounded-2xl shrink-0" iconClassName="w-7 h-7" />
 
                   <div className="flex-1 min-w-0 space-y-1.5">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -295,7 +287,7 @@ export function BookingsListClient({ initialBookings }: BookingsListClientProps)
                     {/* Overdue Alert banner if overdue */}
                     {isOverdue && (
                       <div className="flex items-center gap-1.5 text-xs font-bold text-rose-700 bg-rose-100/90 px-3 py-1 rounded-full border border-rose-200">
-                        <span>🚨 OVERDUE: Return window elapsed! Return immediately to avoid penalty strikes.</span>
+                        <span>OVERDUE: Return window elapsed! Return immediately to avoid penalty strikes.</span>
                       </div>
                     )}
 
@@ -332,7 +324,7 @@ export function BookingsListClient({ initialBookings }: BookingsListClientProps)
                   {isApproved && (
                     <Link
                       href={`/bookings/${booking.id}#condition-actions`}
-                      className="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-full text-xs font-bold shadow-md shadow-emerald-500/20 transition-all flex items-center gap-1.5 hover:-translate-y-0.5"
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 hover:-translate-y-0.5"
                     >
                       <span>Check In</span>
                       <span>→</span>
@@ -345,8 +337,8 @@ export function BookingsListClient({ initialBookings }: BookingsListClientProps)
                       href={`/bookings/${booking.id}#condition-actions`}
                       className={`px-4 py-2 text-white rounded-full text-xs font-bold shadow-md transition-all flex items-center gap-1.5 hover:-translate-y-0.5 ${
                         isOverdue
-                          ? "bg-gradient-to-r from-rose-600 to-rose-700 shadow-rose-500/25 animate-pulse"
-                          : "bg-gradient-to-r from-indigo-600 to-indigo-500 shadow-indigo-500/20 hover:from-indigo-700 hover:to-indigo-600"
+                          ? "bg-rose-500 hover:bg-rose-400 animate-pulse"
+                          : "bg-indigo-600 hover:bg-indigo-500"
                       }`}
                     >
                       <span>Complete Return</span>
@@ -396,7 +388,7 @@ export function BookingsListClient({ initialBookings }: BookingsListClientProps)
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-7 shadow-xl border border-slate-200/80 space-y-4 animate-in fade-in zoom-in-95 duration-150">
             <div>
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">Cancel Reservation</h3>
+              <h3 className="text-lg font-semibold text-slate-900 tracking-tight">Cancel Reservation</h3>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                 Are you sure you want to cancel your reservation for &quot;{cancelModalBooking.resource.name}&quot;?
                 Any deposit held ({cancelModalBooking.depositHeld} credits) will be immediately refunded to your balance.
@@ -428,7 +420,7 @@ export function BookingsListClient({ initialBookings }: BookingsListClientProps)
                 type="button"
                 onClick={confirmCancel}
                 disabled={isPending}
-                className="px-5 py-2.5 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-full text-xs font-bold shadow-md shadow-rose-500/20 transition-all disabled:opacity-50 cursor-pointer"
+                className="px-5 py-2.5 bg-rose-500 hover:bg-rose-400 text-white rounded-full text-xs font-bold shadow-sm transition-all disabled:opacity-50 cursor-pointer"
               >
                 {isPending ? "Cancelling..." : "Confirm Cancellation"}
               </button>

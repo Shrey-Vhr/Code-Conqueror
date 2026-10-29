@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/rbac";
-import { getUserRecentHours } from "@/lib/fairness";
+import { getUserRecentHours, getFairnessPolicy } from "@/lib/fairness";
 import { ProfileClient } from "./ProfileClient";
 import { AuditTimeline } from "@/components/AuditTimeline";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -41,7 +41,8 @@ export default async function ProfilePage() {
     return acc + Math.max(0, durationMs / (1000 * 60 * 60));
   }, 0);
 
-  const weeklyCap = 20; // 20 hours cap
+  const policy = await getFairnessPolicy();
+  const weeklyCap = policy.weeklyHourCap;
   const weeklyUsagePercent = Math.min(100, Math.round((weeklyHours / weeklyCap) * 100));
 
   // Recent 5 bookings
@@ -77,20 +78,25 @@ export default async function ProfilePage() {
 
   const isSuspended = user.suspendedUntil && new Date(user.suspendedUntil) > new Date();
 
-  const creditMax = 500;
-  const creditPercent = Math.min(100, Math.round((user.credits / creditMax) * 100));
+  const heldAgg = await prisma.booking.aggregate({
+    where: { userId: user.id, depositHeld: { gt: 0 } },
+    _sum: { depositHeld: true },
+  });
+  const creditsHeld = heldAgg._sum.depositHeld ?? 0;
+  const creditTotal = user.credits + creditsHeld;
+  const spendablePercent = creditTotal > 0 ? Math.round((user.credits / creditTotal) * 100) : 100;
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* 1. User Info Card */}
-      <div className="card-pastel-lavender rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-[0_8px_30px_rgb(0,0,0,0.03)]">
+      <div className="card-pastel-lavender rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-sm">
         <div className="flex items-center gap-5">
-          <div className="w-18 h-18 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 text-white font-black text-2xl flex items-center justify-center shadow-md ring-4 ring-white/70 shrink-0">
+          <div className="w-18 h-18 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-2xl flex items-center justify-center shadow-md ring-4 ring-white/70 shrink-0">
             {user.name.charAt(0)}
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">
                 {user.name}
               </h1>
               <span className="text-xs font-bold px-3 py-1 rounded-full border bg-indigo-50/80 text-indigo-700 border-indigo-200/80 shadow-2xs">
@@ -120,8 +126,8 @@ export default async function ProfilePage() {
         <div className="flex items-center gap-3 shrink-0 flex-wrap">
           <div className="p-3.5 bg-white/85 rounded-2xl border border-indigo-100/80 text-center min-w-[96px] shadow-2xs backdrop-blur-xs">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Credits</span>
-            <span className="text-xl font-black text-indigo-600">{user.credits}</span>
-            <span className="text-[10px] text-slate-400 block font-medium">/ {creditMax}</span>
+            <span className="text-xl font-semibold text-indigo-600">{user.credits}</span>
+            <span className="text-[10px] text-slate-400 block font-medium">available</span>
           </div>
 
           <div className="p-3.5 bg-white/85 rounded-2xl border border-rose-100/80 text-center min-w-[96px] shadow-2xs backdrop-blur-xs">
@@ -146,7 +152,7 @@ export default async function ProfilePage() {
 
           <div className="p-3.5 bg-white/85 rounded-2xl border border-emerald-100/80 text-center min-w-[96px] shadow-2xs backdrop-blur-xs">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">30d Usage</span>
-            <span className="text-xl font-black text-emerald-600">{recent30dHours}h</span>
+            <span className="text-xl font-semibold text-emerald-600">{recent30dHours}h</span>
             <span className="text-[10px] text-slate-400 block font-medium">Fairness metric</span>
           </div>
         </div>
@@ -155,7 +161,7 @@ export default async function ProfilePage() {
       {/* Suspension Alert */}
       {isSuspended && (
         <div className="p-5 card-pastel-rose rounded-3xl flex items-center gap-4 text-xs text-rose-900 font-medium shadow-sm">
-          <span className="text-3xl">🚨</span>
+          <span className="text-3xl"></span>
           <div>
             <strong className="block text-sm font-bold text-rose-950">
               Account Reservation Privileges Suspended
@@ -170,44 +176,44 @@ export default async function ProfilePage() {
 
       {/* 2. Visual Progress Bars: Credits & Weekly Usage vs Cap */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Credits Balance Progress Bar */}
-        <div className="card-pastel-sky rounded-3xl p-6 sm:p-7 space-y-4 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+        {/* Credit balance */}
+        <div className="card-pastel-sky rounded-3xl p-6 sm:p-7 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Credit Balance & Deposit Escrow</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Credits replenish weekly; held as deposit during active checkouts</p>
+              <h3 className="text-sm font-semibold text-slate-800">Credits</h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {policy.monthlyCreditGrant} credits are added each month; deposits are held during bookings
+              </p>
             </div>
-            <span className="text-xs font-mono font-bold text-sky-700 bg-white/90 px-3 py-1 rounded-full border border-sky-200/80 shadow-2xs">
-              {user.credits} / {creditMax} pts
+            <span className="text-xs font-mono font-semibold text-sky-700 bg-white/70 px-3 py-1 rounded-full border border-sky-200/70">
+              {user.credits} available
             </span>
           </div>
-          <div className="w-full bg-white/80 rounded-full h-3.5 overflow-hidden p-0.5 border border-sky-200/70 shadow-inner">
+          <div className="w-full bg-white/70 rounded-full h-3 overflow-hidden border border-sky-200/60 flex">
             <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                creditPercent > 50
-                  ? "bg-gradient-to-r from-sky-400 to-indigo-500"
-                  : creditPercent > 20
-                  ? "bg-gradient-to-r from-amber-400 to-amber-500"
-                  : "bg-gradient-to-r from-rose-500 to-rose-600"
-              }`}
-              style={{ width: `${creditPercent}%` }}
+              className="h-full bg-sky-400/80 transition-all duration-700"
+              style={{ width: `${spendablePercent}%` }}
             />
+            <div className="h-full bg-amber-300/80 flex-1" />
           </div>
-          <div className="flex justify-between text-[11px] font-semibold text-slate-500">
-            <span>0 credits</span>
-            <span className="text-sky-700 font-bold">{creditPercent}% available</span>
-            <span>500 max cap</span>
+          <div className="flex justify-between text-[11px] text-slate-500">
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-sky-400/80" /> {user.credits} spendable
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-amber-300/80" /> {creditsHeld} held as deposits
+            </span>
           </div>
         </div>
 
         {/* Weekly Usage vs 20h Cap */}
-        <div className="card-pastel-purple rounded-3xl p-6 sm:p-7 space-y-4 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+        <div className="card-pastel-purple rounded-3xl p-6 sm:p-7 space-y-4 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-slate-900">Weekly Equipment Allocation</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Fair-share cap: maximum 20 scheduled hours per 7-day period</p>
+              <p className="text-xs text-slate-500 mt-0.5">Fair-share cap: maximum {weeklyCap} scheduled hours per 7-day period</p>
             </div>
-            <span className="text-xs font-mono font-bold text-purple-700 bg-white/90 px-3 py-1 rounded-full border border-purple-200/80 shadow-2xs">
+            <span className="text-xs font-mono font-bold text-purple-700 bg-white/80 px-3 py-1 rounded-full border border-purple-200/80 shadow-2xs">
               {weeklyHours.toFixed(1)} / {weeklyCap}h
             </span>
           </div>
@@ -218,7 +224,7 @@ export default async function ProfilePage() {
                   ? "bg-gradient-to-r from-teal-400 to-indigo-500"
                   : weeklyUsagePercent < 90
                   ? "bg-gradient-to-r from-amber-400 to-amber-500"
-                  : "bg-gradient-to-r from-rose-500 to-rose-600"
+                  : "bg-rose-500 hover:bg-rose-400"
               }`}
               style={{ width: `${weeklyUsagePercent}%` }}
             />
@@ -226,7 +232,7 @@ export default async function ProfilePage() {
           <div className="flex justify-between text-[11px] font-semibold text-slate-500">
             <span>0 hours</span>
             <span className="text-purple-700 font-bold">{weeklyCap - weeklyHours > 0 ? `${(weeklyCap - weeklyHours).toFixed(1)}h remaining` : "Cap reached"}</span>
-            <span>20h weekly max</span>
+            <span>{weeklyCap}h weekly max</span>
           </div>
         </div>
       </div>
@@ -243,7 +249,7 @@ export default async function ProfilePage() {
       />
 
       {/* 4. Recent Bookings Summary (Last 5) */}
-      <div className="bg-white/85 rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] backdrop-blur-md space-y-5">
+      <div className="bg-white/85 rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm backdrop-blur-md space-y-5">
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div>
             <h2 className="text-base font-bold text-slate-900">Recent Equipment Reservations</h2>
@@ -307,16 +313,16 @@ export default async function ProfilePage() {
       </div>
 
       {/* 5. Activity Audit Trail */}
-      <div className="bg-white/85 rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.03)] backdrop-blur-md space-y-4">
+      <div className="bg-white/85 rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-sm backdrop-blur-md space-y-4">
         <div className="flex items-center justify-between pb-4 border-b border-slate-100">
           <div>
             <h2 className="text-base font-bold text-slate-900">
               My Audit & Security Timeline
             </h2>
-            <p className="text-xs text-slate-500 mt-0.5">Cryptographically verifiable actions associated with your profile</p>
+            <p className="text-xs text-slate-500 mt-0.5">Recent actions recorded against your account</p>
           </div>
           <span className="text-xs text-slate-500 font-mono bg-slate-100/80 px-3 py-1 rounded-full border border-slate-200/60 font-semibold">
-            Immutable
+            Append-only
           </span>
         </div>
         <AuditTimeline logs={userAuditLogs} />

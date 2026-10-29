@@ -61,7 +61,7 @@ export function ResolutionFormClient({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 sm:p-8 card-pastel-lavender rounded-3xl border border-indigo-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-5">
+    <form onSubmit={handleSubmit} className="p-6 sm:p-8 card-pastel-lavender rounded-3xl border border-indigo-100 shadow-sm space-y-5">
       <div>
         <h3 className="font-bold text-slate-900 text-base sm:text-lg">
           Manager Adjudication & Resolution
@@ -87,7 +87,7 @@ export function ResolutionFormClient({
           value={resolution}
           onChange={(e) => setResolution(e.target.value)}
           placeholder="State repair outcome, user interview findings, or equipment inspection verdict..."
-          className="w-full px-4 py-3 rounded-2xl border border-slate-200/90 text-xs bg-white/95 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-medium"
+          className="w-full px-4 py-3 rounded-2xl border border-slate-200/90 text-xs bg-white/80 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs font-medium"
         />
       </div>
 
@@ -104,7 +104,7 @@ export function ResolutionFormClient({
               setDepositAction("FORFEIT");
             }
           }}
-          className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 text-xs bg-white/95 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
+          className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 text-xs bg-white/80 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
         >
           <option value="NONE">No Conduct Penalty (Accidental wear / Warning issued)</option>
           <option value="FORFEIT_DEPOSIT">Forfeit Security Deposit (Direct repair offset)</option>
@@ -123,7 +123,7 @@ export function ResolutionFormClient({
           <select
             value={depositAction}
             onChange={(e) => setDepositAction(e.target.value as "REFUND" | "FORFEIT")}
-            className="w-full px-4 py-2.5 rounded-full border border-amber-300/80 text-xs bg-white/95 font-semibold text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
+            className="w-full px-4 py-2.5 rounded-full border border-amber-300/80 text-xs bg-white/80 font-semibold text-amber-950 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-2xs"
           >
             <option value="REFUND">Refund Deposit ({depositAmount} credits returned to user balance)</option>
             <option value="FORFEIT">Forfeit Deposit ({depositAmount} credits retained for repair fund)</option>
@@ -157,7 +157,7 @@ export function ResolutionFormClient({
             max={200}
             value={penaltyCredits}
             onChange={(e) => setPenaltyCredits(parseInt(e.target.value, 10) || 0)}
-            className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 text-xs bg-white/95 font-semibold text-slate-800 shadow-2xs"
+            className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 text-xs bg-white/80 font-semibold text-slate-800 shadow-2xs"
           />
         </div>
       )}
@@ -173,7 +173,7 @@ export function ResolutionFormClient({
             max={60}
             value={suspendDays}
             onChange={(e) => setSuspendDays(parseInt(e.target.value, 10) || 7)}
-            className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 text-xs bg-white/95 font-semibold text-slate-800 shadow-2xs"
+            className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 text-xs bg-white/80 font-semibold text-slate-800 shadow-2xs"
           />
         </div>
       )}
@@ -182,7 +182,7 @@ export function ResolutionFormClient({
         <button
           type="submit"
           disabled={isLoading}
-          className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-100 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+          className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-100 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
         >
           {isLoading ? "Recording Decision..." : "Resolve Incident & Finalize Reservation"}
         </button>
