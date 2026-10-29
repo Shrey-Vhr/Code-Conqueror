@@ -31,7 +31,7 @@ export default async function NotificationsPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="py-6 sm:py-8">
       <NotificationsClient
         initialNotifications={serializedNotifications}
         user={{

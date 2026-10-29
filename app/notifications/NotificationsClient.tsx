@@ -101,10 +101,10 @@ export function NotificationsClient({
       return {
         icon: (
           <svg className="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
           </svg>
         ),
-        bgClass: "bg-emerald-50 border-emerald-200 text-emerald-800",
+        bgClass: "bg-emerald-50 text-emerald-800 border-emerald-200/80",
         badge: "Approved",
       };
     }
@@ -112,10 +112,10 @@ export function NotificationsClient({
       return {
         icon: (
           <svg className="w-5 h-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
           </svg>
         ),
-        bgClass: "bg-rose-50 border-rose-200 text-rose-800",
+        bgClass: "bg-rose-50 text-rose-800 border-rose-200/80",
         badge: "Rejected / Cancelled",
       };
     }
@@ -126,7 +126,7 @@ export function NotificationsClient({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
         ),
-        bgClass: "bg-amber-50 border-amber-200 text-amber-800",
+        bgClass: "bg-amber-50 text-amber-900 border-amber-200/80",
         badge: t.includes("INCIDENT") ? "Incident Alert" : "Overdue Notice",
       };
     }
@@ -137,41 +137,41 @@ export function NotificationsClient({
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
           </svg>
         ),
-        bgClass: "bg-indigo-50 border-indigo-200 text-indigo-800",
+        bgClass: "bg-indigo-50 text-indigo-800 border-indigo-200/80",
         badge: t.includes("PROMOTED") ? "Promoted to Reservation" : "Waitlist Position",
       };
     }
     return {
       icon: (
-        <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-5 h-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
         </svg>
       ),
-      bgClass: "bg-blue-50 border-blue-200 text-blue-800",
+      bgClass: "bg-indigo-50 text-indigo-800 border-indigo-200/80",
       badge: "Update",
     };
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+    <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+      <div className="card-pastel-lavender rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-5 shadow-[0_8px_30px_rgb(0,0,0,0.03)]">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Notification Center
             </h1>
             {unreadCount > 0 ? (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-100 text-rose-800">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200/80 shadow-2xs">
                 {unreadCount} unread
               </span>
             ) : (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
                 All caught up
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
             Real-time automated alerts for bookings, waitlist advancements, and incident notices.
           </p>
         </div>
@@ -180,10 +180,10 @@ export function NotificationsClient({
           <button
             onClick={handleMarkAllRead}
             disabled={actionLoading}
-            className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50"
+            className="inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-bold text-slate-700 bg-white/90 hover:bg-white border border-slate-200/90 rounded-full transition-all shadow-xs hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
           >
-            <svg className="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg className="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
             </svg>
             Mark all as read
           </button>
@@ -191,7 +191,7 @@ export function NotificationsClient({
       </div>
 
       {/* Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-2 py-6">
+      <div className="flex flex-wrap items-center gap-2">
         {[
           { key: "all", label: "All", count: notifications.length },
           { key: "unread", label: "Unread", count: unreadCount },
@@ -221,16 +221,16 @@ export function NotificationsClient({
           <button
             key={tab.key}
             onClick={() => setFilter(tab.key as any)}
-            className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+            className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
               filter === tab.key
-                ? "bg-blue-600 text-white shadow-sm"
-                : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-100"
+                : "bg-white/85 text-slate-600 hover:bg-white border border-slate-200/70 shadow-2xs hover:text-slate-900"
             }`}
           >
             {tab.label}
             <span
-              className={`ml-1.5 px-1.5 py-0.2 rounded-full text-[10px] ${
-                filter === tab.key ? "bg-blue-700 text-white" : "bg-slate-200 text-slate-700"
+              className={`ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                filter === tab.key ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
               }`}
             >
               {tab.count}
@@ -242,14 +242,14 @@ export function NotificationsClient({
       {/* Notifications List */}
       <div className="space-y-3">
         {filteredNotifications.length === 0 ? (
-          <div className="text-center py-16 bg-white border border-dashed border-slate-200 rounded-xl">
-            <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-3">
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="text-center py-16 card-pastel-lavender rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
+            <div className="w-14 h-14 mx-auto rounded-full bg-white shadow-2xs border border-indigo-100/80 flex items-center justify-center text-indigo-400 mb-3">
+              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
             </div>
-            <h3 className="text-sm font-semibold text-slate-800">No notifications found</h3>
-            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+            <h3 className="text-sm font-bold text-slate-800">No notifications found</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto font-medium">
               {filter === "unread"
                 ? "You've read all your notifications! Check back later for updates on your resource requests."
                 : `There are no notifications matching the "${filter}" filter right now.`}
@@ -263,27 +263,27 @@ export function NotificationsClient({
             return (
               <div
                 key={n.id}
-                className={`relative group p-4 rounded-xl border transition-all ${
+                className={`relative group p-4 sm:p-5 rounded-3xl border transition-all ${
                   !n.read
-                    ? "bg-blue-50/40 border-blue-200 shadow-xs"
-                    : "bg-white border-slate-200 hover:border-slate-300"
+                    ? "card-pastel-lavender border-indigo-200/90 shadow-[0_4px_20px_rgb(99,102,241,0.06)]"
+                    : "bg-white/85 border-slate-200/70 hover:bg-white hover:border-slate-300 shadow-2xs"
                 }`}
               >
-                <div className="flex items-start gap-3.5">
-                  <div className="shrink-0 mt-0.5 p-2 rounded-lg bg-white border border-slate-200 shadow-2xs">
+                <div className="flex items-start gap-4">
+                  <div className="shrink-0 mt-0.5 w-11 h-11 rounded-full bg-white shadow-2xs border border-slate-100 flex items-center justify-center">
                     {visual.icon}
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className={`px-2 py-0.5 rounded text-[11px] font-semibold uppercase tracking-wide border ${visual.bgClass}`}>
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-2xs ${visual.bgClass}`}>
                         {visual.badge}
                       </span>
-                      <span className="text-xs text-slate-400" title={format(dateObj, "PPpp")}>
+                      <span className="text-xs text-slate-400 font-medium" title={format(dateObj, "PPpp")}>
                         {formatDistanceToNow(dateObj, { addSuffix: true })}
                       </span>
                       {!n.read && (
-                        <span className="inline-flex items-center px-1.5 py-0.2 rounded text-[10px] font-medium bg-blue-100 text-blue-700">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 text-indigo-700 border border-indigo-200/60 shadow-2xs">
                           New
                         </span>
                       )}
@@ -293,14 +293,14 @@ export function NotificationsClient({
                       {n.message}
                     </p>
 
-                    <div className="flex items-center gap-4 mt-3">
+                    <div className="flex items-center gap-3 mt-3 flex-wrap">
                       {n.link && (
                         <Link
                           href={n.link}
                           onClick={() => {
                             if (!n.read) handleMarkAsRead(n.id);
                           }}
-                          className="text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors inline-flex items-center gap-1"
+                          className="text-xs font-bold text-indigo-700 bg-white/90 hover:bg-indigo-50 border border-indigo-200/70 px-3.5 py-1.5 rounded-full transition-all shadow-2xs hover:shadow-xs inline-flex items-center gap-1.5 hover:-translate-y-0.5"
                         >
                           <span>View resource or booking</span>
                           <span aria-hidden="true">&rarr;</span>
@@ -310,7 +310,7 @@ export function NotificationsClient({
                       {!n.read && (
                         <button
                           onClick={(e) => handleMarkAsRead(n.id, e)}
-                          className="text-xs text-slate-500 hover:text-slate-700 underline font-medium cursor-pointer"
+                          className="text-xs text-slate-500 hover:text-slate-800 bg-slate-100/80 hover:bg-slate-200/80 px-3 py-1.5 rounded-full font-semibold transition-colors cursor-pointer"
                         >
                           Mark as read
                         </button>

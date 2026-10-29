@@ -54,47 +54,52 @@ export function ProfileClient({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-bold text-slate-900">
             Safety & Operational Certifications
           </h2>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-slate-500 mt-0.5">
             Mandatory credentials unlocking laser cutters, 3D printers, bio-hoods, and GPU clusters.
           </p>
         </div>
 
         <button
           onClick={() => setShowSubmitModal(!showSubmitModal)}
-          className="px-4 py-2 bg-secondary hover:bg-secondary-hover text-addon rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer border border-secondary"
+          className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-100 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer inline-flex items-center gap-1.5 self-start sm:self-auto"
         >
-          + Submit Safety Credential
+          <span>+</span>
+          <span>Submit Safety Credential</span>
         </button>
       </div>
 
       {/* Submit Credential Form */}
       {showSubmitModal && (
-        <form onSubmit={handleSubmit} className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+        <form onSubmit={handleSubmit} className="p-6 sm:p-7 card-pastel-lavender rounded-3xl space-y-4 shadow-lg backdrop-blur-md">
           <div>
-            <h3 className="font-bold text-slate-900 text-sm">
+            <h3 className="font-bold text-slate-900 text-base">
               Submit Credential for Campus Verification
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-500 mt-0.5">
               Paste workshop completion transcript, lab technician badge ID, or online safety test confirmation.
             </p>
           </div>
 
-          {error && <p className="text-xs text-rose-600 font-medium">{error}</p>}
+          {error && (
+            <div className="p-3.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-2xl font-semibold">
+              {error}
+            </div>
+          )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Select Required Training Module *
             </label>
             <select
               required
               value={selectedTrainingId}
               onChange={(e) => setSelectedTrainingId(e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 text-xs bg-white/95 font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
             >
               <option value="">-- Choose Training --</option>
               {trainings.map((t) => (
@@ -106,7 +111,7 @@ export function ProfileClient({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Document Note / Credential Transcript *
             </label>
             <textarea
@@ -115,24 +120,24 @@ export function ProfileClient({
               value={documentNote}
               onChange={(e) => setDocumentNote(e.target.value)}
               placeholder="e.g. Attended safety workshop with Lab Tech Jenkins on Oct 14. Certificate ID: #NF-SAF-8821. Passed fire safety exam."
-              className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 rounded-2xl border border-slate-200/90 text-xs bg-white/95 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-2xs"
             />
           </div>
 
-          <div className="flex justify-end gap-2 pt-1">
+          <div className="flex justify-end gap-2.5 pt-2">
             <button
               type="button"
               onClick={() => setShowSubmitModal(false)}
-              className="px-3.5 py-1.5 border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-100"
+              className="px-4 py-2 border border-slate-200 bg-white/80 text-slate-700 rounded-full text-xs font-semibold hover:bg-white transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="px-5 py-1.5 bg-secondary hover:bg-secondary-hover text-addon rounded-lg text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50 border border-secondary"
+              className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-100 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
             >
-              {isPending ? "Submitting..." : "Submit to Admin for Verification"}
+              {isPending ? "Submitting..." : "Submit for Verification"}
             </button>
           </div>
         </form>
@@ -140,43 +145,52 @@ export function ProfileClient({
 
       {/* Certifications Table */}
       {userCertifications.length === 0 ? (
-        <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-xs text-slate-400">
+        <div className="p-10 text-center bg-white/85 rounded-3xl border border-slate-200/80 text-xs text-slate-400 shadow-[0_8px_30px_rgb(0,0,0,0.02)]">
           No training certifications on record yet. Click &quot;Submit Safety Credential&quot; to request verification.
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {userCertifications.map((cert) => (
-            <div
-              key={cert.id}
-              className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs space-y-3"
-            >
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-[10px] font-bold font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                    {cert.trainingCode}
-                  </span>
-                  <h4 className="font-bold text-slate-900 text-sm mt-1 leading-snug">
-                    {cert.trainingName}
-                  </h4>
-                  <span className="text-xs text-slate-400">{cert.department}</span>
+          {userCertifications.map((cert) => {
+            const isApproved = cert.status === "APPROVED" || cert.status === "ACTIVE";
+            const cardThemeClass = isApproved
+              ? "card-pastel-mint"
+              : cert.status === "PENDING"
+              ? "card-pastel-peach"
+              : "card-pastel-lavender";
+
+            return (
+              <div
+                key={cert.id}
+                className={`${cardThemeClass} rounded-3xl p-5 shadow-[0_4px_20px_rgb(0,0,0,0.02)] space-y-3`}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <span className="text-[10px] font-bold font-mono px-2.5 py-0.5 rounded-full bg-white/90 text-slate-700 border border-slate-200/60 shadow-2xs">
+                      {cert.trainingCode}
+                    </span>
+                    <h4 className="font-bold text-slate-900 text-sm mt-1.5 leading-snug">
+                      {cert.trainingName}
+                    </h4>
+                    <span className="text-xs text-slate-500 font-medium">{cert.department}</span>
+                  </div>
+                  <StatusBadge status={cert.status} />
                 </div>
-                <StatusBadge status={cert.status} />
-              </div>
 
-              {cert.documentNote && (
-                <p className="text-xs text-slate-600 bg-slate-50 p-2.5 rounded-xl border border-slate-100 italic">
-                  &quot;{cert.documentNote}&quot;
-                </p>
-              )}
-
-              <div className="pt-2 text-[11px] text-slate-500 border-t border-slate-100 flex justify-between">
-                <span>Status: <strong>{cert.status}</strong></span>
-                {cert.expiresAt && (
-                  <span>Expires: {format(new Date(cert.expiresAt), "MMM d, yyyy")}</span>
+                {cert.documentNote && (
+                  <p className="text-xs text-slate-600 bg-white/70 p-3 rounded-2xl border border-slate-100/80 italic font-medium">
+                    &quot;{cert.documentNote}&quot;
+                  </p>
                 )}
+
+                <div className="pt-2 text-[11px] text-slate-500 border-t border-slate-200/50 flex justify-between font-medium">
+                  <span>Status: <strong className="text-slate-700">{cert.status}</strong></span>
+                  {cert.expiresAt && (
+                    <span>Expires: {format(new Date(cert.expiresAt), "MMM d, yyyy")}</span>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
