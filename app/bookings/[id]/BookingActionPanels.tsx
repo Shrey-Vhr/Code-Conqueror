@@ -30,7 +30,6 @@ export function BookingActionPanels({
 }: BookingActionPanelsProps) {
   const router = useRouter();
 
-  // Mode: "IDLE" | "CHECK_IN" | "RETURN" | "EXTEND" | "CANCEL" | "REPORT_INCIDENT"
   const [activeAction, setActiveAction] = useState<string>("IDLE");
   const [rating, setRating] = useState<number>(5);
   const [notes, setNotes] = useState<string>("");
@@ -75,7 +74,6 @@ export function BookingActionPanels({
         const ctx = canvas.getContext("2d");
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          // Compress to JPEG with 0.72 quality, well under 200KB for Server Action limits
           const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.72);
           setPhotoUrl(compressedDataUrl);
         } else {
@@ -90,10 +88,8 @@ export function BookingActionPanels({
     reader.readAsDataURL(file);
   };
 
-  // Extension duration in hours
   const [extensionHours, setExtensionHours] = useState<number>(1);
 
-  // Checklist items
   const [checklist, setChecklist] = useState<Record<string, boolean>>({
     "Power system & indicators verified": true,
     "No physical damage or casing fissures": true,
@@ -101,7 +97,6 @@ export function BookingActionPanels({
     "Standard accessories accounted for": true,
   });
 
-  // Incident state
   const [incidentType, setIncidentType] = useState<string>("DAMAGE");
   const [severity, setSeverity] = useState<string>("MEDIUM");
   const [incidentDescription, setIncidentDescription] = useState<string>("");
@@ -200,7 +195,7 @@ export function BookingActionPanels({
         );
       }
     } catch {
-      setError("Network error while attempting extension.");
+      setError("An unexpected error occurred during extension request.");
     } finally {
       setIsLoading(false);
     }
@@ -209,10 +204,8 @@ export function BookingActionPanels({
   const handleCancel = async () => {
     setIsLoading(true);
     setError(null);
-    setSuccessMessage(null);
-
     try {
-      const res = await cancelBookingUserAction(bookingId, cancelReason);
+      const res = await cancelBookingUserAction(bookingId, cancelReason || "Cancelled by user");
       if (res.success) {
         setActiveAction("IDLE");
         router.refresh();
@@ -220,11 +213,11 @@ export function BookingActionPanels({
         setError(
           "error" in res && typeof res.error === "string"
             ? res.error
-            : "Cancellation failed"
+            : "Failed to cancel booking."
         );
       }
     } catch {
-      setError("Failed to cancel reservation.");
+      setError("An unexpected error occurred during cancellation.");
     } finally {
       setIsLoading(false);
     }
@@ -234,11 +227,10 @@ export function BookingActionPanels({
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    setSuccessMessage(null);
 
     const formData = new FormData();
-    formData.append("bookingId", bookingId);
     formData.append("resourceId", resourceId);
+    formData.append("bookingId", bookingId);
     formData.append("type", incidentType);
     formData.append("severity", severity);
     formData.append("description", incidentDescription);
@@ -247,63 +239,57 @@ export function BookingActionPanels({
       const res = await reportIncidentAction(formData);
       if (res.success) {
         setActiveAction("IDLE");
-        setIncidentDescription("");
-        setSuccessMessage("Incident report successfully logged and routed to department manager.");
+        setSuccessMessage("Incident filed and routed for human department review!");
         router.refresh();
       } else {
         setError(
           "error" in res && typeof res.error === "string"
             ? res.error
-            : "Failed to submit incident"
+            : "Failed to report incident."
         );
       }
     } catch {
-      setError("Failed to report incident.");
+      setError("An unexpected error occurred during incident logging.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const canCheckIn = status === "APPROVED" && (isBooker || isOwnerOrManager);
+  const canCheckIn =
+    status === "APPROVED" && (isBooker || isOwnerOrManager);
   const canReturn =
     (status === "CHECKED_IN" || status === "OVERDUE") &&
     (isBooker || isOwnerOrManager);
   const canExtend =
     (status === "APPROVED" || status === "CHECKED_IN") &&
-    (isBooker || isOwnerOrManager);
+    isBooker;
   const canCancel =
     (status === "PENDING" || status === "APPROVED" || status === "WAITLISTED") &&
     (isBooker || isOwnerOrManager);
   const canReportIncident =
-    status === "APPROVED" ||
-    status === "CHECKED_IN" ||
-    status === "RETURNED" ||
-    status === "OVERDUE" ||
-    isOwnerOrManager;
+    (status === "CHECKED_IN" || status === "APPROVED" || status === "OVERDUE") &&
+    (isBooker || isOwnerOrManager);
 
   return (
-    <div
-      id="condition-actions"
-      className="bg-white rounded-2xl border border-slate-200 shadow-2xs p-6 space-y-5"
-    >
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+    <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-[0_8px_30px_rgb(0,0,0,0.03)] space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h3 className="text-base font-bold text-slate-900">
-            Session Controls & Lifecycle Operations
+          <h3 className="font-black text-slate-900 text-base">
+            Reservation Action Controls
           </h3>
-          <p className="text-xs text-slate-500">
-            Record physical condition reports, manage session duration, or report operational incidents.
+          <p className="text-xs text-slate-500 mt-0.5">
+            Two-phase verification, extension requests, cancellations, and incident logs
           </p>
         </div>
 
-        {/* Action Trigger Buttons */}
+        {/* Pill Buttons for Actions */}
         <div className="flex items-center gap-2 flex-wrap">
           {canCheckIn && (
             <button
               onClick={() =>
                 setActiveAction(activeAction === "CHECK_IN" ? "IDLE" : "CHECK_IN")
               }
-              className="px-4 py-2 bg-secondary hover:bg-secondary-hover text-addon rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer border border-secondary"
+              className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-full text-xs font-bold shadow-md shadow-emerald-500/20 transition-all cursor-pointer hover:-translate-y-0.5"
             >
               Check-In Inspection →
             </button>
@@ -314,10 +300,10 @@ export function BookingActionPanels({
               onClick={() =>
                 setActiveAction(activeAction === "RETURN" ? "IDLE" : "RETURN")
               }
-              className={`px-4 py-2 rounded-xl text-xs font-bold shadow-xs transition-colors cursor-pointer ${
+              className={`px-5 py-2.5 rounded-full text-xs font-bold shadow-md transition-all cursor-pointer hover:-translate-y-0.5 ${
                 status === "OVERDUE"
-                  ? "bg-rose-700 hover:bg-rose-800 text-white animate-pulse"
-                  : "bg-secondary hover:bg-secondary-hover text-addon border border-secondary"
+                  ? "bg-gradient-to-r from-rose-600 to-rose-700 text-white shadow-rose-500/30 animate-pulse"
+                  : "bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white shadow-indigo-500/20"
               }`}
             >
               Return Condition Check-out →
@@ -330,10 +316,10 @@ export function BookingActionPanels({
                 setActiveAction(activeAction === "EXTEND" ? "IDLE" : "EXTEND")
               }
               disabled={isLoading}
-              className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer border ${
+              className={`px-4 py-2.5 rounded-full text-xs font-bold transition-all cursor-pointer border ${
                 activeAction === "EXTEND"
-                  ? "bg-secondary text-addon border-secondary font-bold"
-                  : "bg-primary hover:bg-primary-hover text-secondary border-[#DDD0A9]"
+                  ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                  : "bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200/80"
               }`}
             >
               Extend Session +
@@ -347,7 +333,7 @@ export function BookingActionPanels({
                   activeAction === "REPORT_INCIDENT" ? "IDLE" : "REPORT_INCIDENT"
                 )
               }
-              className={`px-3.5 py-2 border rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
+              className={`px-4 py-2.5 border rounded-full text-xs font-bold transition-all cursor-pointer ${
                 activeAction === "REPORT_INCIDENT"
                   ? "bg-rose-600 text-white border-rose-600"
                   : "border-rose-200 hover:bg-rose-50 text-rose-700"
@@ -362,7 +348,7 @@ export function BookingActionPanels({
               onClick={() =>
                 setActiveAction(activeAction === "CANCEL" ? "IDLE" : "CANCEL")
               }
-              className="px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+              className="px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-full text-xs font-bold transition-all cursor-pointer"
             >
               Cancel Reservation
             </button>
@@ -371,7 +357,7 @@ export function BookingActionPanels({
       </div>
 
       {successMessage && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2">
+        <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-medium flex items-center gap-2">
           <svg
             className="w-4 h-4 shrink-0 text-emerald-600"
             fill="none"
@@ -390,7 +376,7 @@ export function BookingActionPanels({
       )}
 
       {error && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
           <svg
             className="w-4 h-4 shrink-0 text-rose-600"
             fill="none"
@@ -412,35 +398,35 @@ export function BookingActionPanels({
       {activeAction === "EXTEND" && (
         <form
           onSubmit={handleExtendSubmit}
-          className="p-5 bg-indigo-50/50 rounded-xl border border-indigo-200 space-y-4"
+          className="p-6 bg-gradient-to-br from-indigo-50/70 via-white to-purple-50/40 rounded-3xl border border-indigo-200/80 space-y-4 shadow-2xs"
         >
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-bold text-indigo-900 text-sm">
+              <h4 className="font-bold text-indigo-950 text-sm">
                 Request Session Extension
               </h4>
-              <p className="text-xs text-indigo-700">
+              <p className="text-xs text-indigo-700 mt-0.5">
                 Extend your active reservation without forfeiting setup time.
               </p>
             </div>
-            <span className="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200">
               ACID Safe
             </span>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
               Extension Duration
             </label>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               {[1, 2, 3].map((hrs) => (
                 <button
                   key={hrs}
                   type="button"
                   onClick={() => setExtensionHours(hrs)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                  className={`px-5 py-2 rounded-full text-xs font-bold border transition-all cursor-pointer ${
                     extensionHours === hrs
-                      ? "bg-indigo-600 text-white border-indigo-600 shadow-xs"
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
                       : "bg-white text-slate-700 border-slate-200 hover:border-indigo-300"
                   }`}
                 >
@@ -449,22 +435,22 @@ export function BookingActionPanels({
               ))}
             </div>
             <p className="text-[11px] text-slate-500 mt-2">
-              Extensions verify in real time that no succeeding reservation or waitlist conflict exists, and your weekly 20-hour quota is not exceeded.
+              Extensions verify in real time that no succeeding reservation or waitlist conflict exists.
             </p>
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2">
             <button
               type="button"
               onClick={() => setActiveAction("IDLE")}
-              className="px-3.5 py-1.5 border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-100"
+              className="px-5 py-2 border border-slate-200 text-slate-600 rounded-full text-xs font-bold hover:bg-slate-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50"
+              className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-500/20 cursor-pointer disabled:opacity-50"
             >
               {isLoading ? "Verifying & Extending..." : `Confirm +${extensionHours}h Extension`}
             </button>
@@ -476,28 +462,28 @@ export function BookingActionPanels({
       {activeAction === "CHECK_IN" && (
         <form
           onSubmit={handleCheckInSubmit}
-          className="p-5 bg-emerald-50/50 rounded-xl border border-emerald-200 space-y-4"
+          className="p-6 bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/40 rounded-3xl border border-emerald-200/80 space-y-4 shadow-2xs"
         >
           <div className="flex items-center justify-between">
-            <h4 className="font-bold text-emerald-900 text-sm">
+            <h4 className="font-bold text-emerald-950 text-sm">
               Check-In Condition Report: &quot;{resourceName}&quot;
             </h4>
-            <span className="text-xs text-emerald-700 font-medium">Phase: CHECK_IN</span>
+            <span className="text-xs text-emerald-700 font-bold px-3 py-1 bg-emerald-100 rounded-full">Phase: CHECK_IN</span>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
               Equipment / Space Condition Rating (1 to 5)
             </label>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
               {[1, 2, 3, 4, 5].map((val) => (
                 <button
                   key={val}
                   type="button"
                   onClick={() => setRating(val)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all cursor-pointer ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer ${
                     rating === val
-                      ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
                       : "bg-white text-slate-700 border-slate-200 hover:border-emerald-300"
                   }`}
                 >
@@ -519,10 +505,10 @@ export function BookingActionPanels({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
               Safety & Functional Checklist
             </label>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {Object.keys(checklist).map((item) => (
                 <label
                   key={item}
@@ -532,7 +518,7 @@ export function BookingActionPanels({
                     type="checkbox"
                     checked={checklist[item]}
                     onChange={() => toggleChecklistItem(item)}
-                    className="rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4 border-slate-300"
+                    className="rounded text-emerald-600 focus:ring-emerald-400 h-4 w-4 border-slate-300"
                   />
                   <span>{item}</span>
                 </label>
@@ -541,7 +527,7 @@ export function BookingActionPanels({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Check-In Notes & Observations
             </label>
             <textarea
@@ -549,12 +535,12 @@ export function BookingActionPanels({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Note any preexisting cosmetic scratches or setup specifics..."
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-emerald-400"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Physical Condition Evidence Photo
             </label>
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
@@ -562,7 +548,7 @@ export function BookingActionPanels({
                 type="file"
                 accept="image/*"
                 onChange={handlePhotoFileChange}
-                className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200 cursor-pointer"
+                className="text-xs file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-emerald-100 file:text-emerald-800 hover:file:bg-emerald-200 cursor-pointer"
               />
               <span className="text-xs text-slate-400">or URL:</span>
               <input
@@ -570,7 +556,7 @@ export function BookingActionPanels({
                 placeholder="https://..."
                 value={photoUrl.startsWith("data:") ? "(Attached file)" : photoUrl}
                 onChange={(e) => setPhotoUrl(e.target.value)}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white flex-1"
+                className="px-3.5 py-1.5 rounded-full border border-slate-200 text-xs bg-white flex-1"
               />
               {photoUrl && (
                 <button
@@ -583,28 +569,28 @@ export function BookingActionPanels({
               )}
             </div>
             {photoUrl && (
-              <div className="mt-2">
+              <div className="mt-2.5">
                 <img
                   src={photoUrl}
                   alt="Condition evidence preview"
-                  className="h-24 w-36 object-cover rounded-lg border border-emerald-300 shadow-2xs"
+                  className="h-24 w-36 object-cover rounded-2xl border border-emerald-300 shadow-2xs"
                 />
               </div>
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2">
             <button
               type="button"
               onClick={() => setActiveAction("IDLE")}
-              className="px-3.5 py-1.5 border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-100"
+              className="px-5 py-2 border border-slate-200 text-slate-600 rounded-full text-xs font-bold hover:bg-slate-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50"
+              className="px-6 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-full text-xs font-bold shadow-md shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
             >
               {isLoading ? "Saving..." : "Confirm & Check In"}
             </button>
@@ -616,33 +602,33 @@ export function BookingActionPanels({
       {activeAction === "RETURN" && (
         <form
           onSubmit={handleReturnSubmit}
-          className="p-5 bg-blue-50/50 rounded-xl border border-blue-200 space-y-4"
+          className="p-6 bg-gradient-to-br from-sky-50/70 via-white to-blue-50/40 rounded-3xl border border-sky-200/80 space-y-4 shadow-2xs"
         >
           <div className="flex items-center justify-between">
-            <h4 className="font-bold text-blue-900 text-sm">
+            <h4 className="font-bold text-sky-950 text-sm">
               Return Inspection Report: &quot;{resourceName}&quot;
             </h4>
-            <span className="text-xs text-blue-700 font-medium">Phase: CHECK_OUT</span>
+            <span className="text-xs text-sky-700 font-bold px-3 py-1 bg-sky-100 rounded-full">Phase: CHECK_OUT</span>
           </div>
 
-          <div className="p-3 bg-white rounded-lg border border-blue-100 text-xs text-slate-600">
+          <div className="p-3.5 bg-white/90 rounded-2xl border border-sky-100 text-xs text-slate-600">
             ℹ️ If the return condition rating drops below the check-in rating, a damage incident will be automatically drafted for manager review.
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
               Equipment Return Condition Rating (1 to 5)
             </label>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
               {[1, 2, 3, 4, 5].map((val) => (
                 <button
                   key={val}
                   type="button"
                   onClick={() => setRating(val)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold border transition-all cursor-pointer ${
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold border transition-all cursor-pointer ${
                     rating === val
-                      ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                      : "bg-white text-slate-700 border-slate-200 hover:border-blue-300"
+                      ? "bg-indigo-600 text-white border-indigo-600 shadow-sm"
+                      : "bg-white text-slate-700 border-slate-200 hover:border-indigo-300"
                   }`}
                 >
                   {val} ★
@@ -663,10 +649,10 @@ export function BookingActionPanels({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
               Return Checklist
             </label>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {Object.keys(checklist).map((item) => (
                 <label
                   key={item}
@@ -676,7 +662,7 @@ export function BookingActionPanels({
                     type="checkbox"
                     checked={checklist[item]}
                     onChange={() => toggleChecklistItem(item)}
-                    className="rounded text-blue-600 focus:ring-blue-500 h-4 w-4 border-slate-300"
+                    className="rounded text-indigo-600 focus:ring-indigo-400 h-4 w-4 border-slate-300"
                   />
                   <span>{item}</span>
                 </label>
@@ -685,7 +671,7 @@ export function BookingActionPanels({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Return Checkout Notes
             </label>
             <textarea
@@ -693,12 +679,12 @@ export function BookingActionPanels({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="State any incidents, clean-up actions taken, or observations..."
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Return Condition Evidence Photo
             </label>
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
@@ -706,7 +692,7 @@ export function BookingActionPanels({
                 type="file"
                 accept="image/*"
                 onChange={handlePhotoFileChange}
-                className="text-xs file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-100 file:text-blue-800 hover:file:bg-blue-200 cursor-pointer"
+                className="text-xs file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-bold file:bg-sky-100 file:text-sky-800 hover:file:bg-sky-200 cursor-pointer"
               />
               <span className="text-xs text-slate-400">or URL:</span>
               <input
@@ -714,7 +700,7 @@ export function BookingActionPanels({
                 placeholder="https://..."
                 value={photoUrl.startsWith("data:") ? "(Attached file)" : photoUrl}
                 onChange={(e) => setPhotoUrl(e.target.value)}
-                className="px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white flex-1"
+                className="px-3.5 py-1.5 rounded-full border border-slate-200 text-xs bg-white flex-1"
               />
               {photoUrl && (
                 <button
@@ -727,28 +713,28 @@ export function BookingActionPanels({
               )}
             </div>
             {photoUrl && (
-              <div className="mt-2">
+              <div className="mt-2.5">
                 <img
                   src={photoUrl}
                   alt="Return evidence preview"
-                  className="h-24 w-36 object-cover rounded-lg border border-blue-300 shadow-2xs"
+                  className="h-24 w-36 object-cover rounded-2xl border border-sky-300 shadow-2xs"
                 />
               </div>
             )}
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-2">
+          <div className="flex items-center justify-end gap-2.5 pt-2">
             <button
               type="button"
               onClick={() => setActiveAction("IDLE")}
-              className="px-3.5 py-1.5 border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-100"
+              className="px-5 py-2 border border-slate-200 text-slate-600 rounded-full text-xs font-bold hover:bg-slate-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50"
+              className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-500/20 cursor-pointer disabled:opacity-50"
             >
               {isLoading ? "Processing..." : "Complete Return & Release Deposit"}
             </button>
@@ -758,7 +744,7 @@ export function BookingActionPanels({
 
       {/* CANCEL FORM PANEL */}
       {activeAction === "CANCEL" && (
-        <div className="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+        <div className="p-6 bg-slate-50/90 rounded-3xl border border-slate-200 space-y-3.5">
           <h4 className="font-bold text-slate-900 text-sm">Confirm Booking Cancellation</h4>
           <p className="text-xs text-slate-500">
             Cancelling will refund any held deposit credits. If a waitlist exists for this slot, the highest priority waitlisted reservation will be automatically promoted!
@@ -768,19 +754,19 @@ export function BookingActionPanels({
             value={cancelReason}
             onChange={(e) => setCancelReason(e.target.value)}
             placeholder="Reason for cancellation (optional)..."
-            className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-slate-500"
+            className="w-full px-4 py-2.5 rounded-full border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-slate-400"
           />
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2.5 pt-1">
             <button
               onClick={() => setActiveAction("IDLE")}
-              className="px-3 py-1.5 border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-100"
+              className="px-5 py-2 border border-slate-200 text-slate-600 rounded-full text-xs font-bold hover:bg-slate-100 transition-colors"
             >
               Nevermind
             </button>
             <button
               onClick={handleCancel}
               disabled={isLoading}
-              className="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50"
+              className="px-6 py-2 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-full text-xs font-bold shadow-md shadow-rose-500/20 cursor-pointer disabled:opacity-50"
             >
               {isLoading ? "Cancelling..." : "Confirm Cancellation & Promote Waitlist"}
             </button>
@@ -792,17 +778,17 @@ export function BookingActionPanels({
       {activeAction === "REPORT_INCIDENT" && (
         <form
           onSubmit={handleIncidentSubmit}
-          className="p-5 bg-rose-50/50 rounded-xl border border-rose-200 space-y-4"
+          className="p-6 bg-gradient-to-br from-rose-50/70 via-white to-pink-50/40 rounded-3xl border border-rose-200/80 space-y-4 shadow-2xs"
         >
           <div className="flex items-center justify-between">
-            <h4 className="font-bold text-rose-900 text-sm">
+            <h4 className="font-bold text-rose-950 text-sm">
               Log Incident or Equipment Malfunction
             </h4>
-            <span className="text-xs text-rose-700 font-medium">Logged to Department Review</span>
+            <span className="text-xs text-rose-700 font-bold px-3 py-1 bg-rose-100 rounded-full">Logged to Department Review</span>
           </div>
 
           {/* AI Human Review Contract Disclaimer */}
-          <div className="p-3 bg-amber-50/90 rounded-lg border border-amber-200/80 text-xs text-amber-900 flex items-start gap-2.5">
+          <div className="p-3.5 bg-amber-50/90 rounded-2xl border border-amber-200/80 text-xs text-amber-900 flex items-start gap-2.5">
             <span className="text-sm shrink-0">⚠️</span>
             <div className="space-y-1">
               <span className="font-bold block text-amber-800">
@@ -816,13 +802,13 @@ export function BookingActionPanels({
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Incident Classification
               </label>
               <select
                 value={incidentType}
                 onChange={(e) => setIncidentType(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full px-4 py-2.5 rounded-full border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-rose-400"
               >
                 <option value="DAMAGE">DAMAGE (Physical damage / broken part)</option>
                 <option value="DELAY">DELAY (Borrower return tardiness)</option>
@@ -833,13 +819,13 @@ export function BookingActionPanels({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Severity
               </label>
               <select
                 value={severity}
                 onChange={(e) => setSeverity(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-rose-500"
+                className="w-full px-4 py-2.5 rounded-full border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-rose-400"
               >
                 <option value="LOW">LOW (Cosmetic / routine)</option>
                 <option value="MEDIUM">MEDIUM (Requires inspection)</option>
@@ -850,7 +836,7 @@ export function BookingActionPanels({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Detailed Description *
             </label>
             <textarea
@@ -859,22 +845,22 @@ export function BookingActionPanels({
               value={incidentDescription}
               onChange={(e) => setIncidentDescription(e.target.value)}
               placeholder="Detail what occurred, visible damages, or parts needing replacement..."
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-rose-500"
+              className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-rose-400"
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-1">
+          <div className="flex items-center justify-end gap-2.5 pt-1">
             <button
               type="button"
               onClick={() => setActiveAction("IDLE")}
-              className="px-3.5 py-1.5 border border-slate-300 text-slate-700 rounded-lg text-xs font-semibold hover:bg-slate-100"
+              className="px-5 py-2 border border-slate-200 text-slate-600 rounded-full text-xs font-bold hover:bg-slate-100 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading || !incidentDescription.trim()}
-              className="px-5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold shadow-xs cursor-pointer disabled:opacity-50"
+              className="px-6 py-2 bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white rounded-full text-xs font-bold shadow-md shadow-rose-500/20 cursor-pointer disabled:opacity-50"
             >
               {isLoading ? "Submitting..." : "Submit Incident Report"}
             </button>

@@ -108,9 +108,9 @@ export function BookingFormClient({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
+    <div className="bg-white/95 backdrop-blur-md rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.03)] p-6 sm:p-7 space-y-6">
       <div>
-        <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+        <h3 className="text-lg font-black text-slate-900 tracking-tight">
           Reserve Time Slot
         </h3>
         <p className="text-xs text-slate-500 mt-0.5">
@@ -119,7 +119,7 @@ export function BookingFormClient({
       </div>
 
       {error && (
-        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2">
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-start gap-2.5">
           <svg
             className="w-4 h-4 shrink-0 text-rose-600 mt-0.5"
             fill="none"
@@ -136,7 +136,7 @@ export function BookingFormClient({
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Date picker */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
             Reservation Date
           </label>
           <input
@@ -144,14 +144,14 @@ export function BookingFormClient({
             required
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2.5 rounded-full border border-slate-200 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-2xs font-medium"
           />
         </div>
 
         {/* Start and End Times */}
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Start Time
             </label>
             <input
@@ -159,11 +159,11 @@ export function BookingFormClient({
               required
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 rounded-full border border-slate-200 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-2xs font-medium"
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               End Time
             </label>
             <input
@@ -171,20 +171,20 @@ export function BookingFormClient({
               required
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2.5 rounded-full border border-slate-200 text-slate-900 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-2xs font-medium"
             />
           </div>
         </div>
 
         {/* Purpose */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
             Academic / Project Purpose
           </label>
           <select
             value={purpose}
             onChange={(e) => setPurpose(e.target.value)}
-            className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-900 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2.5 rounded-full border border-slate-200 text-slate-900 text-xs sm:text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-2xs font-medium cursor-pointer"
           >
             <option value="COURSEWORK">Coursework / Capstone Project (+20 Priority)</option>
             <option value="RESEARCH">Funded Research / Faculty Lab (+25 Priority)</option>
@@ -195,7 +195,7 @@ export function BookingFormClient({
 
         {/* Purpose Description */}
         <div>
-          <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
             Usage Notes & Deliverables
           </label>
           <textarea
@@ -203,33 +203,33 @@ export function BookingFormClient({
             value={purposeDetails}
             onChange={(e) => setPurposeDetails(e.target.value)}
             placeholder="Briefly describe what you will fabricate or test..."
-            className="w-full px-3.5 py-2 rounded-lg border border-slate-300 text-slate-900 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-3 rounded-2xl border border-slate-200 text-slate-900 text-xs sm:text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-2xs"
           />
         </div>
 
-        {/* Cost & Deposit Summary Breakdown */}
-        <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 text-xs space-y-2">
+        {/* Cost & Deposit Summary in Soft Pastel Peach Card */}
+        <div className="p-4 bg-gradient-to-br from-amber-50/70 via-white to-orange-50/40 rounded-2xl border border-amber-200/70 text-xs space-y-2.5 shadow-2xs">
           <div className="flex justify-between text-slate-600">
             <span>Duration Requested</span>
-            <span className="font-semibold text-slate-800">
+            <span className="font-bold text-slate-800">
               {durationHours > 0 ? `${durationHours.toFixed(1)} hours` : "Invalid time"}
             </span>
           </div>
           <div className="flex justify-between text-slate-600">
             <span>Hourly Cost ({creditCostPerHour} cr/h)</span>
-            <span className="font-semibold text-slate-800">{estimatedCost} credits</span>
+            <span className="font-bold text-slate-800">{estimatedCost} credits</span>
           </div>
           <div className="flex justify-between text-slate-600">
             <span>Refundable Deposit Hold</span>
-            <span className="font-semibold text-slate-800">{depositCredits} credits</span>
+            <span className="font-bold text-slate-800">{depositCredits} credits</span>
           </div>
-          <div className="pt-2 border-t border-slate-200 flex justify-between font-bold text-slate-900 text-sm">
+          <div className="pt-2 border-t border-amber-200/60 flex justify-between font-bold text-slate-900 text-sm">
             <span>Total Credits Required</span>
-            <span className="text-secondary">{totalCreditsNeeded} credits</span>
+            <span className="text-indigo-600 font-black">{totalCreditsNeeded} credits</span>
           </div>
           <div className="flex justify-between text-[11px] text-slate-500">
             <span>Your Available Balance</span>
-            <span className={userCredits >= totalCreditsNeeded ? "text-emerald-700 font-medium" : "text-rose-600 font-bold"}>
+            <span className={userCredits >= totalCreditsNeeded ? "text-emerald-700 font-bold" : "text-rose-600 font-bold"}>
               {userCredits} credits {userCredits < totalCreditsNeeded ? "(Insufficient)" : "✓"}
             </span>
           </div>
@@ -241,7 +241,7 @@ export function BookingFormClient({
         <button
           type="submit"
           disabled={isSubmitting || !isEligible}
-          className="w-full py-3 bg-secondary hover:bg-secondary-hover text-[#F3EBD2] hover:text-addon rounded-xl font-bold text-sm shadow-xs transition-colors cursor-pointer disabled:opacity-50 disabled:pointer-events-none border border-secondary"
+          className="w-full py-3.5 px-6 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full font-bold text-xs sm:text-sm shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all cursor-pointer disabled:opacity-50 disabled:pointer-events-none hover:-translate-y-0.5 active:translate-y-0"
         >
           {isSubmitting ? "Submitting Request..." : "Request Booking"}
         </button>

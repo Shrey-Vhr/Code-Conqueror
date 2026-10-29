@@ -18,7 +18,8 @@ export default function LoginPage() {
       email: "alice@northfield.edu",
       role: "Student (USER)",
       desc: "Good standing, all certifications, active booking",
-      badgeColor: "bg-blue-100 text-blue-800 border-blue-200",
+      badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200/80",
+      cardPastel: "from-indigo-50/50 via-white to-purple-50/30 border-indigo-100",
       password: "Alice2024!",
     },
     {
@@ -26,7 +27,8 @@ export default function LoginPage() {
       email: "bob@northfield.edu",
       role: "Student (USER)",
       desc: "Missing laser cert, has overdue oscilloscope & damage report",
-      badgeColor: "bg-amber-100 text-amber-800 border-amber-200",
+      badgeColor: "bg-amber-50 text-amber-800 border-amber-200/80",
+      cardPastel: "from-amber-50/50 via-white to-orange-50/30 border-amber-100",
       password: "Bob2024!",
     },
     {
@@ -34,7 +36,8 @@ export default function LoginPage() {
       email: "carol@northfield.edu",
       role: "Researcher (USER)",
       desc: "High priority score, approved laser slot with waitlist competition",
-      badgeColor: "bg-emerald-100 text-emerald-800 border-emerald-200",
+      badgeColor: "bg-purple-50 text-purple-700 border-purple-200/80",
+      cardPastel: "from-purple-50/50 via-white to-indigo-50/30 border-purple-100",
       password: "Carol2024!",
     },
     {
@@ -42,7 +45,8 @@ export default function LoginPage() {
       email: "dave@northfield.edu",
       role: "Owner (OWNER)",
       desc: "Owns Engineering lab tools, reviews booking queue",
-      badgeColor: "bg-purple-100 text-purple-800 border-purple-200",
+      badgeColor: "bg-sky-50 text-sky-700 border-sky-200/80",
+      cardPastel: "from-sky-50/50 via-white to-blue-50/30 border-sky-100",
       password: "Dave2024!",
     },
     {
@@ -50,7 +54,8 @@ export default function LoginPage() {
       email: "eve@northfield.edu",
       role: "Manager (MANAGER)",
       desc: "Department approver, resolves incidents, applies penalties",
-      badgeColor: "bg-indigo-100 text-indigo-800 border-indigo-200",
+      badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200/80",
+      cardPastel: "from-emerald-50/50 via-white to-teal-50/30 border-emerald-100",
       password: "Eve2024!",
     },
     {
@@ -58,7 +63,8 @@ export default function LoginPage() {
       email: "frank@northfield.edu",
       role: "Admin (ADMIN)",
       desc: "Dean of Facilities, verifies certs, global audit & fairness policy",
-      badgeColor: "bg-rose-100 text-rose-800 border-rose-200",
+      badgeColor: "bg-rose-50 text-rose-700 border-rose-200/80",
+      cardPastel: "from-rose-50/50 via-white to-pink-50/30 border-rose-100",
       password: "Frank2024!",
     },
   ];
@@ -111,24 +117,24 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center bg-slate-50">
+    <div className="min-h-[calc(100vh-4rem)] py-12 px-4 sm:px-6 lg:px-8 flex flex-col justify-center items-center">
       <div className="max-w-4xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Traditional Login Box */}
-        <div className="lg:col-span-5 bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+        {/* Left Column: Traditional Login Box in Soft Pastel Card */}
+        <div className="lg:col-span-5 bg-white/95 backdrop-blur-md p-8 sm:p-9 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-200/80">
           <div className="mb-6">
-            <div className="w-10 h-10 rounded-xl bg-secondary text-addon flex items-center justify-center font-extrabold text-lg mb-3 shadow-sm border border-secondary">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-600 text-white flex items-center justify-center font-black text-sm mb-3.5 shadow-md shadow-indigo-300/40">
               CS
             </div>
-            <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
               Sign in to CampusShare
             </h1>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Northfield University Equipment & Space Federation
             </p>
           </div>
 
           {error && (
-            <div className="mb-5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center gap-2">
+            <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
               <svg
                 className="w-4 h-4 shrink-0 text-rose-600"
                 fill="none"
@@ -148,7 +154,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleFormSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Campus Email
               </label>
               <input
@@ -157,12 +163,12 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="netid@northfield.edu"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 text-sm shadow-2xs transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Password
               </label>
               <input
@@ -171,14 +177,14 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
-                className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full px-4 py-2.5 rounded-full border border-slate-200/90 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 text-sm shadow-2xs transition-all"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2.5 px-4 rounded-lg bg-secondary hover:bg-secondary-hover text-[#F3EBD2] font-bold text-sm transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-addon disabled:opacity-50 cursor-pointer"
+              className="w-full py-3 px-5 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white font-bold text-sm transition-all shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50 cursor-pointer hover:-translate-y-0.5 active:translate-y-0"
             >
               {isLoading ? "Signing in..." : "Sign In with Single Sign-On"}
             </button>
@@ -189,23 +195,23 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Right Column: Hackathon Judge One-Click Role Switcher */}
-        <div className="lg:col-span-7 bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+        {/* Right Column: Hackathon Judge One-Click Role Switcher in Soft Pastel Card */}
+        <div className="lg:col-span-7 bg-white/95 backdrop-blur-md p-8 sm:p-9 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-slate-200/80">
           <div className="flex items-center justify-between mb-4">
             <div>
               <div className="flex items-center gap-2">
-                <span className="flex h-2 w-2 rounded-full bg-addon"></span>
-                <span className="text-xs font-bold uppercase tracking-wider text-secondary bg-primary px-2 py-0.5 rounded border border-[#DDD0A9]">
+                <span className="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200/80">
                   Judge Sandbox Ready
                 </span>
               </div>
-              <h2 className="text-lg font-bold text-slate-900 mt-1">
+              <h2 className="text-xl font-black text-slate-900 mt-2 tracking-tight">
                 One-Click Demo Account Switcher
               </h2>
             </div>
           </div>
-          <p className="text-xs text-slate-500 mb-5">
-            Click any demo profile to instantly log in as that persona and explore role-specific capabilities:
+          <p className="text-xs text-slate-500 mb-5 leading-relaxed">
+            Click any demo profile to instantly log in as that persona and evaluate role-based controls and permissions:
           </p>
 
           <div className="space-y-3">
@@ -215,15 +221,15 @@ export default function LoginPage() {
               return (
                 <div
                   key={acc.email}
-                  className="p-3.5 rounded-xl border border-slate-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all flex items-center justify-between gap-4 group"
+                  className={`p-4 rounded-2xl border bg-gradient-to-br ${acc.cardPastel} hover:border-indigo-400 hover:shadow-md transition-all flex items-center justify-between gap-4 group hover:-translate-y-0.5`}
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-900 text-sm">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-slate-900 text-sm group-hover:text-indigo-600 transition-colors">
                         {acc.name}
                       </span>
                       <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded border ${acc.badgeColor}`}
+                        className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border shadow-2xs ${acc.badgeColor}`}
                       >
                         {acc.role}
                       </span>
@@ -240,8 +246,8 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => fillCredentials(acc.email, acc.password)}
-                      className="hidden sm:inline-block text-xs text-slate-500 hover:text-slate-800 px-2 py-1 rounded hover:bg-slate-100 transition-colors cursor-pointer"
-                      title="Fill into form"
+                      className="hidden sm:inline-block text-xs font-semibold text-slate-500 hover:text-slate-800 px-3 py-1 rounded-full hover:bg-white/80 transition-colors cursor-pointer border border-transparent hover:border-slate-200"
+                      title="Fill credentials into form"
                     >
                       Fill
                     </button>
@@ -249,7 +255,7 @@ export default function LoginPage() {
                       type="button"
                       onClick={() => handleQuickLogin(acc.email)}
                       disabled={isLoggingIn}
-                      className="px-3.5 py-1.5 rounded-lg bg-secondary group-hover:bg-[#223F10] text-[#F3EBD2] group-hover:text-addon text-xs font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+                      className="px-4 py-1.5 rounded-full bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white text-xs font-bold shadow-xs hover:shadow-indigo-500/25 transition-all cursor-pointer disabled:opacity-50 hover:-translate-y-0.5"
                     >
                       {isLoggingIn ? "Switching..." : "Login →"}
                     </button>

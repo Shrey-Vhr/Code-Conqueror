@@ -65,45 +65,45 @@ export default async function BookingsPage() {
       {/* Page Title & Header Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             My Campus Reservations
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Track active sessions, waitlist queue promotions, condition reports, and return verifications.
           </p>
         </div>
 
         <Link
           href="/resources"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-xs transition-colors shrink-0"
+          className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-full text-xs font-bold shadow-md shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all shrink-0 hover:-translate-y-0.5"
         >
           Book Another Resource
         </Link>
       </div>
 
-      {/* Summary KPI Cards */}
+      {/* Summary KPI Cards with Soft Pastel Gradients */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-          <span className="text-xs font-semibold text-slate-500 uppercase block">Active Sessions</span>
-          <span className="text-2xl font-black text-slate-900 mt-1 block">{activeCount}</span>
+        <div className="p-5 bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/40 rounded-3xl border border-emerald-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+          <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider block">Active Sessions</span>
+          <span className="text-2xl sm:text-3xl font-black text-emerald-950 mt-1.5 block">{activeCount}</span>
         </div>
-        <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-          <span className="text-xs font-semibold text-purple-600 uppercase block">Waitlist Queues</span>
-          <span className="text-2xl font-black text-purple-700 mt-1 block">{waitlistCount}</span>
+        <div className="p-5 bg-gradient-to-br from-purple-50/70 via-white to-indigo-50/40 rounded-3xl border border-purple-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+          <span className="text-xs font-bold text-purple-800 uppercase tracking-wider block">Waitlist Queues</span>
+          <span className="text-2xl sm:text-3xl font-black text-purple-950 mt-1.5 block">{waitlistCount}</span>
         </div>
-        <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-          <span className="text-xs font-semibold text-rose-600 uppercase block">Overdue Warnings</span>
+        <div className="p-5 bg-gradient-to-br from-rose-50/70 via-white to-pink-50/40 rounded-3xl border border-rose-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+          <span className="text-xs font-bold text-rose-800 uppercase tracking-wider block">Overdue Warnings</span>
           <span
-            className={`text-2xl font-black mt-1 block ${
-              overdueCount > 0 ? "text-rose-600 animate-pulse" : "text-slate-900"
+            className={`text-2xl sm:text-3xl font-black mt-1.5 block ${
+              overdueCount > 0 ? "text-rose-600 animate-pulse" : "text-rose-950"
             }`}
           >
             {overdueCount}
           </span>
         </div>
-        <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
-          <span className="text-xs font-semibold text-slate-500 uppercase block">Total History</span>
-          <span className="text-2xl font-black text-slate-900 mt-1 block">{rawBookings.length}</span>
+        <div className="p-5 bg-gradient-to-br from-indigo-50/70 via-white to-sky-50/40 rounded-3xl border border-indigo-100 shadow-[0_4px_20px_rgb(0,0,0,0.02)]">
+          <span className="text-xs font-bold text-indigo-800 uppercase tracking-wider block">Total History</span>
+          <span className="text-2xl sm:text-3xl font-black text-indigo-950 mt-1.5 block">{rawBookings.length}</span>
         </div>
       </div>
 
